@@ -5,6 +5,18 @@ import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent
 import rotateGeometry from "./rotate";
 
 /**
+ * @typedef {Object} RotateFeatureInteractionOptions
+ * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
+ * @property {ol.events.ConditionType | undefined} condition A function that takes an ol.MapBrowserEvent and returns a boolean
+ *                                                             to indicate whether that event will be considered to rotate ghost feature.
+ *                                                             Default is ol.events.condition.primaryAction.
+ * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the rotation overlay.
+ * @property {number | undefined} pixelTolerance Pixel tolerance for considering the pointer close enough to a segment
+ *                                                or vertex for editing. Default is 10.
+ * @property {string} rotatePropertyNane Property name of the features. Used for exporting total angle value.
+ */
+
+/**
  * @enum {string}
  */
 const GEOMETRY_TYPE = {
@@ -74,17 +86,6 @@ var previousCursor,
      * @private
      */
     anchorMoving = false;
-/**
- * @typedef {Object} RotateFeatureInteractionOptions
- * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
- * @property {ol.events.ConditionType | undefined} condition A function that takes an ol.MapBrowserEvent and returns a boolean
- *                                                             to indicate whether that event will be considered to rotate ghost feature.
- *                                                             Default is ol.events.condition.primaryAction.
- * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the rotation overlay.
- * @property {number | undefined} pixelTolerance Pixel tolerance for considering the pointer close enough to a segment
- *                                                or vertex for editing. Default is 10.
- * @property {string} rotatePropertyNane Property name of the features. Used for exporting total angle value.
- */
 
 /**
  * Rotate interaction class.
@@ -94,8 +95,7 @@ var previousCursor,
  * @extends ol.interaction.Interaction
  * @author Vladimir Vershinin
  *
- * TODO Перемещение центра кручения
- * TODO Добавить bounding feature
+ * TODO Добавить bounding feature, типа как в фотошопе
  */
 export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     /**
@@ -204,6 +204,7 @@ function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
  * @private
  */
 function handleUpEvent(evt : ol.MapBrowserEvent) : boolean {
+    // stop drag sequence of features
     if (lastCoordinate) {
         lastCoordinate = undefined;
         startCoordinate = undefined;
@@ -212,7 +213,9 @@ function handleUpEvent(evt : ol.MapBrowserEvent) : boolean {
         this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.END, features));
 
         return true;
-    } else if (anchorMoving) {
+    }
+    // stop drag sequence of the anchors
+    else if (anchorMoving) {
         anchorMoving = false;
         handleMoveEvent.call(this, evt);
 
@@ -233,10 +236,13 @@ function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
     const newCoordinate = evt.coordinate;
     const anchorCoordinate = anchorFeature.getGeometry().getCoordinates();
 
+    // handle drag of features by angle
     if (lastCoordinate) {
+        // calculate vectors of last and current pointer positions
         const lastVector = [lastCoordinate[0] - anchorCoordinate[0], lastCoordinate[1] - anchorCoordinate[1]];
         const newVector = [newCoordinate[0] - anchorCoordinate[0], newCoordinate[1] - anchorCoordinate[1]];
 
+        // calculate angle between last and current vectors as a clockwise angle
         let angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
 
         features.forEach(feature => {
@@ -247,7 +253,9 @@ function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
         this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.ROTATING, features));
 
         lastCoordinate = evt.coordinate;
-    } else if (anchorMoving) {
+    }
+    // handle drag of the anchor
+    else if (anchorMoving) {
         let deltaX = newCoordinate[0] - anchorCoordinate[0];
         let deltaY = newCoordinate[1] - anchorCoordinate[1];
 
