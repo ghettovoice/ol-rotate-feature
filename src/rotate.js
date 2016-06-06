@@ -46,9 +46,9 @@ export function rotate(flatCoordinates, offset, end, stride, angle, anchor, opt_
 /**
  * @param {ol.geom.Geometry} geometry
  * @param {number} angle
- * @param {number[]} anchor
+ * @param {ol.Coordinate} anchor
  */
-export default function rotateGeometry(geometry : ol.geom.Geometry, angle: number, anchor: number[]) {
+export default function rotateGeometry(geometry : ol.geom.Geometry, angle: number, anchor: ol.Coordinate) {
     if (geometry instanceof ol.geom.GeometryCollection) {
         let geometries = geometry.getGeometries();
 

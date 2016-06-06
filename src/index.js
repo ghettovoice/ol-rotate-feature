@@ -9,7 +9,7 @@
  * @copyright (c) 2015, Vladimir Vershinin
  */
 import RotateFeatureInteraction from "./rotatefeatureintraction";
-import RotateFeatureEvent from "./rotatefeatureevent";
+import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent";
 
 export {
     RotateFeatureInteraction,

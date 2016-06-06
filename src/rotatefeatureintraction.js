@@ -1,7 +1,8 @@
 // @flow
 import ol from "openlayers";
 import { assert, assertInstanceOf } from "./util";
-import rotateGeometry from './rotate';
+import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent";
+import rotateGeometry from "./rotate";
 
 /**
  * @enum {string}
@@ -14,21 +15,65 @@ const GEOMETRY_TYPE = {
     POLYGON: 'Polygon',
     MULTI_POLYGON: 'MultiPolygon',
     CIRCLE: 'Circle',
-    GEOMETRY_COLLECTION: 'GeometryCollection',
+    GEOMETRY_COLLECTION: 'GeometryCollection'
 };
 const ANCHOR_NAME = 'anchorFeature';
 const GHOST_NAME = 'ghostFeature';
 const BOUNDING_NAME = 'boundingFeature';
 
-/* TODO
-При добавлении первого фечера в this.features_ создаем ghost feature и circle feature для кручения
-pointerdown на circle feature + pointerdrag кручение rotatestart event
-pointerup фиксация реальных фечеров - rotateend event
-если объект один и это точка, и есть иконка и центр в координате точки то крутим иконку!
-    иначе крутим геометрию относительно координаты
-МОЖЕТ СДЕЛАТЬ ВСЕ БЕЗ БОУНДИНГ ФЕЧЕРА, СОБЫТИЯ ПРЯМ НА ГОСТ ФЕЧЕРЕ
-*/
-
+var previousCursor,
+    /**
+     * Rotated feature.
+     *
+     * @type {ol.Feature}
+     * @private
+     */
+    ghostFeature,
+    /**
+     * @type {ol.Feature}
+     * @private
+     */
+    anchorFeature,
+    /**
+     * @type {ol.Feature}
+     * @private
+     */
+    boundingFeature,
+    /**
+     * @type {ol.FeatureOverlay}
+     * @private
+     */
+    overlay,
+    /**
+     * @type {number}
+     * @private
+     */
+    pixelTolerance = 10,
+    /**
+     * @type {ol.Coordinate}
+     * @private
+     */
+    startCoordinate,
+    /**
+     * @type {ol.Coordinate}
+     * @private
+     */
+    lastCoordinate,
+    /**
+     * @type {ol.Collection.<ol.Feature>}
+     * @private
+     */
+    features,
+    /**
+     * @type {string}
+     * @private
+     */
+    rotatePropertyName = 'rotateAngle',
+    /**
+     * @type {boolean}
+     * @private
+     */
+    anchorMoving = false;
 /**
  * @typedef {Object} RotateFeatureInteractionOptions
  * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
@@ -38,6 +83,7 @@ pointerup фиксация реальных фечеров - rotateend event
  * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the rotation overlay.
  * @property {number | undefined} pixelTolerance Pixel tolerance for considering the pointer close enough to a segment
  *                                                or vertex for editing. Default is 10.
+ * @property {string} rotatePropertyNane Property name of the features. Used for exporting total angle value.
  */
 
 /**
@@ -47,6 +93,9 @@ pointerup фиксация реальных фечеров - rotateend event
  * @class
  * @extends ol.interaction.Interaction
  * @author Vladimir Vershinin
+ *
+ * TODO Перемещение центра кручения
+ * TODO Добавить bounding feature
  */
 export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     /**
@@ -57,157 +106,31 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
             handleEvent: RotateFeatureInteraction.handleEvent,
             handleDownEvent: handleDownEvent,
             handleUpEvent: handleUpEvent,
-            handleDragEvent: handleDragEvent
+            handleDragEvent: handleDragEvent,
+            handleMoveEvent: handleMoveEvent
         });
 
-        /**
-         * Rotated feature.
-         *
-         * @type {ol.Feature}
-         * @private
-         */
-        this.ghostFeature_ = null;
-
-        /**
-         * @type {ol.Feature}
-         * @private
-         */
-        this.anchorFeature_ = null;
-
-        /**
-         * @type {ol.Feature}
-         * @private
-         */
-        this.boundingFeature_ = null;
-
-        /**
-         * @type {ol.FeatureOverlay}
-         * @private
-         */
-        this.overlay_ = new ol.FeatureOverlay({
-            style: typeof options.style !== 'undefined' ? options.style : RotateFeatureInteraction.getDefaultStyleFunction()
+        overlay = new ol.FeatureOverlay({
+            style: options.style || RotateFeatureInteraction.getDefaultStyleFunction()
         });
+        pixelTolerance = typeof options.pixelTolerance !== 'undefined' ? options.pixelTolerance : pixelTolerance;
+        rotatePropertyName = options.rotatePropertyNane || rotatePropertyName;
+        features = options.features;
 
-        /**
-         * @type {number}
-         * @private
-         */
-        this.pixelTolerance_ = typeof options.pixelTolerance !== 'undefined' ? options.pixelTolerance : 10;
+        assert(features, 'Option features is required');
 
-        /**
-         * @type {ol.Collection.<ol.Feature>}
-         * @private
-         */
-        this.features_ = options.features;
-        assert(this.features_, 'Option features is required');
+        createOrUpdateInteractionFeatures();
 
-        this.createOrUpdateInteractionFeatures_();
-
-        this.features_.on('add', this.handleFeatureAdd_, this);
-        this.features_.on('remove', this.handleFeatureRemove_, this);
+        features.on('add', handleFeatureAdd, this);
+        features.on('remove', handleFeatureRemove, this);
     }
 
     /**
      * @param {ol.Map} map
      */
     setMap(map) {
-        this.overlay_.setMap(map);
-
+        overlay.setMap(map);
         super.setMap(map);
-    }
-
-    /**
-     * Creates or updates all interaction helper features.
-     *
-     * @private
-     */
-    createOrUpdateInteractionFeatures_() {
-        this.createOrUpdateGhostFeature_(this.features_.getArray());
-
-        const ghostExtent = this.ghostFeature_.getGeometry().getExtent();
-
-        this.createOrUpdateAnchorFeature_(ol.extent.getCenter(ghostExtent));
-//        this.createOrUpdateBoundingFeature_(ghostExtent);
-    }
-
-    /**
-     * @param {ol.Coordinate} anchor
-     * @private
-     */
-    createOrUpdateAnchorFeature_(anchor : ol.Coordinate) {
-        if (this.anchorFeature_) {
-            this.anchorFeature_.getGeometry().setCoordinates(anchor);
-        } else {
-            this.anchorFeature_ = new ol.Feature({
-                geometry: new ol.geom.Point(anchor),
-                [ANCHOR_NAME]: true
-            });
-
-            this.overlay_.addFeature(this.anchorFeature_);
-        }
-    }
-
-    /**
-     * @param {ol.Feature[]} features
-     * @private
-     */
-    createOrUpdateGhostFeature_(features : Array<ol.Feature>) {
-        const geometries = features.map(feature => feature.getGeometry().clone());
-
-        if (this.ghostFeature_) {
-            this.ghostFeature_.getGeometry().setGeometries(geometries);
-        } else {
-            this.ghostFeature_ = new ol.Feature({
-                geometry: new ol.geom.GeometryCollection(geometries),
-                [GHOST_NAME]: true
-            });
-
-            this.overlay_.addFeature(this.ghostFeature_);
-        }
-    }
-
-    /**
-     * @param {ol.Extent} extent
-     * @private
-     */
-    createOrUpdateBoundingFeature_(extent : ol.Extent) {
-        const coordinates = [
-            [extent[0], extent[1]],
-            [extent[0], extent[3]],
-            [extent[2], extent[3]],
-            [extent[2], extent[1]]
-        ];
-
-        if (this.boundingFeature_) {
-            this.boundingFeature_.getGeometry().setCoordinates(coordinates);
-        } else {
-            this.boundingFeature_ = new ol.Feature({
-                geometry: new ol.geom.MultiPoint(coordinates),
-                [BOUNDING_NAME]: true
-            });
-
-            this.overlay_.addFeature(this.boundingFeature_);
-        }
-    }
-
-    /**
-     * @param {ol.Feature} element
-     * @private
-     */
-    handleFeatureAdd_({ element }) {
-        assertInstanceOf(element, ol.Feature);
-
-        this.createOrUpdateGhostFeature_(this.features_);
-    }
-
-    /**
-     * @param {ol.Feature} element
-     * @private
-     */
-    handleFeatureRemove_({ element }) {
-        assertInstanceOf(element, ol.Feature);
-
-        this.createOrUpdateGhostFeature_(this.features_);
     }
 }
 
@@ -215,53 +138,19 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
  * @param {ol.MapBrowserEvent} evt Map browser event.
  * @return {boolean} `false` to stop event propagation.
  * @this {RotateFeatureInteraction}
+ * @public
  */
 RotateFeatureInteraction.handleEvent = function (evt : ol.MapBrowserEvent) : boolean {
     return ol.interaction.Pointer.handleEvent.call(this, evt);
 };
 
 /**
- * @param {ol.MapBrowserEvent} evt Event.
- * @return {boolean}
- * @this {RotateFeatureInteraction}
- * @private
- */
-function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
-    console.log('down');
-    if (this.ghostFeature_) {
-
-    }
-
-    return true;
-}
-
-/**
- * @param {ol.MapBrowserEvent} evt Event.
- * @return {boolean}
- * @this {RotateFeatureInteraction}
- * @private
- */
-function handleUpEvent(evt : ol.MapBrowserEvent) : boolean {
-    console.log('up');
-    return false;
-}
-
-/**
- * @param {ol.MapBrowserEvent} evt Event.
- * @return {boolean}
- * @this {RotateFeatureInteraction}
- * @private
- */
-function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
-    console.log('drag');
-}
-
-/**
  * Creates default style function for interaction.
  *
  * @returns {ol.style.StyleFunction}
+ * @public
  */
-RotateFeatureInteraction.getDefaultStyleFunction = function () : ol.style.StyleFunction {
+RotateFeatureInteraction.getDefaultStyleFunction = function ():ol.style.StyleFunction {
     const styles = getDefaultStyles();
 
     return function (feature) {
@@ -279,7 +168,220 @@ RotateFeatureInteraction.getDefaultStyleFunction = function () : ol.style.StyleF
 };
 
 /**
+ * @param {ol.MapBrowserEvent} evt Event.
+ * @return {boolean}
+ * @this {RotateFeatureInteraction}
+ * @private
+ */
+function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
+    const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
+
+    // handle click & drag on features for rotation
+    if (foundFeature && !lastCoordinate && features.getArray().includes(foundFeature)) {
+        lastCoordinate = evt.coordinate;
+        startCoordinate = evt.coordinate;
+
+        handleMoveEvent.call(this, evt);
+        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.START, features));
+
+        return true;
+    }
+    // handle click & drag on rotation anchor feature
+    else if (foundFeature === anchorFeature) {
+        anchorMoving = true;
+        handleMoveEvent.call(this, evt);
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @param {ol.MapBrowserEvent} evt Event.
+ * @return {boolean}
+ * @this {RotateFeatureInteraction}
+ * @private
+ */
+function handleUpEvent(evt : ol.MapBrowserEvent) : boolean {
+    if (lastCoordinate) {
+        lastCoordinate = undefined;
+        startCoordinate = undefined;
+
+        handleMoveEvent.call(this, evt);
+        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.END, features));
+
+        return true;
+    } else if (anchorMoving) {
+        anchorMoving = false;
+        handleMoveEvent.call(this, evt);
+
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * @param {ol.MapBrowserEvent} evt Event.
+ * @return {boolean}
+ * @this {RotateFeatureInteraction}
+ * @private
+ * todo обработка коллекции с одной точкой! крутить иконку!
+ */
+function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
+    const newCoordinate = evt.coordinate;
+    const anchorCoordinate = anchorFeature.getGeometry().getCoordinates();
+
+    if (lastCoordinate) {
+        const lastVector = [lastCoordinate[0] - anchorCoordinate[0], lastCoordinate[1] - anchorCoordinate[1]];
+        const newVector = [newCoordinate[0] - anchorCoordinate[0], newCoordinate[1] - anchorCoordinate[1]];
+
+        let angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
+
+        features.forEach(feature => {
+            rotateGeometry(feature.getGeometry(), angle, anchorCoordinate);
+            feature.set(rotatePropertyName, (feature.get(rotatePropertyName) || 0) + angle);
+        });
+
+        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.ROTATING, features));
+
+        lastCoordinate = evt.coordinate;
+    } else if (anchorMoving) {
+        let deltaX = newCoordinate[0] - anchorCoordinate[0];
+        let deltaY = newCoordinate[1] - anchorCoordinate[1];
+
+        anchorFeature.getGeometry().translate(deltaX, deltaY);
+    }
+}
+
+/**
+ * @param {ol.MapBrowserEvent} evt Event.
+ * @return {boolean}
+ * @this {RotateFeatureInteraction}
+ * @private
+ */
+function handleMoveEvent(evt:ol.MapBrowserEvent):boolean {
+    const elem = evt.map.getTargetElement();
+    const foundFeature = map.forEachFeatureAtPixel(evt.pixel, feature => feature);
+
+    if (foundFeature || lastCoordinate) {
+        var isSelected = false;
+
+        if (features && features.getArray().includes(foundFeature)) {
+            isSelected = true;
+        }
+
+        previousCursor = elem.style.cursor;
+
+        // WebKit browsers don't support the grab icons without a prefix
+        elem.style.cursor = lastCoordinate ? '-webkit-grabbing' : (isSelected ? '-webkit-grab' : 'pointer');
+
+        // Thankfully, attempting to set the standard ones will silently fail,
+        // keeping the prefixed icons
+        elem.style.cursor = lastCoordinate ? 'grabbing' : (isSelected ? 'grab' : 'pointer');
+    } else {
+        elem.style.cursor = previousCursor || '';
+        previousCursor = undefined;
+    }
+}
+
+/**
+ * Creates or updates all interaction helper features.
+ * @private
+ */
+function createOrUpdateInteractionFeatures() {
+    const geometries = features.getArray().map(feature => feature.getGeometry());
+    const extent = new ol.geom.GeometryCollection(geometries).getExtent();
+
+//        createOrUpdateGhostFeature(geometries);
+    createOrUpdateAnchorFeature(ol.extent.getCenter(extent));
+//        createOrUpdateBoundingFeature(extent);
+}
+
+/**
+ * @param {ol.Coordinate} anchor
+ * @private
+ */
+function createOrUpdateAnchorFeature(anchor:ol.Coordinate) {
+    if (anchorFeature) {
+        anchorFeature.getGeometry().setCoordinates(anchor);
+    } else {
+        anchorFeature = new ol.Feature({
+            geometry: new ol.geom.Point(anchor),
+            [ANCHOR_NAME]: true
+        });
+
+        overlay.addFeature(anchorFeature);
+    }
+}
+
+/**
+ * @param {ol.geom.SimpleGeometry[]} geometries
+ * @private
+ */
+function createOrUpdateGhostFeature(geometries:Array<ol.geom.SimpleGeometry>) {
+    if (ghostFeature) {
+        ghostFeature.getGeometry().setGeometries(geometries);
+    } else {
+        ghostFeature = new ol.Feature({
+            geometry: new ol.geom.GeometryCollection(geometries),
+            [GHOST_NAME]: true
+        });
+
+        overlay.addFeature(ghostFeature);
+    }
+}
+
+/**
+ * @param {ol.Extent} extent
+ * @private
+ */
+function createOrUpdateBoundingFeature(extent:ol.Extent) {
+    const coordinates = [
+        [extent[0], extent[1]],
+        [extent[0], extent[3]],
+        [extent[2], extent[3]],
+        [extent[2], extent[1]]
+    ];
+
+    if (boundingFeature) {
+        boundingFeature.getGeometry().setCoordinates(coordinates);
+    } else {
+        boundingFeature = new ol.Feature({
+            geometry: new ol.geom.MultiPoint(coordinates),
+            [BOUNDING_NAME]: true
+        });
+
+        overlay.addFeature(boundingFeature);
+    }
+}
+
+/**
+ * @param {ol.Feature} element
+ * @this RotateFeatureInteraction
+ * @private
+ */
+function handleFeatureAdd({ element }) {
+    assertInstanceOf(element, ol.Feature);
+
+    createOrUpdateGhostFeature(features);
+}
+
+/**
+ * @param {ol.Feature} element
+ * @this RotateFeatureInteraction
+ * @private
+ */
+function handleFeatureRemove({ element }) {
+    assertInstanceOf(element, ol.Feature);
+
+    createOrUpdateGhostFeature(features);
+}
+
+/**
  * @returns {Object.<string, Array.<ol.style.Style>>}
+ * @private
  */
 function getDefaultStyles() : Object<string, Array<ol.style.Style>> {
     /** @type {Object<string, Array<ol.style.Style>>} */
