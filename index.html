@@ -17,7 +17,7 @@
 <body>
     <div id="map"></div>
 
-    <script src="node_modules/openlayers/dist/ol-debug.js"></script>
+    <script src="node_modules/openlayers/dist/ol.js"></script>
     <script src="dist/bundle.js"></script>
     <script>
         const point = new ol.Feature({
@@ -54,19 +54,16 @@
         });
 
         const features = new ol.Collection();
-
-        map.addInteraction(new ol.interaction.Select({
-            features: features
-        }));
-
+        const select = new ol.interaction.Select();
         const rotate = new ol3RotateFeature.RotateFeatureInteraction({
-            features: features
+            features: select.getFeatures()
         });
 
         rotate.on(ol3RotateFeature.RotateFeatureEventType.START, evt => console.log('rotate start', evt.features));
         rotate.on(ol3RotateFeature.RotateFeatureEventType.ROTATING, evt => console.log('rotating', evt.features));
         rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => console.log('rotate end', evt.features));
 
+        map.addInteraction(select);
         map.addInteraction(rotate);
     </script>
 </body>

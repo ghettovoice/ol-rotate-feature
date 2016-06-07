@@ -18,7 +18,7 @@
 		exports["ol3RotateFeature"] = factory(require("ol"));
 	else
 		root["ol3RotateFeature"] = factory(root["ol"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_5__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -105,9 +105,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.RotateFeatureEvent = exports.RotateFeatureEventType = undefined;
 
-	var _openlayers = __webpack_require__(2);
+	var _event = __webpack_require__(2);
 
-	var _openlayers2 = _interopRequireDefault(_openlayers);
+	var _event2 = _interopRequireDefault(_event);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -142,12 +142,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Events emitted by RotateFeatureInteraction instances are instances of this type.
 	 *
 	 * @class
-	 * @extends {ol.events.Event}
+	 * @extends {olEvent}
 	 * @author Vladimir Vershinin
 	 */
 
-	var RotateFeatureEvent = exports.RotateFeatureEvent = function (_ol$events$Event) {
-	  _inherits(RotateFeatureEvent, _ol$events$Event);
+	var RotateFeatureEvent = exports.RotateFeatureEvent = function (_olEvent) {
+	  _inherits(RotateFeatureEvent, _olEvent);
 
 	  /**
 	   * @param {RotateFeatureEventType} type Type.
@@ -169,13 +169,108 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  return RotateFeatureEvent;
-	}(_openlayers2.default.events.Event);
+	}(_event2.default);
 
 /***/ },
 /* 2 */
 /***/ function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	/**
+	 * Polyfill of OpenLayers 3 new Event system.
+	 * Use it for old versions.
+	 */
+
+	/**
+	 * Stripped down implementation of the W3C DOM Level 2 Event interface.
+	 * @see {@link https://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface}
+	 *
+	 * This implementation only provides `type` and `target` properties, and
+	 * `stopPropagation` and `preventDefault` methods. It is meant as base class
+	 * for higher level events defined in the library, and works with
+	 * {@link ol.events.EventTarget}.
+	 *
+	 * @constructor
+	 * @implements {oli.events.Event}
+	 * @param {string} type Type.
+	 * @param {Object=} opt_target Target.
+	 */
+
+	var olEvent = function () {
+	  function olEvent(type, opt_target) {
+	    _classCallCheck(this, olEvent);
+
+	    /**
+	     * @type {boolean}
+	     */
+	    this.propagationStopped = undefined;
+
+	    /**
+	     * The event type.
+	     * @type {string}
+	     */
+	    this.type = type;
+
+	    /**
+	     * The event target.
+	     * @type {Object}
+	     */
+	    this.target = opt_target || null;
+	  }
+
+	  /**
+	   * Stop event propagation.
+	   * @function
+	   */
+
+
+	  _createClass(olEvent, [{
+	    key: "preventDefault",
+	    value: function preventDefault() {
+	      this.propagationStopped = true;
+	    }
+
+	    /**
+	     * Stop event propagation.
+	     * @function
+	     */
+
+	  }, {
+	    key: "stopPropagation",
+	    value: function stopPropagation() {
+	      this.propagationStopped = true;
+	    }
+	  }]);
+
+	  return olEvent;
+	}();
+
+	/**
+	 * @param {Event|ol.events.Event} evt Event
+	 */
+
+
+	olEvent.stopPropagation = function (evt) {
+	  evt.stopPropagation();
+	};
+
+	/**
+	 * @param {Event|ol.events.Event} evt Event
+	 */
+	olEvent.preventDefault = function (evt) {
+	  evt.preventDefault();
+	};
+
+	exports.default = olEvent;
 
 /***/ },
 /* 3 */
@@ -191,7 +286,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-	var _openlayers = __webpack_require__(2);
+	var _openlayers = __webpack_require__(5);
 
 	var _openlayers2 = _interopRequireDefault(_openlayers);
 
@@ -324,7 +419,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function setMap(map) {
 	            this.overlay_.setMap(map);
 	            _get(Object.getPrototypeOf(RotateFeatureInteraction.prototype), "setMap", this).call(this, map);
-	            this.createOrUpdateInteractionFeatures_();
+	            this.updateInteractionFeatures_();
 	        }
 
 	        /**
@@ -333,17 +428,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 
 	    }, {
-	        key: "createOrUpdateInteractionFeatures_",
-	        value: function createOrUpdateInteractionFeatures_() {
+	        key: "updateInteractionFeatures_",
+	        value: function updateInteractionFeatures_() {
 	            var geometries = this.features_.getArray().map(function (feature) {
 	                return feature.getGeometry();
 	            });
+
+	            if (geometries.length === 0) {
+	                this.reset_();
+
+	                return;
+	            }
+
 	            var extent = new _openlayers2.default.geom.GeometryCollection(geometries).getExtent();
 	            var anchorCoordinate = _openlayers2.default.extent.getCenter(extent);
 
 	            //        this.createOrUpdateGhostFeature_(geometries);
 	            this.createOrUpdateAnchorFeature_(anchorCoordinate);
 	            this.createOrUpdateArrowFeature_(anchorCoordinate);
+	        }
+	    }, {
+	        key: "reset_",
+	        value: function reset_() {
+	            var _this2 = this;
+
+	            [this.anchorFeature_, this.arrowFeature_].forEach(function (feature) {
+	                if (feature) {
+	                    _this2.overlay_.getSource().removeFeature(feature);
+	                }
+	            });
+
+	            this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = undefined;
+	            this.anchorMoving_ = false;
 	        }
 
 	        /**
@@ -413,7 +529,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            (0, _util.assertInstanceOf)(element, _openlayers2.default.Feature);
 
-	            this.createOrUpdateInteractionFeatures_();
+	            this.updateInteractionFeatures_();
 	        }
 
 	        /**
@@ -429,7 +545,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            (0, _util.assertInstanceOf)(element, _openlayers2.default.Feature);
 
-	            this.createOrUpdateInteractionFeatures_();
+	            this.updateInteractionFeatures_();
 	        }
 	    }]);
 
@@ -461,7 +577,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    // handle click & drag on features for rotation
-	    if (foundFeature && !this.lastCoordinate_ && this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_) {
+	    if (foundFeature && !this.lastCoordinate_ && (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_)) {
 	        this.lastCoordinate_ = evt.coordinate;
 
 	        handleMoveEvent.call(this, evt);
@@ -470,7 +586,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return true;
 	    }
 	    // handle click & drag on rotation anchor feature
-	    else if (foundFeature === this.anchorFeature_) {
+	    else if (foundFeature && foundFeature === this.anchorFeature_) {
 	            this.anchorMoving_ = true;
 	            handleMoveEvent.call(this, evt);
 
@@ -514,37 +630,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @private
 	 */
 	function handleDragEvent(evt) {
-	    var _this2 = this;
+	    var _this3 = this;
 
 	    var newCoordinate = evt.coordinate;
 	    var anchorCoordinate = this.anchorFeature_.getGeometry().getCoordinates();
 
 	    var updateAngleProperty = function updateAngleProperty(feature, angle) {
-	        return feature.set(_this2.angleProperty_, (feature.get(_this2.angleProperty_) || 0) + angle);
+	        return feature.set(_this3.angleProperty_, (feature.get(_this3.angleProperty_) || 0) + angle);
 	    };
 
 	    // handle drag of features by angle
 	    if (this.lastCoordinate_) {
 	        (function () {
 	            // calculate vectors of last and current pointer positions
-	            var lastVector = [_this2.lastCoordinate_[0] - anchorCoordinate[0], _this2.lastCoordinate_[1] - anchorCoordinate[1]];
+	            var lastVector = [_this3.lastCoordinate_[0] - anchorCoordinate[0], _this3.lastCoordinate_[1] - anchorCoordinate[1]];
 	            var newVector = [newCoordinate[0] - anchorCoordinate[0], newCoordinate[1] - anchorCoordinate[1]];
 
 	            // calculate angle between last and current vectors (positive angle counter-clockwise)
 	            var angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
 
-	            _this2.features_.forEach(function (feature) {
+	            _this3.features_.forEach(function (feature) {
 	                feature.getGeometry().rotate(angle, anchorCoordinate);
 	                updateAngleProperty(feature, angle);
 	            });
 
-	            [_this2.anchorFeature_, _this2.arrowFeature_].forEach(function (feature) {
+	            [_this3.anchorFeature_, _this3.arrowFeature_].forEach(function (feature) {
 	                return updateAngleProperty(feature, angle);
 	            });
 
-	            _this2.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, _this2.features_));
+	            _this3.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, _this3.features_));
 
-	            _this2.lastCoordinate_ = evt.coordinate;
+	            _this3.lastCoordinate_ = evt.coordinate;
 	        })();
 	    }
 	    // handle drag of the anchor
@@ -583,10 +699,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.lastCoordinate_) {
 	        this.previousCursor_ = elem.style.cursor;
 	        setCursor('grabbing', true);
-	    } else if (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_) {
+	    } else if (foundFeature && (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_)) {
 	        this.previousCursor_ = elem.style.cursor;
 	        setCursor('grab', true);
-	    } else if (foundFeature === this.anchorFeature_ || this.anchorMoving_) {
+	    } else if (foundFeature && foundFeature === this.anchorFeature_ || this.anchorMoving_) {
 	        this.previousCursor_ = elem.style.cursor;
 	        setCursor('crosshair');
 	    } else {
@@ -621,7 +737,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            radius: 4,
 	            points: 6
 	        }),
-	        zIndex: 10
+	        zIndex: Infinity
 	    })]), _defineProperty(_styles, ARROW_KEY, [new _openlayers2.default.style.Style({
 	        fill: new _openlayers2.default.style.Fill({
 	            color: transparent
@@ -641,7 +757,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                color: white,
 	                width: width + 1
 	            })
-	        })
+	        }),
+	        zIndex: Infinity
 	    }), new _openlayers2.default.style.Style({
 	        fill: new _openlayers2.default.style.Fill({
 	            color: transparent
@@ -649,7 +766,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        stroke: new _openlayers2.default.style.Stroke({
 	            color: blue,
 	            width: width
-	        })
+	        }),
+	        zIndex: Infinity
 	    })]), _styles);
 
 	    return function (feature, resolution) {
@@ -694,6 +812,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.assert = assert;
 	exports.assertInstanceOf = assertInstanceOf;
 	exports.noop = noop;
+	exports.identity = identity;
 	exports.getValueType = getValueType;
 
 	/**
@@ -728,6 +847,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	function noop() {}
 
 	/**
+	 * @param {*} arg
+	 * @returns {*}
+	 */
+	function identity(arg) {
+	    return arg;
+	}
+
+	/**
 	 * Returns the type of a value. If a constructor is passed, and a suitable
 	 * string cannot be found, 'unknown type name' will be returned.
 	 *
@@ -743,6 +870,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return value === null ? 'null' : typeof value === 'undefined' ? 'undefined' : _typeof(value);
 	    }
 	}
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
 
 /***/ }
 /******/ ])

@@ -60,19 +60,16 @@ const map = new ol.Map({
 });
 
 const features = new ol.Collection();
-
-map.addInteraction(new ol.interaction.Select({
-    features: features
-}));
-
+const select = new ol.interaction.Select();
 const rotate = new ol3RotateFeature.RotateFeatureInteraction({
-    features: features
+    features: select.getFeatures()
 });
 
 rotate.on(ol3RotateFeature.RotateFeatureEventType.START, evt => console.log('rotate start', evt.features));
 rotate.on(ol3RotateFeature.RotateFeatureEventType.ROTATING, evt => console.log('rotating', evt.features));
 rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => console.log('rotate end', evt.features));
 
+map.addInteraction(select);
 map.addInteraction(rotate);
 ```
 Example of usage in Browser environment in `index.html`.
