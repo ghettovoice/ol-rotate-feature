@@ -308,7 +308,7 @@ function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
  */
 function handleMoveEvent(evt : ol.MapBrowserEvent) : boolean {
     const elem = evt.map.getTargetElement();
-    const foundFeature = map.forEachFeatureAtPixel(evt.pixel, feature => feature);
+    const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
 
     const setCursor = (cursor, vendor = false) => {
         if (vendor) {

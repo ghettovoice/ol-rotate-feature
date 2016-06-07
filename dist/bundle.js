@@ -401,9 +401,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @typedef {Object} RotateFeatureInteractionOptions
 	 * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
-	 * @property {ol.events.ConditionType | undefined} condition A function that takes an ol.MapBrowserEvent and returns a boolean
-	 *                                                             to indicate whether that event will be considered to rotate ghost feature.
-	 *                                                             Default is ol.events.condition.primaryAction.
 	 * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
 	 * @property {string} angleProperty Property name of the features where to save current angle. Used for exporting total angle value. Default is  'angle'.
 	 */
@@ -421,7 +418,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends ol.interaction.Interaction
 	 * @author Vladimir Vershinin
 	 *
-	 * TODO добавить индикатор угла на круге
+	 * todo возможно добавить ghost feature для отображения начального угла
 	 */
 
 	var RotateFeatureInteraction = function (_ol$interaction$Point) {
@@ -753,7 +750,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function handleMoveEvent(evt) {
 	    var elem = evt.map.getTargetElement();
-	    var foundFeature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+	    var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, function (feature) {
 	        return feature;
 	    });
 
