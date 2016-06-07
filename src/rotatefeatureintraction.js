@@ -2,7 +2,6 @@
 import ol from "openlayers";
 import { assertInstanceOf } from "./util";
 import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent";
-import rotateGeometry from "./rotate";
 
 /**
  * @typedef {Object} RotateFeatureInteractionOptions
@@ -44,17 +43,23 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
          * @private
          */
         this.features_ = options.features;
+
+        assertInstanceOf(this.features_, ol.Collection);
+
         /**
          * @type {string}
          * @private
          */
         this.angleProperty_ = options.angleProperty || 'angle';
         /**
-         * @type {ol.FeatureOverlay}
+         * @type {ol.layer.Vector}
          * @private
          */
-        this.overlay_ = new ol.FeatureOverlay({
-            style: options.style || getDefaultStyle.call(this, this.angleProperty_)
+        this.overlay_ = new ol.layer.Vector({
+            style: options.style || getDefaultStyle.call(this, this.angleProperty_),
+            source: new ol.source.Vector({
+                features: new ol.Collection()
+            })
         });
         /**
          * @type {string}
@@ -88,8 +93,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
          * @private
          */
         this.anchorMoving_ = false;
-
-        assertInstanceOf(this.features_, ol.Collection);
 
         this.features_.on('add', this.handleFeatureAdd_, this);
         this.features_.on('remove', this.handleFeatureRemove_, this);
@@ -130,7 +133,7 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
                 geometry: new ol.geom.Point(coordinate),
                 [ANCHOR_KEY]: true
             });
-            this.overlay_.addFeature(this.anchorFeature_);
+            this.overlay_.getSource().addFeature(this.anchorFeature_);
         }
     }
 
@@ -146,7 +149,7 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
                 geometry: new ol.geom.GeometryCollection(geometries),
                 [GHOST_KEY]: true
             });
-            this.overlay_.addFeature(this.ghostFeature_);
+            this.overlay_.getSource().addFeature(this.ghostFeature_);
         }
     }
 
@@ -162,7 +165,7 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
                 geometry: new ol.geom.Point(coordinate),
                 [ARROW_KEY]: true
             });
-            this.overlay_.addFeature(this.arrowFeature_);
+            this.overlay_.getSource().addFeature(this.arrowFeature_);
         }
     }
 
@@ -280,7 +283,7 @@ function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
         let angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
 
         this.features_.forEach(feature => {
-            rotateGeometry(feature.getGeometry(), angle, anchorCoordinate);
+            feature.getGeometry().rotate(angle, anchorCoordinate);
             updateAngleProperty(feature, angle);
         });
 
@@ -422,7 +425,7 @@ function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
                     ]
                 ]);
                 // and rotate it according to current angle
-                rotateGeometry(geom, angle, coordinate);
+                geom.rotate(angle, coordinate);
                 style[0].setGeometry(geom);
                 style[1].setGeometry(geom);
                 style[0].getText().setText(Math.round(-angle * 180 / Math.PI) + '°');

@@ -70,9 +70,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.RotateFeatureEvent = exports.RotateFeatureInteraction = undefined;
+	exports.RotateFeatureEventType = exports.RotateFeatureEvent = exports.RotateFeatureInteraction = undefined;
 
-	var _rotatefeatureintraction = __webpack_require__(5);
+	var _rotatefeatureintraction = __webpack_require__(3);
 
 	var _rotatefeatureintraction2 = _interopRequireDefault(_rotatefeatureintraction);
 
@@ -92,6 +92,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	exports.RotateFeatureInteraction = _rotatefeatureintraction2.default;
 	exports.RotateFeatureEvent = _rotatefeatureevent.RotateFeatureEvent;
+	exports.RotateFeatureEventType = _rotatefeatureevent.RotateFeatureEventType;
 
 /***/ },
 /* 1 */
@@ -104,9 +105,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.RotateFeatureEvent = exports.RotateFeatureEventType = undefined;
 
-	var _event = __webpack_require__(3);
+	var _openlayers = __webpack_require__(2);
 
-	var _event2 = _interopRequireDefault(_event);
+	var _openlayers2 = _interopRequireDefault(_openlayers);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -141,12 +142,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Events emitted by RotateFeatureInteraction instances are instances of this type.
 	 *
 	 * @class
-	 * @extends {olEvent|ol.events.Event}
+	 * @extends {ol.events.Event}
 	 * @author Vladimir Vershinin
 	 */
 
-	var RotateFeatureEvent = exports.RotateFeatureEvent = function (_olEvent) {
-	  _inherits(RotateFeatureEvent, _olEvent);
+	var RotateFeatureEvent = exports.RotateFeatureEvent = function (_ol$events$Event) {
+	  _inherits(RotateFeatureEvent, _ol$events$Event);
 
 	  /**
 	   * @param {RotateFeatureEventType} type Type.
@@ -168,7 +169,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  return RotateFeatureEvent;
-	}(_event2.default);
+	}(_openlayers2.default.events.Event);
 
 /***/ },
 /* 2 */
@@ -178,192 +179,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	/**
-	 * Polyfill of OpenLayers 3 new Event system.
-	 * Use it for old versions.
-	 */
-
-	/**
-	 * Stripped down implementation of the W3C DOM Level 2 Event interface.
-	 * @see {@link https://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface}
-	 *
-	 * This implementation only provides `type` and `target` properties, and
-	 * `stopPropagation` and `preventDefault` methods. It is meant as base class
-	 * for higher level events defined in the library, and works with
-	 * {@link ol.events.EventTarget}.
-	 *
-	 * @constructor
-	 * @implements {oli.events.Event}
-	 * @param {string} type Type.
-	 * @param {Object=} opt_target Target.
-	 */
-
-	var olEvent = function () {
-	  function olEvent(type, opt_target) {
-	    _classCallCheck(this, olEvent);
-
-	    /**
-	     * @type {boolean}
-	     */
-	    this.propagationStopped = undefined;
-
-	    /**
-	     * The event type.
-	     * @type {string}
-	     */
-	    this.type = type;
-
-	    /**
-	     * The event target.
-	     * @type {Object}
-	     */
-	    this.target = opt_target || null;
-	  }
-
-	  /**
-	   * Stop event propagation.
-	   * @function
-	   */
-
-
-	  _createClass(olEvent, [{
-	    key: "preventDefault",
-	    value: function preventDefault() {
-	      this.propagationStopped = true;
-	    }
-
-	    /**
-	     * Stop event propagation.
-	     * @function
-	     */
-
-	  }, {
-	    key: "stopPropagation",
-	    value: function stopPropagation() {
-	      this.propagationStopped = true;
-	    }
-	  }]);
-
-	  return olEvent;
-	}();
-
-	/**
-	 * @param {Event|ol.events.Event} evt Event
-	 */
-
-
-	olEvent.stopPropagation = function (evt) {
-	  evt.stopPropagation();
-	};
-
-	/**
-	 * @param {Event|ol.events.Event} evt Event
-	 */
-	olEvent.preventDefault = function (evt) {
-	  evt.preventDefault();
-	};
-
-	exports.default = olEvent;
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.rotate = rotate;
-	exports.default = rotateGeometry;
-
-	var _openlayers = __webpack_require__(2);
-
-	var _openlayers2 = _interopRequireDefault(_openlayers);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	/**
-	 * @param {Array.<number>} flatCoordinates Flat coordinates.
-	 * @param {number} offset Offset.
-	 * @param {number} end End.
-	 * @param {number} stride Stride.
-	 * @param {number} angle Angle.
-	 * @param {Array.<number>} anchor Rotation anchor point.
-	 * @param {Array.<number>=} opt_dest Destination.
-	 * @return {Array.<number>} Transformed coordinates.
-	 * @link https://github.com/openlayers/ol3/blob/v3.16.0/src/ol/geom/flat/transformflatgeom.js#L48
-	 */
-	function rotate(flatCoordinates, offset, end, stride, angle, anchor, opt_dest) {
-	    var dest = opt_dest ? opt_dest : [];
-	    var cos = Math.cos(angle);
-	    var sin = Math.sin(angle);
-	    var anchorX = anchor[0];
-	    var anchorY = anchor[1];
-	    var i = 0;
-
-	    for (var j = offset; j < end; j += stride) {
-	        var deltaX = flatCoordinates[j] - anchorX;
-	        var deltaY = flatCoordinates[j + 1] - anchorY;
-
-	        dest[i++] = anchorX + deltaX * cos - deltaY * sin;
-	        dest[i++] = anchorY + deltaX * sin + deltaY * cos;
-
-	        for (var k = j + 2; k < j + stride; ++k) {
-	            dest[i++] = flatCoordinates[k];
-	        }
-	    }
-
-	    if (opt_dest && dest.length != i) {
-	        dest.length = i;
-	    }
-
-	    return dest;
-	}
-
-	/**
-	 * @param {ol.geom.Geometry} geometry
-	 * @param {number} angle
-	 * @param {ol.Coordinate} anchor
-	 */
-	/**
-	 * Polyfill of OpenLayers 3 ol.geom.SimpleGeometry.prototype.rotate method.
-	 * Use it for old versions.
-	 */
-	function rotateGeometry(geometry, angle, anchor) {
-	    if (geometry instanceof _openlayers2.default.geom.GeometryCollection) {
-	        var geometries = geometry.getGeometries();
-
-	        for (var i = 0, l = geometries.length; i < l; ++i) {
-	            rotateGeometry(geometries[i], angle, anchor);
-	        }
-	    } else {
-	        var flatCoordinates = geometry.getFlatCoordinates();
-
-	        if (flatCoordinates) {
-	            var stride = geometry.getStride();
-
-	            rotate(flatCoordinates, 0, flatCoordinates.length, stride, angle, anchor, flatCoordinates);
-	        }
-	    }
-
-	    geometry.changed();
-	}
-
-/***/ },
-/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -380,13 +195,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _openlayers2 = _interopRequireDefault(_openlayers);
 
-	var _util = __webpack_require__(6);
+	var _util = __webpack_require__(4);
 
 	var _rotatefeatureevent = __webpack_require__(1);
-
-	var _rotate = __webpack_require__(4);
-
-	var _rotate2 = _interopRequireDefault(_rotate);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -401,9 +212,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @typedef {Object} RotateFeatureInteractionOptions
 	 * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
-	 * @property {ol.events.ConditionType | undefined} condition A function that takes an ol.MapBrowserEvent and returns a boolean
-	 *                                                             to indicate whether that event will be considered to rotate ghost feature.
-	 *                                                             Default is ol.events.condition.primaryAction.
 	 * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
 	 * @property {string} angleProperty Property name of the features where to save current angle. Used for exporting total angle value. Default is  'angle'.
 	 */
@@ -421,7 +229,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends ol.interaction.Interaction
 	 * @author Vladimir Vershinin
 	 *
-	 * TODO добавить индикатор угла на круге
+	 * todo возможно добавить ghost feature для отображения начального угла
 	 */
 
 	var RotateFeatureInteraction = function (_ol$interaction$Point) {
@@ -450,17 +258,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }));
 
 	        _this.features_ = options.features;
+
+	        (0, _util.assertInstanceOf)(_this.features_, _openlayers2.default.Collection);
+
 	        /**
 	         * @type {string}
 	         * @private
 	         */
 	        _this.angleProperty_ = options.angleProperty || 'angle';
 	        /**
-	         * @type {ol.FeatureOverlay}
+	         * @type {ol.layer.Vector}
 	         * @private
 	         */
-	        _this.overlay_ = new _openlayers2.default.FeatureOverlay({
-	            style: options.style || getDefaultStyle.call(_this, _this.angleProperty_)
+	        _this.overlay_ = new _openlayers2.default.layer.Vector({
+	            style: options.style || getDefaultStyle.call(_this, _this.angleProperty_),
+	            source: new _openlayers2.default.source.Vector({
+	                features: new _openlayers2.default.Collection()
+	            })
 	        });
 	        /**
 	         * @type {string}
@@ -494,8 +308,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @private
 	         */
 	        _this.anchorMoving_ = false;
-
-	        (0, _util.assertInstanceOf)(_this.features_, _openlayers2.default.Collection);
 
 	        _this.features_.on('add', _this.handleFeatureAdd_, _this);
 	        _this.features_.on('remove', _this.handleFeatureRemove_, _this);
@@ -548,7 +360,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.anchorFeature_ = new _openlayers2.default.Feature(_defineProperty({
 	                    geometry: new _openlayers2.default.geom.Point(coordinate)
 	                }, ANCHOR_KEY, true));
-	                this.overlay_.addFeature(this.anchorFeature_);
+	                this.overlay_.getSource().addFeature(this.anchorFeature_);
 	            }
 	        }
 
@@ -566,7 +378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.ghostFeature_ = new _openlayers2.default.Feature(_defineProperty({
 	                    geometry: new _openlayers2.default.geom.GeometryCollection(geometries)
 	                }, GHOST_KEY, true));
-	                this.overlay_.addFeature(this.ghostFeature_);
+	                this.overlay_.getSource().addFeature(this.ghostFeature_);
 	            }
 	        }
 
@@ -584,7 +396,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                this.arrowFeature_ = new _openlayers2.default.Feature(_defineProperty({
 	                    geometry: new _openlayers2.default.geom.Point(coordinate)
 	                }, ARROW_KEY, true));
-	                this.overlay_.addFeature(this.arrowFeature_);
+	                this.overlay_.getSource().addFeature(this.arrowFeature_);
 	            }
 	        }
 
@@ -722,7 +534,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
 
 	            _this2.features_.forEach(function (feature) {
-	                (0, _rotate2.default)(feature.getGeometry(), angle, anchorCoordinate);
+	                feature.getGeometry().rotate(angle, anchorCoordinate);
 	                updateAngleProperty(feature, angle);
 	            });
 
@@ -857,7 +669,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // generate arrow polygon
 	                var geom = new _openlayers2.default.geom.Polygon([[[coordinate[0], coordinate[1] - 6 * resolution], [coordinate[0] + 8 * resolution, coordinate[1] - 12 * resolution], [coordinate[0], coordinate[1] + 30 * resolution], [coordinate[0] - 8 * resolution, coordinate[1] - 12 * resolution], [coordinate[0], coordinate[1] - 6 * resolution]]]);
 	                // and rotate it according to current angle
-	                (0, _rotate2.default)(geom, angle, coordinate);
+	                geom.rotate(angle, coordinate);
 	                style[0].setGeometry(geom);
 	                style[1].setGeometry(geom);
 	                style[0].getText().setText(Math.round(-angle * 180 / Math.PI) + '°');
@@ -868,7 +680,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 6 */
+/* 4 */
 /***/ function(module, exports) {
 
 	'use strict';

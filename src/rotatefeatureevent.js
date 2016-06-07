@@ -1,5 +1,5 @@
 // @flow
-import olEvent from './event';
+import ol from 'openlayers';
 
 /**
  * @enum {string}
@@ -26,10 +26,10 @@ export const RotateFeatureEventType = {
  * Events emitted by RotateFeatureInteraction instances are instances of this type.
  *
  * @class
- * @extends {olEvent|ol.events.Event}
+ * @extends {ol.events.Event}
  * @author Vladimir Vershinin
  */
-export class RotateFeatureEvent extends olEvent {
+export class RotateFeatureEvent extends ol.events.Event {
     /**
      * @param {RotateFeatureEventType} type Type.
      * @param {ol.Collection<ol.Feature>} features Rotated features.

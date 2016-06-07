@@ -13,5 +13,6 @@ import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent
 
 export {
     RotateFeatureInteraction,
-    RotateFeatureEvent
+    RotateFeatureEvent,
+    RotateFeatureEventType
 };
