@@ -565,7 +565,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function handleMoveEvent(evt) {
 	    var elem = evt.map.getTargetElement();
-	    var foundFeature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+	    var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, function (feature) {
 	        return feature;
 	    });
 
