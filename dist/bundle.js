@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.RotateFeatureEvent = exports.RotateFeatureInteraction = undefined;
+	exports.RotateFeatureEventType = exports.RotateFeatureEvent = exports.RotateFeatureInteraction = undefined;
 
 	var _rotatefeatureintraction = __webpack_require__(5);
 
@@ -92,6 +92,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	exports.RotateFeatureInteraction = _rotatefeatureintraction2.default;
 	exports.RotateFeatureEvent = _rotatefeatureevent.RotateFeatureEvent;
+	exports.RotateFeatureEventType = _rotatefeatureevent.RotateFeatureEventType;
 
 /***/ },
 /* 1 */
@@ -447,6 +448,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }));
 
 	        _this.features_ = options.features;
+
+	        (0, _util.assertInstanceOf)(_this.features_, _openlayers2.default.Collection);
+
 	        /**
 	         * @type {string}
 	         * @private
@@ -492,8 +496,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        _this.anchorMoving_ = false;
 
-	        (0, _util.assertInstanceOf)(_this.features_, _openlayers2.default.Collection);
-
 	        _this.features_.on('add', _this.handleFeatureAdd_, _this);
 	        _this.features_.on('remove', _this.handleFeatureRemove_, _this);
 	        return _this;
@@ -509,7 +511,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function setMap(map) {
 	            this.overlay_.setMap(map);
 	            _get(Object.getPrototypeOf(RotateFeatureInteraction.prototype), "setMap", this).call(this, map);
-	            this.createOrUpdateInteractionFeatures_();
+	            this.updateInteractionFeatures_();
 	        }
 
 	        /**
@@ -518,17 +520,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 
 	    }, {
-	        key: "createOrUpdateInteractionFeatures_",
-	        value: function createOrUpdateInteractionFeatures_() {
+	        key: "updateInteractionFeatures_",
+	        value: function updateInteractionFeatures_() {
 	            var geometries = this.features_.getArray().map(function (feature) {
 	                return feature.getGeometry();
 	            });
+
+	            if (geometries.length === 0) {
+	                this.reset_();
+
+	                return;
+	            }
+
 	            var extent = new _openlayers2.default.geom.GeometryCollection(geometries).getExtent();
 	            var anchorCoordinate = _openlayers2.default.extent.getCenter(extent);
 
 	            //        this.createOrUpdateGhostFeature_(geometries);
 	            this.createOrUpdateAnchorFeature_(anchorCoordinate);
 	            this.createOrUpdateArrowFeature_(anchorCoordinate);
+	        }
+	    }, {
+	        key: "reset_",
+	        value: function reset_() {
+	            var _this2 = this;
+
+	            [this.anchorFeature_, this.arrowFeature_].forEach(function (feature) {
+	                if (feature) {
+	                    _this2.overlay_.removeFeature(feature);
+	                }
+	            });
+
+	            this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = undefined;
+	            this.anchorMoving_ = false;
 	        }
 
 	        /**
@@ -598,7 +621,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            (0, _util.assertInstanceOf)(element, _openlayers2.default.Feature);
 
-	            this.createOrUpdateInteractionFeatures_();
+	            this.updateInteractionFeatures_();
 	        }
 
 	        /**
@@ -614,7 +637,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            (0, _util.assertInstanceOf)(element, _openlayers2.default.Feature);
 
-	            this.createOrUpdateInteractionFeatures_();
+	            this.updateInteractionFeatures_();
 	        }
 	    }]);
 
@@ -646,7 +669,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    // handle click & drag on features for rotation
-	    if (foundFeature && !this.lastCoordinate_ && this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_) {
+	    if (foundFeature && !this.lastCoordinate_ && (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_)) {
 	        this.lastCoordinate_ = evt.coordinate;
 
 	        handleMoveEvent.call(this, evt);
@@ -655,7 +678,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return true;
 	    }
 	    // handle click & drag on rotation anchor feature
-	    else if (foundFeature === this.anchorFeature_) {
+	    else if (foundFeature && foundFeature === this.anchorFeature_) {
 	            this.anchorMoving_ = true;
 	            handleMoveEvent.call(this, evt);
 
@@ -699,37 +722,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @private
 	 */
 	function handleDragEvent(evt) {
-	    var _this2 = this;
+	    var _this3 = this;
 
 	    var newCoordinate = evt.coordinate;
 	    var anchorCoordinate = this.anchorFeature_.getGeometry().getCoordinates();
 
 	    var updateAngleProperty = function updateAngleProperty(feature, angle) {
-	        return feature.set(_this2.angleProperty_, (feature.get(_this2.angleProperty_) || 0) + angle);
+	        return feature.set(_this3.angleProperty_, (feature.get(_this3.angleProperty_) || 0) + angle);
 	    };
 
 	    // handle drag of features by angle
 	    if (this.lastCoordinate_) {
 	        (function () {
 	            // calculate vectors of last and current pointer positions
-	            var lastVector = [_this2.lastCoordinate_[0] - anchorCoordinate[0], _this2.lastCoordinate_[1] - anchorCoordinate[1]];
+	            var lastVector = [_this3.lastCoordinate_[0] - anchorCoordinate[0], _this3.lastCoordinate_[1] - anchorCoordinate[1]];
 	            var newVector = [newCoordinate[0] - anchorCoordinate[0], newCoordinate[1] - anchorCoordinate[1]];
 
 	            // calculate angle between last and current vectors (positive angle counter-clockwise)
 	            var angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
 
-	            _this2.features_.forEach(function (feature) {
+	            _this3.features_.forEach(function (feature) {
 	                (0, _rotate2.default)(feature.getGeometry(), angle, anchorCoordinate);
 	                updateAngleProperty(feature, angle);
 	            });
 
-	            [_this2.anchorFeature_, _this2.arrowFeature_].forEach(function (feature) {
+	            [_this3.anchorFeature_, _this3.arrowFeature_].forEach(function (feature) {
 	                return updateAngleProperty(feature, angle);
 	            });
 
-	            _this2.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, _this2.features_));
+	            _this3.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, _this3.features_));
 
-	            _this2.lastCoordinate_ = evt.coordinate;
+	            _this3.lastCoordinate_ = evt.coordinate;
 	        })();
 	    }
 	    // handle drag of the anchor
@@ -768,10 +791,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (this.lastCoordinate_) {
 	        this.previousCursor_ = elem.style.cursor;
 	        setCursor('grabbing', true);
-	    } else if (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_) {
+	    } else if (foundFeature && (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_)) {
 	        this.previousCursor_ = elem.style.cursor;
 	        setCursor('grab', true);
-	    } else if (foundFeature === this.anchorFeature_ || this.anchorMoving_) {
+	    } else if (foundFeature && foundFeature === this.anchorFeature_ || this.anchorMoving_) {
 	        this.previousCursor_ = elem.style.cursor;
 	        setCursor('crosshair');
 	    } else {
@@ -806,7 +829,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            radius: 4,
 	            points: 6
 	        }),
-	        zIndex: 10
+	        zIndex: Infinity
 	    })]), _defineProperty(_styles, ARROW_KEY, [new _openlayers2.default.style.Style({
 	        fill: new _openlayers2.default.style.Fill({
 	            color: transparent
@@ -826,7 +849,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                color: white,
 	                width: width + 1
 	            })
-	        })
+	        }),
+	        zIndex: Infinity
 	    }), new _openlayers2.default.style.Style({
 	        fill: new _openlayers2.default.style.Fill({
 	            color: transparent
@@ -834,7 +858,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        stroke: new _openlayers2.default.style.Stroke({
 	            color: blue,
 	            width: width
-	        })
+	        }),
+	        zIndex: Infinity
 	    })]), _styles);
 
 	    return function (feature, resolution) {
@@ -879,6 +904,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.assert = assert;
 	exports.assertInstanceOf = assertInstanceOf;
 	exports.noop = noop;
+	exports.identity = identity;
 	exports.getValueType = getValueType;
 
 	/**
@@ -911,6 +937,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Null function. Do nothing.
 	 */
 	function noop() {}
+
+	/**
+	 * @param {*} arg
+	 * @returns {*}
+	 */
+	function identity(arg) {
+	    return arg;
+	}
 
 	/**
 	 * Returns the type of a value. If a constructor is passed, and a suitable

@@ -29,6 +29,14 @@ export function assertInstanceOf(value, type) {
 export function noop() {}
 
 /**
+ * @param {*} arg
+ * @returns {*}
+ */
+export function identity(arg) {
+    return arg;
+}
+
+/**
  * Returns the type of a value. If a constructor is passed, and a suitable
  * string cannot be found, 'unknown type name' will be returned.
  *

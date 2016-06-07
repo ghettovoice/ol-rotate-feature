@@ -44,6 +44,9 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
          * @private
          */
         this.features_ = options.features;
+
+        assertInstanceOf(this.features_, ol.Collection);
+
         /**
          * @type {string}
          * @private
@@ -89,8 +92,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
          */
         this.anchorMoving_ = false;
 
-        assertInstanceOf(this.features_, ol.Collection);
-
         this.features_.on('add', this.handleFeatureAdd_, this);
         this.features_.on('remove', this.handleFeatureRemove_, this);
     }
@@ -101,21 +102,39 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     setMap(map) {
         this.overlay_.setMap(map);
         super.setMap(map);
-        this.createOrUpdateInteractionFeatures_();
+        this.updateInteractionFeatures_();
     }
 
     /**
      * Creates or updates all interaction helper features.
      * @private
      */
-    createOrUpdateInteractionFeatures_() {
+    updateInteractionFeatures_() {
         const geometries = this.features_.getArray().map(feature => feature.getGeometry());
+
+        if (geometries.length === 0) {
+            this.reset_();
+
+            return;
+        }
+
         const extent = new ol.geom.GeometryCollection(geometries).getExtent();
         const anchorCoordinate = ol.extent.getCenter(extent);
 
 //        this.createOrUpdateGhostFeature_(geometries);
         this.createOrUpdateAnchorFeature_(anchorCoordinate);
         this.createOrUpdateArrowFeature_(anchorCoordinate);
+    }
+
+    reset_() {
+        [this.anchorFeature_, this.arrowFeature_].forEach(feature => {
+            if (feature) {
+                this.overlay_.removeFeature(feature);
+            }
+        });
+
+        this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = undefined;
+        this.anchorMoving_ = false;
     }
 
     /**
@@ -174,7 +193,7 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     handleFeatureAdd_({ element }) {
         assertInstanceOf(element, ol.Feature);
 
-        this.createOrUpdateInteractionFeatures_();
+        this.updateInteractionFeatures_();
     }
 
     /**
@@ -185,7 +204,7 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     handleFeatureRemove_({ element }) {
         assertInstanceOf(element, ol.Feature);
 
-        this.createOrUpdateInteractionFeatures_();
+        this.updateInteractionFeatures_();
     }
 }
 
@@ -211,7 +230,7 @@ function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
     // handle click & drag on features for rotation
     if (
         foundFeature && !this.lastCoordinate_ &&
-        (this.features_.getArray().includes(foundFeature)) || foundFeature === this.arrowFeature_
+        (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_)
     ) {
         this.lastCoordinate_ = evt.coordinate;
 
@@ -221,7 +240,7 @@ function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
         return true;
     }
     // handle click & drag on rotation anchor feature
-    else if (foundFeature === this.anchorFeature_) {
+    else if (foundFeature && foundFeature === this.anchorFeature_) {
         this.anchorMoving_ = true;
         handleMoveEvent.call(this, evt);
 
@@ -322,10 +341,10 @@ function handleMoveEvent(evt : ol.MapBrowserEvent) : boolean {
     if (this.lastCoordinate_) {
         this.previousCursor_ = elem.style.cursor;
         setCursor('grabbing', true);
-    } else if (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_) {
+    } else if (foundFeature && (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_)) {
         this.previousCursor_ = elem.style.cursor;
         setCursor('grab', true);
-    } else if (foundFeature === this.anchorFeature_ || this.anchorMoving_) {
+    } else if (foundFeature && foundFeature === this.anchorFeature_ || this.anchorMoving_) {
         this.previousCursor_ = elem.style.cursor;
         setCursor('crosshair');
     } else {
@@ -360,7 +379,7 @@ function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
                     radius: 4,
                     points: 6
                 }),
-                zIndex: 10
+                zIndex: Infinity
             })
         ],
         [ARROW_KEY]: [
@@ -383,7 +402,8 @@ function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
                         color: white,
                         width: width + 1
                     })
-                })
+                }),
+                zIndex: Infinity
             }),
             new ol.style.Style({
                 fill: new ol.style.Fill({
@@ -392,7 +412,8 @@ function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
                 stroke: new ol.style.Stroke({
                     color: blue,
                     width
-                })
+                }),
+                zIndex: Infinity
             })
         ]
     };
