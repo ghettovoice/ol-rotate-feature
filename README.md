@@ -69,9 +69,9 @@ const rotate = new ol3RotateFeature.RotateFeatureInteraction({
     features: features
 });
 
-rotate.on(ol3RotateFeature.START, evt => console.log('rotate start', evt.features));
-rotate.on(ol3RotateFeature.ROTATING, evt => console.log('rotating', evt.features));
-rotate.on(ol3RotateFeature.END, evt => console.log('rotate end', evt.features));
+rotate.on(ol3RotateFeature.RotateFeatureEventType.START, evt => console.log('rotate start', evt.features));
+rotate.on(ol3RotateFeature.RotateFeatureEventType.ROTATING, evt => console.log('rotating', evt.features));
+rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => console.log('rotate end', evt.features));
 
 map.addInteraction(rotate);
 ```
