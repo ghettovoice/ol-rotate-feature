@@ -1,101 +1,30 @@
 // @flow
 import ol from "openlayers";
-import { assert, assertInstanceOf } from "./util";
+import { assertInstanceOf } from "./util";
 import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent";
 import rotateGeometry from "./rotate";
 
 /**
  * @typedef {Object} RotateFeatureInteractionOptions
  * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
- * @property {ol.events.ConditionType | undefined} condition A function that takes an ol.MapBrowserEvent and returns a boolean
- *                                                             to indicate whether that event will be considered to rotate ghost feature.
- *                                                             Default is ol.events.condition.primaryAction.
- * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the rotation overlay.
- * @property {number | undefined} pixelTolerance Pixel tolerance for considering the pointer close enough to a segment
- *                                                or vertex for editing. Default is 10.
- * @property {string} rotatePropertyNane Property name of the features. Used for exporting total angle value.
+ * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
+ * @property {string} angleProperty Property name of the features where to save current angle. Used for exporting total angle value. Default is  'angle'.
  */
 
-/**
- * @enum {string}
- */
-const GEOMETRY_TYPE = {
-    POINT: 'Point',
-    MULTI_POINT: 'MultiPoint',
-    LINE_STRING: 'LineString',
-    MULTI_LINE_STRING: 'MultiLineString',
-    POLYGON: 'Polygon',
-    MULTI_POLYGON: 'MultiPolygon',
-    CIRCLE: 'Circle',
-    GEOMETRY_COLLECTION: 'GeometryCollection'
-};
-const ANCHOR_NAME = 'anchorFeature';
-const GHOST_NAME = 'ghostFeature';
-const BOUNDING_NAME = 'boundingFeature';
-
-var previousCursor,
-    /**
-     * Rotated feature.
-     *
-     * @type {ol.Feature}
-     * @private
-     */
-    ghostFeature,
-    /**
-     * @type {ol.Feature}
-     * @private
-     */
-    anchorFeature,
-    /**
-     * @type {ol.Feature}
-     * @private
-     */
-    boundingFeature,
-    /**
-     * @type {ol.FeatureOverlay}
-     * @private
-     */
-    overlay,
-    /**
-     * @type {number}
-     * @private
-     */
-    pixelTolerance = 10,
-    /**
-     * @type {ol.Coordinate}
-     * @private
-     */
-    startCoordinate,
-    /**
-     * @type {ol.Coordinate}
-     * @private
-     */
-    lastCoordinate,
-    /**
-     * @type {ol.Collection.<ol.Feature>}
-     * @private
-     */
-    features,
-    /**
-     * @type {string}
-     * @private
-     */
-    rotatePropertyName = 'rotateAngle',
-    /**
-     * @type {boolean}
-     * @private
-     */
-    anchorMoving = false;
+const ANCHOR_KEY = 'anchor';
+const ARROW_KEY = 'arrow';
+const GHOST_KEY = 'ghost';
 
 /**
  * Rotate interaction class.
  * Adds controls to rotate vector features.
+ * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
  *
  * @class
  * @extends ol.interaction.Interaction
  * @author Vladimir Vershinin
  *
- * TODO Добавить bounding feature, типа как в фотошопе
+ * todo возможно добавить ghost feature для отображения начального угла
  */
 export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     /**
@@ -110,27 +39,153 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
             handleMoveEvent: handleMoveEvent
         });
 
-        overlay = new ol.FeatureOverlay({
-            style: options.style || RotateFeatureInteraction.getDefaultStyleFunction()
+        /**
+         * @type {ol.Collection.<ol.Feature>}
+         * @private
+         */
+        this.features_ = options.features;
+        /**
+         * @type {string}
+         * @private
+         */
+        this.angleProperty_ = options.angleProperty || 'angle';
+        /**
+         * @type {ol.FeatureOverlay}
+         * @private
+         */
+        this.overlay_ = new ol.FeatureOverlay({
+            style: options.style || getDefaultStyle.call(this, this.angleProperty_)
         });
-        pixelTolerance = typeof options.pixelTolerance !== 'undefined' ? options.pixelTolerance : pixelTolerance;
-        rotatePropertyName = options.rotatePropertyNane || rotatePropertyName;
-        features = options.features;
+        /**
+         * @type {string}
+         * @private
+         */
+        this.previousCursor_ = undefined;
+        /**
+         * Rotated feature.
+         *
+         * @type {ol.Feature}
+         * @private
+         */
+        this.ghostFeature_ = undefined;
+        /**
+         * @type {ol.Feature}
+         * @private
+         */
+        this.anchorFeature_ = undefined;
+        /**
+         * @type {ol.Feature}
+         * @private
+         */
+        this.arrowFeature_ = undefined;
+        /**
+         * @type {ol.Coordinate}
+         * @private
+         */
+        this.lastCoordinate_ = undefined;
+        /**
+         * @type {boolean}
+         * @private
+         */
+        this.anchorMoving_ = false;
 
-        assert(features, 'Option features is required');
+        assertInstanceOf(this.features_, ol.Collection);
 
-        createOrUpdateInteractionFeatures();
-
-        features.on('add', handleFeatureAdd, this);
-        features.on('remove', handleFeatureRemove, this);
+        this.features_.on('add', this.handleFeatureAdd_, this);
+        this.features_.on('remove', this.handleFeatureRemove_, this);
     }
 
     /**
      * @param {ol.Map} map
      */
     setMap(map) {
-        overlay.setMap(map);
+        this.overlay_.setMap(map);
         super.setMap(map);
+        this.createOrUpdateInteractionFeatures_();
+    }
+
+    /**
+     * Creates or updates all interaction helper features.
+     * @private
+     */
+    createOrUpdateInteractionFeatures_() {
+        const geometries = this.features_.getArray().map(feature => feature.getGeometry());
+        const extent = new ol.geom.GeometryCollection(geometries).getExtent();
+        const anchorCoordinate = ol.extent.getCenter(extent);
+
+//        this.createOrUpdateGhostFeature_(geometries);
+        this.createOrUpdateAnchorFeature_(anchorCoordinate);
+        this.createOrUpdateArrowFeature_(anchorCoordinate);
+    }
+
+    /**
+     * @param {ol.Coordinate} coordinate
+     * @private
+     */
+    createOrUpdateAnchorFeature_(coordinate : ol.Coordinate) {
+        if (this.anchorFeature_) {
+            this.anchorFeature_.getGeometry().setCoordinates(coordinate);
+        } else {
+            this.anchorFeature_ = new ol.Feature({
+                geometry: new ol.geom.Point(coordinate),
+                [ANCHOR_KEY]: true
+            });
+            this.overlay_.addFeature(this.anchorFeature_);
+        }
+    }
+
+    /**
+     * @param {ol.geom.SimpleGeometry[]} geometries
+     * @private
+     */
+    createOrUpdateGhostFeature_(geometries : Array<ol.geom.SimpleGeometry>) {
+        if (this.ghostFeature_) {
+            this.ghostFeature_.getGeometry().setGeometries(geometries);
+        } else {
+            this.ghostFeature_ = new ol.Feature({
+                geometry: new ol.geom.GeometryCollection(geometries),
+                [GHOST_KEY]: true
+            });
+            this.overlay_.addFeature(this.ghostFeature_);
+        }
+    }
+
+    /**
+     * @param {ol.Coordinate} coordinate
+     * @private
+     */
+    createOrUpdateArrowFeature_(coordinate : ol.Coordinate) {
+        if (this.arrowFeature_) {
+            this.arrowFeature_.getGeometry().setCoordinates(coordinate);
+        } else {
+            this.arrowFeature_ = new ol.Feature({
+                geometry: new ol.geom.Point(coordinate),
+                [ARROW_KEY]: true
+            });
+            this.overlay_.addFeature(this.arrowFeature_);
+        }
+    }
+
+    /**
+     * @param {ol.Feature} element
+     * @this RotateFeatureInteraction
+     * @private
+     */
+    handleFeatureAdd_({ element }) {
+        assertInstanceOf(element, ol.Feature);
+
+        this.createOrUpdateInteractionFeatures_();
+    }
+
+    /**
+     * @param {ol.Feature} element
+     * @this RotateFeatureInteraction
+     * @private
+     */
+    handleFeatureRemove_({ element }) {
+        assertInstanceOf(element, ol.Feature);
+
+        this.createOrUpdateInteractionFeatures_();
     }
 }
 
@@ -145,29 +200,6 @@ RotateFeatureInteraction.handleEvent = function (evt : ol.MapBrowserEvent) : boo
 };
 
 /**
- * Creates default style function for interaction.
- *
- * @returns {ol.style.StyleFunction}
- * @public
- */
-RotateFeatureInteraction.getDefaultStyleFunction = function ():ol.style.StyleFunction {
-    const styles = getDefaultStyles();
-
-    return function (feature) {
-        switch (true) {
-            case feature.get(ANCHOR_NAME) && (ANCHOR_NAME in styles):
-                return styles[ANCHOR_NAME];
-            case feature.get(GHOST_NAME) && (GHOST_NAME in styles):
-                return styles[GHOST_NAME];
-            case feature.get(BOUNDING_NAME) && (BOUNDING_NAME in styles):
-                return styles[BOUNDING_NAME];
-            default:
-                return styles[feature.getGeometry().getType()];
-        }
-    };
-};
-
-/**
  * @param {ol.MapBrowserEvent} evt Event.
  * @return {boolean}
  * @this {RotateFeatureInteraction}
@@ -177,18 +209,20 @@ function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
     const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
 
     // handle click & drag on features for rotation
-    if (foundFeature && !lastCoordinate && features.getArray().includes(foundFeature)) {
-        lastCoordinate = evt.coordinate;
-        startCoordinate = evt.coordinate;
+    if (
+        foundFeature && !this.lastCoordinate_ &&
+        (this.features_.getArray().includes(foundFeature)) || foundFeature === this.arrowFeature_
+    ) {
+        this.lastCoordinate_ = evt.coordinate;
 
         handleMoveEvent.call(this, evt);
-        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.START, features));
+        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.START, this.features_));
 
         return true;
     }
     // handle click & drag on rotation anchor feature
-    else if (foundFeature === anchorFeature) {
-        anchorMoving = true;
+    else if (foundFeature === this.anchorFeature_) {
+        this.anchorMoving_ = true;
         handleMoveEvent.call(this, evt);
 
         return true;
@@ -205,18 +239,17 @@ function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
  */
 function handleUpEvent(evt : ol.MapBrowserEvent) : boolean {
     // stop drag sequence of features
-    if (lastCoordinate) {
-        lastCoordinate = undefined;
-        startCoordinate = undefined;
+    if (this.lastCoordinate_) {
+        this.lastCoordinate_ = undefined;
 
         handleMoveEvent.call(this, evt);
-        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.END, features));
+        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.END, this.features_));
 
         return true;
     }
     // stop drag sequence of the anchors
-    else if (anchorMoving) {
-        anchorMoving = false;
+    else if (this.anchorMoving_) {
+        this.anchorMoving_ = false;
         handleMoveEvent.call(this, evt);
 
         return true;
@@ -230,36 +263,40 @@ function handleUpEvent(evt : ol.MapBrowserEvent) : boolean {
  * @return {boolean}
  * @this {RotateFeatureInteraction}
  * @private
- * todo обработка коллекции с одной точкой! крутить иконку!
  */
 function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
     const newCoordinate = evt.coordinate;
-    const anchorCoordinate = anchorFeature.getGeometry().getCoordinates();
+    const anchorCoordinate = this.anchorFeature_.getGeometry().getCoordinates();
+
+    const updateAngleProperty = (feature, angle) => feature.set(this.angleProperty_, ( feature.get(this.angleProperty_) || 0 ) + angle);
 
     // handle drag of features by angle
-    if (lastCoordinate) {
+    if (this.lastCoordinate_) {
         // calculate vectors of last and current pointer positions
-        const lastVector = [lastCoordinate[0] - anchorCoordinate[0], lastCoordinate[1] - anchorCoordinate[1]];
+        const lastVector = [this.lastCoordinate_[0] - anchorCoordinate[0], this.lastCoordinate_[1] - anchorCoordinate[1]];
         const newVector = [newCoordinate[0] - anchorCoordinate[0], newCoordinate[1] - anchorCoordinate[1]];
 
-        // calculate angle between last and current vectors as a clockwise angle
+        // calculate angle between last and current vectors (positive angle counter-clockwise)
         let angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
 
-        features.forEach(feature => {
+        this.features_.forEach(feature => {
             rotateGeometry(feature.getGeometry(), angle, anchorCoordinate);
-            feature.set(rotatePropertyName, (feature.get(rotatePropertyName) || 0) + angle);
+            updateAngleProperty(feature, angle);
         });
 
-        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.ROTATING, features));
+        [this.anchorFeature_, this.arrowFeature_].forEach(feature => updateAngleProperty(feature, angle));
 
-        lastCoordinate = evt.coordinate;
+        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.ROTATING, this.features_));
+
+        this.lastCoordinate_ = evt.coordinate;
     }
     // handle drag of the anchor
-    else if (anchorMoving) {
+    else if (this.anchorMoving_) {
         let deltaX = newCoordinate[0] - anchorCoordinate[0];
         let deltaY = newCoordinate[1] - anchorCoordinate[1];
 
-        anchorFeature.getGeometry().translate(deltaX, deltaY);
+        this.anchorFeature_.getGeometry().translate(deltaX, deltaY);
+        this.arrowFeature_.getGeometry().translate(deltaX, deltaY);
     }
 }
 
@@ -269,222 +306,128 @@ function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleMoveEvent(evt:ol.MapBrowserEvent):boolean {
+function handleMoveEvent(evt : ol.MapBrowserEvent) : boolean {
     const elem = evt.map.getTargetElement();
     const foundFeature = map.forEachFeatureAtPixel(evt.pixel, feature => feature);
 
-    if (foundFeature || lastCoordinate) {
-        var isSelected = false;
-
-        if (features && features.getArray().includes(foundFeature)) {
-            isSelected = true;
+    const setCursor = (cursor, vendor = false) => {
+        if (vendor) {
+            elem.style.cursor = '-webkit-' + cursor;
+            elem.style.cursor = '-moz-' + cursor;
         }
 
-        previousCursor = elem.style.cursor;
+        elem.style.cursor = cursor;
+    };
 
-        // WebKit browsers don't support the grab icons without a prefix
-        elem.style.cursor = lastCoordinate ? '-webkit-grabbing' : (isSelected ? '-webkit-grab' : 'pointer');
-
-        // Thankfully, attempting to set the standard ones will silently fail,
-        // keeping the prefixed icons
-        elem.style.cursor = lastCoordinate ? 'grabbing' : (isSelected ? 'grab' : 'pointer');
+    if (this.lastCoordinate_) {
+        this.previousCursor_ = elem.style.cursor;
+        setCursor('grabbing', true);
+    } else if (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_) {
+        this.previousCursor_ = elem.style.cursor;
+        setCursor('grab', true);
+    } else if (foundFeature === this.anchorFeature_ || this.anchorMoving_) {
+        this.previousCursor_ = elem.style.cursor;
+        setCursor('crosshair');
     } else {
-        elem.style.cursor = previousCursor || '';
-        previousCursor = undefined;
+        setCursor(this.previousCursor_ || '');
+        this.previousCursor_ = undefined;
     }
 }
 
 /**
- * Creates or updates all interaction helper features.
+ * @param {string} angleProperty
+ * @returns {ol.style.StyleFunction}
+ * @this {RotateFeatureInteraction}
  * @private
  */
-function createOrUpdateInteractionFeatures() {
-    const geometries = features.getArray().map(feature => feature.getGeometry());
-    const extent = new ol.geom.GeometryCollection(geometries).getExtent();
+function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
+    const white = [255, 255, 255, 0.8];
+    const blue = [0, 153, 255, 0.8];
+    const transparent = [255, 255, 255, 0.01];
+    const width = 2;
 
-//        createOrUpdateGhostFeature(geometries);
-    createOrUpdateAnchorFeature(ol.extent.getCenter(extent));
-//        createOrUpdateBoundingFeature(extent);
-}
-
-/**
- * @param {ol.Coordinate} anchor
- * @private
- */
-function createOrUpdateAnchorFeature(anchor:ol.Coordinate) {
-    if (anchorFeature) {
-        anchorFeature.getGeometry().setCoordinates(anchor);
-    } else {
-        anchorFeature = new ol.Feature({
-            geometry: new ol.geom.Point(anchor),
-            [ANCHOR_NAME]: true
-        });
-
-        overlay.addFeature(anchorFeature);
-    }
-}
-
-/**
- * @param {ol.geom.SimpleGeometry[]} geometries
- * @private
- */
-function createOrUpdateGhostFeature(geometries:Array<ol.geom.SimpleGeometry>) {
-    if (ghostFeature) {
-        ghostFeature.getGeometry().setGeometries(geometries);
-    } else {
-        ghostFeature = new ol.Feature({
-            geometry: new ol.geom.GeometryCollection(geometries),
-            [GHOST_NAME]: true
-        });
-
-        overlay.addFeature(ghostFeature);
-    }
-}
-
-/**
- * @param {ol.Extent} extent
- * @private
- */
-function createOrUpdateBoundingFeature(extent:ol.Extent) {
-    const coordinates = [
-        [extent[0], extent[1]],
-        [extent[0], extent[3]],
-        [extent[2], extent[3]],
-        [extent[2], extent[1]]
-    ];
-
-    if (boundingFeature) {
-        boundingFeature.getGeometry().setCoordinates(coordinates);
-    } else {
-        boundingFeature = new ol.Feature({
-            geometry: new ol.geom.MultiPoint(coordinates),
-            [BOUNDING_NAME]: true
-        });
-
-        overlay.addFeature(boundingFeature);
-    }
-}
-
-/**
- * @param {ol.Feature} element
- * @this RotateFeatureInteraction
- * @private
- */
-function handleFeatureAdd({ element }) {
-    assertInstanceOf(element, ol.Feature);
-
-    createOrUpdateGhostFeature(features);
-}
-
-/**
- * @param {ol.Feature} element
- * @this RotateFeatureInteraction
- * @private
- */
-function handleFeatureRemove({ element }) {
-    assertInstanceOf(element, ol.Feature);
-
-    createOrUpdateGhostFeature(features);
-}
-
-/**
- * @returns {Object.<string, Array.<ol.style.Style>>}
- * @private
- */
-function getDefaultStyles() : Object<string, Array<ol.style.Style>> {
-    /** @type {Object<string, Array<ol.style.Style>>} */
-    const styles = Object.create(null);
-    const white = [255, 255, 255, 1];
-    const blue = [0, 153, 255, 1];
-    const width = 3;
-
-    styles[GEOMETRY_TYPE.POLYGON] = styles[GEOMETRY_TYPE.MULTI_POLYGON] = [
-        new ol.style.Style({
-            fill: new ol.style.Fill({
-                color: [255, 255, 255, 0.5]
-            })
-        }),
-        new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: white,
-                width: width + 2
-            })
-        }),
-        new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: blue,
-                width: width
-            })
-        })
-    ];
-
-    styles[GEOMETRY_TYPE.LINE_STRING] = styles[GEOMETRY_TYPE.MULTI_LINE_STRING] = [
-        new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: white,
-                width: width + 2
-            })
-        }),
-        new ol.style.Style({
-            stroke: new ol.style.Stroke({
-                color: blue,
-                width: width
-            })
-        })
-    ];
-
-    styles[GEOMETRY_TYPE.CIRCLE] = styles[GEOMETRY_TYPE.POLYGON].concat(styles[GEOMETRY_TYPE.LINE_STRING]);
-
-    styles[GEOMETRY_TYPE.POINT] = styles[GEOMETRY_TYPE.MULTI_POINT] = [
-        new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: width * 2,
-                fill: new ol.style.Fill({
-                    color: blue
+    const styles = {
+        [ANCHOR_KEY]: [
+            new ol.style.Style({
+                image: new ol.style.RegularShape({
+                    fill: new ol.style.Fill({
+                        color: [0, 153, 255, 0.8]
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: blue,
+                        width: 1
+                    }),
+                    radius: 4,
+                    points: 6
                 }),
-                stroke: new ol.style.Stroke({
-                    color: white,
-                    width: width / 2
-                })
-            }),
-            zIndex: Infinity
-        })
-    ];
-
-    styles[GEOMETRY_TYPE.GEOMETRY_COLLECTION] = styles[GEOMETRY_TYPE.POLYGON].concat(styles[GEOMETRY_TYPE.POINT]);
-
-    styles[ANCHOR_NAME] = [
-        new ol.style.Style({
-            image: new ol.style.RegularShape({
+                zIndex: 10
+            })
+        ],
+        [ARROW_KEY]: [
+            new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color: white
+                    color: transparent
                 }),
                 stroke: new ol.style.Stroke({
                     color: white,
                     width: width + 2
                 }),
-                points: 4,
-                radius: 6,
-                radius2: 0,
-                angle: 0
-            })
-        }),
-        new ol.style.Style({
-            image: new ol.style.RegularShape({
+                text: new ol.style.Text({
+                    font: '12px sans-serif',
+                    offsetX: 20,
+                    offsetY: -20,
+                    fill: new ol.style.Fill({
+                        color: 'blue'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: white,
+                        width: width + 1
+                    })
+                })
+            }),
+            new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color: white
+                    color: transparent
                 }),
                 stroke: new ol.style.Stroke({
                     color: blue,
-                    width: width
-                }),
-                points: 4,
-                radius: 6,
-                radius2: 0,
-                angle: 0
+                    width
+                })
             })
-        })
-    ];
+        ]
+    };
 
-    return styles;
+    return function (feature, resolution) {
+        var style;
+        const angle = feature.get(angleProperty) || 0;
+
+        switch (true) {
+            case feature.get(ANCHOR_KEY):
+                style = styles[ANCHOR_KEY];
+                style[0].getImage().setRotation(-angle);
+
+                return style;
+            case feature.get(ARROW_KEY):
+                style = styles[ARROW_KEY];
+
+                const coordinate = feature.getGeometry().getCoordinates();
+                // generate arrow polygon
+                const geom = new ol.geom.Polygon([
+                    [
+                        [coordinate[0], coordinate[1] - 6 * resolution],
+                        [coordinate[0] + 8 * resolution, coordinate[1] - 12 * resolution],
+                        [coordinate[0], coordinate[1] + 30 * resolution],
+                        [coordinate[0] - 8 * resolution, coordinate[1] - 12 * resolution],
+                        [coordinate[0], coordinate[1] - 6 * resolution],
+                    ]
+                ]);
+                // and rotate it according to current angle
+                rotateGeometry(geom, angle, coordinate);
+                style[0].setGeometry(geom);
+                style[1].setGeometry(geom);
+                style[0].getText().setText(Math.round(-angle * 180 / Math.PI) + '°');
+
+                return style;
+        }
+    };
 }

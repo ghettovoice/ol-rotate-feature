@@ -65,6 +65,8 @@
         });
 
         map.addInteraction(rotate);
+
+        rotate.on('rotating', evt => evt.features.forEach(feature => console.log(feature.get('angle'))));
     </script>
 </body>
 </html>
