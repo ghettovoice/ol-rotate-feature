@@ -37,5 +37,14 @@
     "plugins": [
       "transform-flow-strip-types"
     ]
-  }
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ghettovoice/ol3-rotate-feature.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ghettovoice/ol3-rotate-feature/issues"
+  },
+  "homepage": "http://ghettovoice.github.io/ol3-rotate-feature/"
 }
