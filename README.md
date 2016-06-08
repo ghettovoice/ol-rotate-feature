@@ -21,7 +21,7 @@ Or download the latest version archive and add it with script tag:
 Plugin is packed into UMD wrapper and exports an object
 `ol3RotateFeature` with three properties:
 
-```jsx harmony
+```js
 export {
     RotateFeatureInteraction,
     RotateFeatureEvent,
@@ -56,7 +56,7 @@ All events triggered by the interaction are instances of `RotateFeatureEvent`.
 
 #### Example usage:
 
-```jsx harmony
+```js
 import ol from 'openlayers';
 import * as ol3RotateFeature from 'ol3-rotate-feature';
 
@@ -119,7 +119,7 @@ Example of usage in Browser environment in `index.html`.
 
 Getting total angle or last anchor coordinates after rotation:
 
-```jsx harmony
+```js
 rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => {
     evt.features.forEach(feature => {
         // get total angle in radians (positive is counter-clockwise)
