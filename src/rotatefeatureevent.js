@@ -9,7 +9,7 @@ export const RotateFeatureEventType = {
      * Triggered upon feature draw start
      * @event RotateFeatureEvent#rotatestart
      */
-    START: 'rotatefeaturestart',
+    START: 'rotatestart',
     /**
      * Triggered upon feature draw start
      * @event RotateFeatureEvent#rotating
@@ -19,7 +19,7 @@ export const RotateFeatureEventType = {
      * Triggered upon feature draw start
      * @event RotateFeatureEvent#rotateend
      */
-    END: 'rotatefeatureend'
+    END: 'rotateend'
 };
 
 /**
