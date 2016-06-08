@@ -18,7 +18,7 @@
 		exports["ol3RotateFeature"] = factory(require("ol"));
 	else
 		root["ol3RotateFeature"] = factory(root["ol"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_3__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -72,7 +72,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.RotateFeatureEventType = exports.RotateFeatureEvent = exports.RotateFeatureInteraction = undefined;
 
-	var _rotatefeatureintraction = __webpack_require__(5);
+	var _rotatefeatureintraction = __webpack_require__(7);
 
 	var _rotatefeatureintraction2 = _interopRequireDefault(_rotatefeatureintraction);
 
@@ -105,7 +105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	exports.RotateFeatureEvent = exports.RotateFeatureEventType = undefined;
 
-	var _event = __webpack_require__(3);
+	var _event = __webpack_require__(4);
 
 	var _event2 = _interopRequireDefault(_event);
 
@@ -175,10 +175,84 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	exports.assert = assert;
+	exports.assertInstanceOf = assertInstanceOf;
+	exports.noop = noop;
+	exports.identity = identity;
+	exports.getValueType = getValueType;
+
+	/**
+	 * @param {boolean} condition
+	 * @param {string} message
+	 * @throws Error
+	 */
+	function assert(condition) {
+	    var message = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+
+	    message = ['Assertion failed', message].join(': ');
+
+	    if (!condition) {
+	        throw new Error(message);
+	    }
+	}
+
+	/**
+	 * Checks if the value is an instance of the user-defined type.
+	 *
+	 * @param {*} value
+	 * @param {*} type
+	 * @throws Error
+	 */
+	function assertInstanceOf(value, type) {
+	    assert(value instanceof type, 'Expected instanceof ' + getValueType(type) + ' but got ' + getValueType(value) + '.');
+	}
+
+	/**
+	 * Null function. Do nothing.
+	 */
+	function noop() {}
+
+	/**
+	 * @param {*} arg
+	 * @returns {*}
+	 */
+	function identity(arg) {
+	    return arg;
+	}
+
+	/**
+	 * Returns the type of a value. If a constructor is passed, and a suitable
+	 * string cannot be found, 'unknown type name' will be returned.
+	 *
+	 * @param {*} value
+	 * @returns string
+	 */
+	function getValueType(value) {
+	    if (value instanceof Function) {
+	        return value.name || 'unknown type name';
+	    } else if (value instanceof Object) {
+	        return value.constructor.name || Object.prototype.toString.call(value);
+	    } else {
+	        return value === null ? 'null' : typeof value === 'undefined' ? 'undefined' : _typeof(value);
+	    }
+	}
 
 /***/ },
 /* 3 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ },
+/* 4 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -279,7 +353,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.default = olEvent;
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -287,12 +361,284 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.GeometryType = exports.GeometryLayout = undefined;
+	exports.deflateCoordinate = deflateCoordinate;
+	exports.deflateCoordinates = deflateCoordinates;
+	exports.deflateCoordinatess = deflateCoordinatess;
+	exports.deflateCoordinatesss = deflateCoordinatesss;
+	exports.inflateCoordinates = inflateCoordinates;
+	exports.inflateCoordinatess = inflateCoordinatess;
+	exports.inflateCoordinatesss = inflateCoordinatesss;
+	exports.getStrideForLayout = getStrideForLayout;
+	exports.deflateGeometryCoordinates = deflateGeometryCoordinates;
+	exports.setGeometryCoordinatesFromFlatCoordinates = setGeometryCoordinatesFromFlatCoordinates;
+
+	var _util = __webpack_require__(2);
+
+	/**
+	 * @enum {string}
+	 */
+	var GeometryLayout = exports.GeometryLayout = {
+	    XY: 'XY',
+	    XYZ: 'XYZ',
+	    XYM: 'XYM',
+	    XYZM: 'XYZM'
+	};
+
+	/**
+	 * @enum {string}
+	 */
+	var GeometryType = exports.GeometryType = {
+	    POINT: 'Point',
+	    MULTI_POINT: 'MultiPoint',
+	    LINE_STRING: 'LineString',
+	    MULTI_LINE_STRING: 'MultiLineString',
+	    POLYGON: 'Polygon',
+	    MULTI_POLYGON: 'MultiPolygon',
+	    GEOMETRY_COLLECTION: 'GeometryCollection'
+	};
+
+	/**
+	 * @param {Array.<number>} flatCoordinates Flat coordinates.
+	 * @param {number} offset Offset.
+	 * @param {ol.Coordinate} coordinate Coordinate.
+	 * @param {number} stride Stride.
+	 * @return {number} offset Offset.
+	 */
+	function deflateCoordinate(flatCoordinates, offset, coordinate, stride) {
+	    (0, _util.assert)(coordinate.length == stride);
+	    var i, ii;
+	    for (i = 0, ii = coordinate.length; i < ii; ++i) {
+	        flatCoordinates[offset++] = coordinate[i];
+	    }
+	    return offset;
+	}
+
+	/**
+	 * @param {Array.<number>} flatCoordinates Flat coordinates.
+	 * @param {number} offset Offset.
+	 * @param {Array.<ol.Coordinate>} coordinates Coordinates.
+	 * @param {number} stride Stride.
+	 * @return {number} offset Offset.
+	 */
+	function deflateCoordinates(flatCoordinates, offset, coordinates, stride) {
+	    var i, ii;
+	    for (i = 0, ii = coordinates.length; i < ii; ++i) {
+	        var coordinate = coordinates[i];
+	        (0, _util.assert)(coordinate.length == stride);
+	        var j;
+	        for (j = 0; j < stride; ++j) {
+	            flatCoordinates[offset++] = coordinate[j];
+	        }
+	    }
+	    return offset;
+	}
+
+	/**
+	 * @param {Array.<number>} flatCoordinates Flat coordinates.
+	 * @param {number} offset Offset.
+	 * @param {Array.<Array.<ol.Coordinate>>} coordinatess Coordinatess.
+	 * @param {number} stride Stride.
+	 * @param {Array.<number>=} opt_ends Ends.
+	 * @return {Array.<number>} Ends.
+	 */
+	function deflateCoordinatess(flatCoordinates, offset, coordinatess, stride, opt_ends) {
+	    var ends = opt_ends !== undefined ? opt_ends : [];
+	    var i = 0;
+	    var j, jj;
+	    for (j = 0, jj = coordinatess.length; j < jj; ++j) {
+	        var end = deflateCoordinates(flatCoordinates, offset, coordinatess[j], stride);
+	        ends[i++] = end;
+	        offset = end;
+	    }
+	    ends.length = i;
+	    return ends;
+	}
+
+	/**
+	 * @param {Array.<number>} flatCoordinates Flat coordinates.
+	 * @param {number} offset Offset.
+	 * @param {Array.<Array.<Array.<ol.Coordinate>>>} coordinatesss Coordinatesss.
+	 * @param {number} stride Stride.
+	 * @param {Array.<Array.<number>>=} opt_endss Endss.
+	 * @return {Array.<Array.<number>>} Endss.
+	 */
+	function deflateCoordinatesss(flatCoordinates, offset, coordinatesss, stride, opt_endss) {
+	    var endss = opt_endss !== undefined ? opt_endss : [];
+	    var i = 0;
+	    var j, jj;
+	    for (j = 0, jj = coordinatesss.length; j < jj; ++j) {
+	        var ends = deflateCoordinatess(flatCoordinates, offset, coordinatesss[j], stride, endss[i]);
+	        endss[i++] = ends;
+	        offset = ends[ends.length - 1];
+	    }
+	    endss.length = i;
+	    return endss;
+	}
+
+	/**
+	 * @param {Array.<number>} flatCoordinates Flat coordinates.
+	 * @param {number} offset Offset.
+	 * @param {number} end End.
+	 * @param {number} stride Stride.
+	 * @param {Array.<ol.Coordinate>=} opt_coordinates Coordinates.
+	 * @return {Array.<ol.Coordinate>} Coordinates.
+	 */
+	function inflateCoordinates(flatCoordinates, offset, end, stride, opt_coordinates) {
+	    var coordinates = opt_coordinates != undefined ? opt_coordinates : [];
+	    var i = 0;
+	    var j;
+	    for (j = offset; j < end; j += stride) {
+	        coordinates[i++] = flatCoordinates.slice(j, j + stride);
+	    }
+	    coordinates.length = i;
+	    return coordinates;
+	}
+
+	/**
+	 * @param {Array.<number>} flatCoordinates Flat coordinates.
+	 * @param {number} offset Offset.
+	 * @param {Array.<number>} ends Ends.
+	 * @param {number} stride Stride.
+	 * @param {Array.<Array.<ol.Coordinate>>=} opt_coordinatess Coordinatess.
+	 * @return {Array.<Array.<ol.Coordinate>>} Coordinatess.
+	 */
+	function inflateCoordinatess(flatCoordinates, offset, ends, stride, opt_coordinatess) {
+	    var coordinatess = opt_coordinatess != undefined ? opt_coordinatess : [];
+	    var i = 0;
+	    var j, jj;
+	    for (j = 0, jj = ends.length; j < jj; ++j) {
+	        var end = ends[j];
+	        coordinatess[i++] = inflateCoordinates(flatCoordinates, offset, end, stride, coordinatess[i]);
+	        offset = end;
+	    }
+	    coordinatess.length = i;
+	    return coordinatess;
+	}
+
+	/**
+	 * @param {Array.<number>} flatCoordinates Flat coordinates.
+	 * @param {number} offset Offset.
+	 * @param {Array.<Array.<number>>} endss Endss.
+	 * @param {number} stride Stride.
+	 * @param {Array.<Array.<Array.<ol.Coordinate>>>=} opt_coordinatesss
+	 *     Coordinatesss.
+	 * @return {Array.<Array.<Array.<ol.Coordinate>>>} Coordinatesss.
+	 */
+	function inflateCoordinatesss(flatCoordinates, offset, endss, stride, opt_coordinatesss) {
+	    var coordinatesss = opt_coordinatesss != undefined ? opt_coordinatesss : [];
+	    var i = 0;
+	    var j, jj;
+	    for (j = 0, jj = endss.length; j < jj; ++j) {
+	        var ends = endss[j];
+	        coordinatesss[i++] = inflateCoordinatess(flatCoordinates, offset, ends, stride, coordinatesss[i]);
+	        offset = ends[ends.length - 1];
+	    }
+	    coordinatesss.length = i;
+	    return coordinatesss;
+	}
+
+	/**
+	 * @param {ol.geom.GeometryLayout} layout Layout.
+	 * @return {number} Stride.
+	 */
+	function getStrideForLayout(layout) {
+	    if (layout == GeometryLayout.XY) {
+	        return 2;
+	    } else if (layout == GeometryLayout.XYZ) {
+	        return 3;
+	    } else if (layout == GeometryLayout.XYM) {
+	        return 3;
+	    } else if (layout == GeometryLayout.XYZM) {
+	        return 4;
+	    } else {
+	        throw new Error('unsupported layout: ' + layout);
+	    }
+	}
+
+	/**
+	 * @param {ol.geom.SimpleGeometry} geometry
+	 * @param {Array<number>} flatCoordinates Destination array.
+	 * @returns {Array|number} Result of deflate is offset or array of stop indexes.
+	 */
+	function deflateGeometryCoordinates(geometry, flatCoordinates) {
+	    var stride = getStrideForLayout(geometry.getLayout());
+	    var coordinates = geometry.getCoordinates();
+	    var result;
+
+	    switch (true) {
+	        case geometry.getType() === GeometryType.POINT:
+	            result = deflateCoordinate(flatCoordinates, 0, coordinates, stride);
+	            break;
+	        case [GeometryType.MULTI_POINT, GeometryType.LINE_STRING].includes(geometry.getType()):
+	            result = deflateCoordinates(flatCoordinates, 0, coordinates, stride);
+	            break;
+	        case [GeometryType.MULTI_LINE_STRING, GeometryType.POLYGON].includes(geometry.getType()):
+	            result = deflateCoordinatess(flatCoordinates, 0, coordinates, stride);
+	            flatCoordinates.length = result.length === 0 ? 0 : result[result.length - 1];
+	            break;
+	        case geometry.getType() === GeometryType.MULTI_POLYGON:
+	            result = deflateCoordinatesss(flatCoordinates, 0, coordinates, stride);
+
+	            if (result.length === 0) {
+	                flatCoordinates.length = 0;
+	            } else {
+	                var lastEnds = result[result.length - 1];
+	                flatCoordinates.length = lastEnds.length === 0 ? 0 : lastEnds[lastEnds.length - 1];
+	            }
+	            break;
+	    }
+
+	    return result;
+	}
+
+	/**
+	 * @param {ol.geom.SimpleGeometry} geometry
+	 * @param {Array<number>} flatCoordinates
+	 * @param {Array | number} offsetOrEnds
+	 */
+	function setGeometryCoordinatesFromFlatCoordinates(geometry, flatCoordinates, offsetOrEnds) {
+	    var coordinates = [];
+	    var stride = getStrideForLayout(geometry.getLayout());
+
+	    switch (true) {
+	        case geometry.getType() === GeometryType.POINT:
+	            geometry.setCoordinates(flatCoordinates.slice(flatCoordinates.length - offsetOrEnds));
+	            break;
+	        case [GeometryType.MULTI_POINT, GeometryType.LINE_STRING].includes(geometry.getType()):
+	            inflateCoordinates(flatCoordinates, 0, offsetOrEnds, stride, coordinates);
+	            geometry.setCoordinates(coordinates);
+	            break;
+	        case [GeometryType.MULTI_LINE_STRING, GeometryType.POLYGON].includes(geometry.getType()):
+	            inflateCoordinatess(flatCoordinates, 0, offsetOrEnds, stride, coordinates);
+	            geometry.setCoordinates(coordinates);
+	            break;
+	        case geometry.getType() === GeometryType.MULTI_POLYGON:
+	            inflateCoordinatesss(flatCoordinates, 0, offsetOrEnds, stride, coordinates);
+	            geometry.setCoordinates(coordinates);
+	            break;
+	    }
+
+	    return coordinates;
+	}
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
 	exports.rotate = rotate;
 	exports.default = rotateGeometry;
 
-	var _openlayers = __webpack_require__(2);
+	var _openlayers = __webpack_require__(3);
 
 	var _openlayers2 = _interopRequireDefault(_openlayers);
+
+	var _geometry = __webpack_require__(5);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -306,6 +652,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {Array.<number>=} opt_dest Destination.
 	 * @return {Array.<number>} Transformed coordinates.
 	 * @link https://github.com/openlayers/ol3/blob/v3.16.0/src/ol/geom/flat/transformflatgeom.js#L48
+	 */
+	/**
+	 * Polyfill of OpenLayers 3 ol.geom.SimpleGeometry.prototype.rotate method.
+	 * Use it for old versions.
 	 */
 	function rotate(flatCoordinates, offset, end, stride, angle, anchor, opt_dest) {
 	    var dest = opt_dest ? opt_dest : [];
@@ -335,13 +685,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * @param {ol.geom.Geometry} geometry
+	 * @param {ol.geom.GeometryCollection | ol.geom.SimpleGeometry} geometry
 	 * @param {number} angle
 	 * @param {ol.Coordinate} anchor
-	 */
-	/**
-	 * Polyfill of OpenLayers 3 ol.geom.SimpleGeometry.prototype.rotate method.
-	 * Use it for old versions.
 	 */
 	function rotateGeometry(geometry, angle, anchor) {
 	    if (geometry instanceof _openlayers2.default.geom.GeometryCollection) {
@@ -351,12 +697,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            rotateGeometry(geometries[i], angle, anchor);
 	        }
 	    } else {
-	        var flatCoordinates = geometry.getFlatCoordinates();
+	        var flatCoordinates = [];
+	        var offsetOrEnds = (0, _geometry.deflateGeometryCoordinates)(geometry, flatCoordinates);
 
 	        if (flatCoordinates) {
-	            var stride = geometry.getStride();
-
-	            rotate(flatCoordinates, 0, flatCoordinates.length, stride, angle, anchor, flatCoordinates);
+	            rotate(flatCoordinates, 0, flatCoordinates.length, (0, _geometry.getStrideForLayout)(geometry.getLayout()), angle, anchor, flatCoordinates);
+	            (0, _geometry.setGeometryCoordinatesFromFlatCoordinates)(geometry, flatCoordinates, offsetOrEnds);
 	        }
 	    }
 
@@ -364,7 +710,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 5 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -377,15 +723,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-	var _openlayers = __webpack_require__(2);
+	var _openlayers = __webpack_require__(3);
 
 	var _openlayers2 = _interopRequireDefault(_openlayers);
 
-	var _util = __webpack_require__(6);
+	var _util = __webpack_require__(2);
 
 	var _rotatefeatureevent = __webpack_require__(1);
 
-	var _rotate = __webpack_require__(4);
+	var _rotate = __webpack_require__(6);
 
 	var _rotate2 = _interopRequireDefault(_rotate);
 
@@ -403,7 +749,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typedef {Object} RotateFeatureInteractionOptions
 	 * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
 	 * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
-	 * @property {string} angleProperty Property name of the features where to save current angle. Used for exporting total angle value. Default is  'angle'.
+	 * @property {string} angleProperty Property name where to save current rotation angle. Default is  'angle'.
+	 * @property {string} anchorProperty Property name where to save current rotation anchor coordinates. Default is  'anchor'.
 	 */
 
 	var ANCHOR_KEY = 'anchor';
@@ -419,6 +766,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends ol.interaction.Interaction
 	 * @author Vladimir Vershinin
 	 *
+	 * todo добавить опцию condition - для возможности переопределения клавиш
 	 * todo возможно добавить ghost feature для отображения начального угла
 	 */
 
@@ -457,6 +805,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        _this.angleProperty_ = options.angleProperty || 'angle';
 	        /**
+	         * @type {string}
+	         * @private
+	         */
+	        _this.anchorProperty_ = options.anchorProperty || 'anchor';
+	        /**
 	         * @type {ol.FeatureOverlay}
 	         * @private
 	         */
@@ -468,13 +821,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @private
 	         */
 	        _this.previousCursor_ = undefined;
-	        /**
-	         * Rotated feature.
-	         *
-	         * @type {ol.Feature}
-	         * @private
-	         */
-	        _this.ghostFeature_ = undefined;
+	        //        /**
+	        //         * Rotated feature.
+	        //         *
+	        //         * @type {ol.Feature}
+	        //         * @private
+	        //         */
+	        //        this.ghostFeature_ = undefined;
 	        /**
 	         * @type {ol.Feature}
 	         * @private
@@ -495,6 +848,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @private
 	         */
 	        _this.anchorMoving_ = false;
+	        /**
+	         * @type {ol.Extent}
+	         * @private
+	         */
+	        _this.featuresExtent_ = undefined;
 
 	        _this.features_.on('add', _this.handleFeatureAdd_, _this);
 	        _this.features_.on('remove', _this.handleFeatureRemove_, _this);
@@ -522,23 +880,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "updateInteractionFeatures_",
 	        value: function updateInteractionFeatures_() {
-	            var geometries = this.features_.getArray().map(function (feature) {
-	                return feature.getGeometry();
-	            });
-
-	            if (geometries.length === 0) {
+	            if (!this.features_.getLength()) {
 	                this.reset_();
 
 	                return;
 	            }
 
-	            var extent = new _openlayers2.default.geom.GeometryCollection(geometries).getExtent();
-	            var anchorCoordinate = _openlayers2.default.extent.getCenter(extent);
+	            this.featuresExtent_ = getFeaturesExtent(this.features_);
 
-	            //        this.createOrUpdateGhostFeature_(geometries);
-	            this.createOrUpdateAnchorFeature_(anchorCoordinate);
-	            this.createOrUpdateArrowFeature_(anchorCoordinate);
+	            this.createOrUpdateAnchorFeature_();
+	            this.createOrUpdateArrowFeature_();
 	        }
+
+	        /**
+	         * @private
+	         */
+
 	    }, {
 	        key: "reset_",
 	        value: function reset_() {
@@ -550,60 +907,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            });
 
-	            this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = undefined;
+	            this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = this.featuresExtent_ = undefined;
 	            this.anchorMoving_ = false;
 	        }
 
 	        /**
-	         * @param {ol.Coordinate} coordinate
 	         * @private
 	         */
 
 	    }, {
 	        key: "createOrUpdateAnchorFeature_",
-	        value: function createOrUpdateAnchorFeature_(coordinate) {
+	        value: function createOrUpdateAnchorFeature_() {
+	            var _this3 = this;
+
+	            var firstFeature = this.features_.item(0);
+	            var coordinate, angle;
+
+	            if (firstFeature) {
+	                angle = firstFeature.get(this.angleProperty_) || 0;
+	                coordinate = firstFeature.get(this.anchorProperty_);
+	            }
+
+	            if (!coordinate || !coordinate.length) {
+	                coordinate = _openlayers2.default.extent.getCenter(this.featuresExtent_);
+	            }
+
 	            if (this.anchorFeature_) {
 	                this.anchorFeature_.getGeometry().setCoordinates(coordinate);
 	            } else {
-	                this.anchorFeature_ = new _openlayers2.default.Feature(_defineProperty({
+	                var _ref;
+
+	                this.anchorFeature_ = new _openlayers2.default.Feature((_ref = {
 	                    geometry: new _openlayers2.default.geom.Point(coordinate)
-	                }, ANCHOR_KEY, true));
+	                }, _defineProperty(_ref, ANCHOR_KEY, true), _defineProperty(_ref, this.angleProperty_, angle), _ref));
 	                this.overlay_.addFeature(this.anchorFeature_);
+
+	                this.features_.forEach(function (feature) {
+	                    return feature.set(_this3.anchorProperty_, coordinate);
+	                });
 	            }
 	        }
 
-	        /**
-	         * @param {ol.geom.SimpleGeometry[]} geometries
-	         * @private
-	         */
-
-	    }, {
-	        key: "createOrUpdateGhostFeature_",
-	        value: function createOrUpdateGhostFeature_(geometries) {
-	            if (this.ghostFeature_) {
-	                this.ghostFeature_.getGeometry().setGeometries(geometries);
-	            } else {
-	                this.ghostFeature_ = new _openlayers2.default.Feature(_defineProperty({
-	                    geometry: new _openlayers2.default.geom.GeometryCollection(geometries)
-	                }, GHOST_KEY, true));
-	                this.overlay_.addFeature(this.ghostFeature_);
-	            }
-	        }
+	        //    /**
+	        //     * @private
+	        //     */
+	        //    createOrUpdateGhostFeature_() {
+	        //        if (this.ghostFeature_) {
+	        //            this.ghostFeature_.getGeometry().setGeometries(geometries);
+	        //        } else {
+	        //            this.ghostFeature_ = new ol.Feature({
+	        //                geometry: new ol.geom.GeometryCollection(geometries),
+	        //                [GHOST_KEY]: true
+	        //            });
+	        //            this.overlay_.addFeature(this.ghostFeature_);
+	        //        }
+	        //    }
 
 	        /**
-	         * @param {ol.Coordinate} coordinate
 	         * @private
 	         */
 
 	    }, {
 	        key: "createOrUpdateArrowFeature_",
-	        value: function createOrUpdateArrowFeature_(coordinate) {
+	        value: function createOrUpdateArrowFeature_() {
+	            var firstFeature = this.features_.item(0);
+	            var coordinate, angle;
+
+	            if (firstFeature) {
+	                angle = firstFeature.get(this.angleProperty_) || 0;
+	                coordinate = firstFeature.get(this.anchorProperty_);
+	            }
+
+	            if (!coordinate || !coordinate.length) {
+	                coordinate = _openlayers2.default.extent.getCenter(this.featuresExtent_);
+	            }
+
 	            if (this.arrowFeature_) {
 	                this.arrowFeature_.getGeometry().setCoordinates(coordinate);
 	            } else {
-	                this.arrowFeature_ = new _openlayers2.default.Feature(_defineProperty({
+	                var _ref2;
+
+	                this.arrowFeature_ = new _openlayers2.default.Feature((_ref2 = {
 	                    geometry: new _openlayers2.default.geom.Point(coordinate)
-	                }, ARROW_KEY, true));
+	                }, _defineProperty(_ref2, ARROW_KEY, true), _defineProperty(_ref2, this.angleProperty_, angle), _ref2));
 	                this.overlay_.addFeature(this.arrowFeature_);
 	            }
 	        }
@@ -616,8 +1002,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: "handleFeatureAdd_",
-	        value: function handleFeatureAdd_(_ref4) {
-	            var element = _ref4.element;
+	        value: function handleFeatureAdd_(_ref3) {
+	            var element = _ref3.element;
 
 	            (0, _util.assertInstanceOf)(element, _openlayers2.default.Feature);
 
@@ -632,8 +1018,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: "handleFeatureRemove_",
-	        value: function handleFeatureRemove_(_ref5) {
-	            var element = _ref5.element;
+	        value: function handleFeatureRemove_(_ref4) {
+	            var element = _ref4.element;
 
 	            (0, _util.assertInstanceOf)(element, _openlayers2.default.Feature);
 
@@ -654,6 +1040,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.default = RotateFeatureInteraction;
 	RotateFeatureInteraction.handleEvent = function (evt) {
+	    // disable selection of inner features
+	    var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+	        return feature;
+	    });
+	    if (['click', 'singleclick'].includes(evt.type) && foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)) {
+	        return false;
+	    }
+
 	    return _openlayers2.default.interaction.Pointer.handleEvent.call(this, evt);
 	};
 
@@ -722,37 +1116,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @private
 	 */
 	function handleDragEvent(evt) {
-	    var _this3 = this;
+	    var _this4 = this;
 
 	    var newCoordinate = evt.coordinate;
 	    var anchorCoordinate = this.anchorFeature_.getGeometry().getCoordinates();
 
 	    var updateAngleProperty = function updateAngleProperty(feature, angle) {
-	        return feature.set(_this3.angleProperty_, (feature.get(_this3.angleProperty_) || 0) + angle);
+	        return feature.set(_this4.angleProperty_, (feature.get(_this4.angleProperty_) || 0) + angle);
 	    };
 
 	    // handle drag of features by angle
 	    if (this.lastCoordinate_) {
 	        (function () {
 	            // calculate vectors of last and current pointer positions
-	            var lastVector = [_this3.lastCoordinate_[0] - anchorCoordinate[0], _this3.lastCoordinate_[1] - anchorCoordinate[1]];
+	            var lastVector = [_this4.lastCoordinate_[0] - anchorCoordinate[0], _this4.lastCoordinate_[1] - anchorCoordinate[1]];
 	            var newVector = [newCoordinate[0] - anchorCoordinate[0], newCoordinate[1] - anchorCoordinate[1]];
 
 	            // calculate angle between last and current vectors (positive angle counter-clockwise)
 	            var angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
 
-	            _this3.features_.forEach(function (feature) {
+	            _this4.features_.forEach(function (feature) {
 	                (0, _rotate2.default)(feature.getGeometry(), angle, anchorCoordinate);
 	                updateAngleProperty(feature, angle);
 	            });
 
-	            [_this3.anchorFeature_, _this3.arrowFeature_].forEach(function (feature) {
+	            [_this4.anchorFeature_, _this4.arrowFeature_].forEach(function (feature) {
 	                return updateAngleProperty(feature, angle);
 	            });
 
-	            _this3.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, _this3.features_));
+	            _this4.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, _this4.features_));
 
-	            _this3.lastCoordinate_ = evt.coordinate;
+	            _this4.lastCoordinate_ = evt.coordinate;
 	        })();
 	    }
 	    // handle drag of the anchor
@@ -762,6 +1156,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.anchorFeature_.getGeometry().translate(deltaX, deltaY);
 	            this.arrowFeature_.getGeometry().translate(deltaX, deltaY);
+
+	            this.features_.forEach(function (feature) {
+	                return feature.set(_this4.anchorProperty_, newCoordinate);
+	            });
 	        }
 	}
 
@@ -875,11 +1273,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            case feature.get(ARROW_KEY):
 	                style = styles[ARROW_KEY];
 
-	                var coordinate = feature.getGeometry().getCoordinates();
+	                var coordinates = feature.getGeometry().getCoordinates();
 	                // generate arrow polygon
-	                var geom = new _openlayers2.default.geom.Polygon([[[coordinate[0], coordinate[1] - 6 * resolution], [coordinate[0] + 8 * resolution, coordinate[1] - 12 * resolution], [coordinate[0], coordinate[1] + 30 * resolution], [coordinate[0] - 8 * resolution, coordinate[1] - 12 * resolution], [coordinate[0], coordinate[1] - 6 * resolution]]]);
+	                var geom = new _openlayers2.default.geom.Polygon([[[coordinates[0], coordinates[1] - 6 * resolution], [coordinates[0] + 8 * resolution, coordinates[1] - 12 * resolution], [coordinates[0], coordinates[1] + 30 * resolution], [coordinates[0] - 8 * resolution, coordinates[1] - 12 * resolution], [coordinates[0], coordinates[1] - 6 * resolution]]]);
+
 	                // and rotate it according to current angle
-	                (0, _rotate2.default)(geom, angle, coordinate);
+	                (0, _rotate2.default)(geom, angle, coordinates);
 	                style[0].setGeometry(geom);
 	                style[1].setGeometry(geom);
 	                style[0].getText().setText(Math.round(-angle * 180 / Math.PI) + '°');
@@ -889,78 +1288,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	}
 
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	exports.assert = assert;
-	exports.assertInstanceOf = assertInstanceOf;
-	exports.noop = noop;
-	exports.identity = identity;
-	exports.getValueType = getValueType;
-
 	/**
-	 * @param {boolean} condition
-	 * @param {string} message
-	 * @throws Error
+	 * @param {ol.Collection<ol.Feature> | Array<ol.Feature>} features
+	 * @returns {ol.Extent}
+	 * @private
 	 */
-	function assert(condition) {
-	    var message = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-
-	    message = ['Assertion failed', message].join(': ');
-
-	    if (!condition) {
-	        throw new Error(message);
-	    }
-	}
-
-	/**
-	 * Checks if the value is an instance of the user-defined type.
-	 *
-	 * @param {*} value
-	 * @param {*} type
-	 * @throws Error
-	 */
-	function assertInstanceOf(value, type) {
-	    assert(value instanceof type, 'Expected instanceof ' + getValueType(type) + ' but got ' + getValueType(value) + '.');
-	}
-
-	/**
-	 * Null function. Do nothing.
-	 */
-	function noop() {}
-
-	/**
-	 * @param {*} arg
-	 * @returns {*}
-	 */
-	function identity(arg) {
-	    return arg;
-	}
-
-	/**
-	 * Returns the type of a value. If a constructor is passed, and a suitable
-	 * string cannot be found, 'unknown type name' will be returned.
-	 *
-	 * @param {*} value
-	 * @returns string
-	 */
-	function getValueType(value) {
-	    if (value instanceof Function) {
-	        return value.name || 'unknown type name';
-	    } else if (value instanceof Object) {
-	        return value.constructor.name || Object.prototype.toString.call(value);
-	    } else {
-	        return value === null ? 'null' : typeof value === 'undefined' ? 'undefined' : _typeof(value);
-	    }
+	function getFeaturesExtent(features) {
+	    return new _openlayers2.default.geom.GeometryCollection((Array.isArray(features) ? features : features.getArray()).map(function (feature) {
+	        return feature.getGeometry();
+	    })).getExtent();
 	}
 
 /***/ }

@@ -59,9 +59,9 @@
             features: select.getFeatures()
         });
 
-        rotate.on(ol3RotateFeature.RotateFeatureEventType.START, evt => console.log('rotate start', evt.features));
-        rotate.on(ol3RotateFeature.RotateFeatureEventType.ROTATING, evt => console.log('rotating', evt.features));
-        rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => console.log('rotate end', evt.features));
+        rotate.on(ol3RotateFeature.RotateFeatureEventType.START, evt => console.log('rotate start', evt));
+        rotate.on(ol3RotateFeature.RotateFeatureEventType.ROTATING, evt => console.log('rotating', evt));
+        rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => console.log('rotate end', evt));
 
         map.addInteraction(select);
         map.addInteraction(rotate);

@@ -3,7 +3,8 @@
  * Use it for old versions.
  */
 // @flow
-import ol from 'openlayers';
+import ol from "openlayers";
+import { deflateGeometryCoordinates, getStrideForLayout, setGeometryCoordinatesFromFlatCoordinates } from './geometry';
 
 /**
  * @param {Array.<number>} flatCoordinates Flat coordinates.
@@ -44,11 +45,11 @@ export function rotate(flatCoordinates, offset, end, stride, angle, anchor, opt_
 }
 
 /**
- * @param {ol.geom.Geometry} geometry
+ * @param {ol.geom.GeometryCollection | ol.geom.SimpleGeometry} geometry
  * @param {number} angle
  * @param {ol.Coordinate} anchor
  */
-export default function rotateGeometry(geometry : ol.geom.Geometry, angle: number, anchor: ol.Coordinate) {
+export default function rotateGeometry(geometry : ol.geom.GeometryCollection | ol.geom.SimpleGeometry, angle: number, anchor: ol.Coordinate) {
     if (geometry instanceof ol.geom.GeometryCollection) {
         let geometries = geometry.getGeometries();
 
@@ -56,12 +57,12 @@ export default function rotateGeometry(geometry : ol.geom.Geometry, angle: numbe
             rotateGeometry(geometries[i], angle, anchor);
         }
     } else {
-        const flatCoordinates = geometry.getFlatCoordinates();
+        const flatCoordinates = [];
+        const offsetOrEnds = deflateGeometryCoordinates(geometry, flatCoordinates);
 
         if (flatCoordinates) {
-            var stride = geometry.getStride();
-
-            rotate(flatCoordinates, 0, flatCoordinates.length, stride, angle, anchor, flatCoordinates);
+            rotate(flatCoordinates, 0, flatCoordinates.length, getStrideForLayout(geometry.getLayout()), angle, anchor, flatCoordinates);
+            setGeometryCoordinatesFromFlatCoordinates(geometry, flatCoordinates, offsetOrEnds);
         }
     }
 

@@ -8,7 +8,8 @@ import rotateGeometry from "./rotate";
  * @typedef {Object} RotateFeatureInteractionOptions
  * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
  * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
- * @property {string} angleProperty Property name of the features where to save current angle. Used for exporting total angle value. Default is  'angle'.
+ * @property {string} angleProperty Property name where to save current rotation angle. Default is  'angle'.
+ * @property {string} anchorProperty Property name where to save current rotation anchor coordinates. Default is  'anchor'.
  */
 
 const ANCHOR_KEY = 'anchor';
@@ -24,6 +25,7 @@ const GHOST_KEY = 'ghost';
  * @extends ol.interaction.Interaction
  * @author Vladimir Vershinin
  *
+ * todo добавить опцию condition - для возможности переопределения клавиш
  * todo возможно добавить ghost feature для отображения начального угла
  */
 export default class RotateFeatureInteraction extends ol.interaction.Pointer {
@@ -53,6 +55,11 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
          */
         this.angleProperty_ = options.angleProperty || 'angle';
         /**
+         * @type {string}
+         * @private
+         */
+        this.anchorProperty_ = options.anchorProperty || 'anchor';
+        /**
          * @type {ol.FeatureOverlay}
          * @private
          */
@@ -64,13 +71,13 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
          * @private
          */
         this.previousCursor_ = undefined;
-        /**
-         * Rotated feature.
-         *
-         * @type {ol.Feature}
-         * @private
-         */
-        this.ghostFeature_ = undefined;
+//        /**
+//         * Rotated feature.
+//         *
+//         * @type {ol.Feature}
+//         * @private
+//         */
+//        this.ghostFeature_ = undefined;
         /**
          * @type {ol.Feature}
          * @private
@@ -91,6 +98,11 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
          * @private
          */
         this.anchorMoving_ = false;
+        /**
+         * @type {ol.Extent}
+         * @private
+         */
+        this.featuresExtent_ = undefined;
 
         this.features_.on('add', this.handleFeatureAdd_, this);
         this.features_.on('remove', this.handleFeatureRemove_, this);
@@ -110,22 +122,21 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     updateInteractionFeatures_() {
-        const geometries = this.features_.getArray().map(feature => feature.getGeometry());
-
-        if (geometries.length === 0) {
+        if (!this.features_.getLength()) {
             this.reset_();
 
             return;
         }
 
-        const extent = new ol.geom.GeometryCollection(geometries).getExtent();
-        const anchorCoordinate = ol.extent.getCenter(extent);
+        this.featuresExtent_ = getFeaturesExtent(this.features_);
 
-//        this.createOrUpdateGhostFeature_(geometries);
-        this.createOrUpdateAnchorFeature_(anchorCoordinate);
-        this.createOrUpdateArrowFeature_(anchorCoordinate);
+        this.createOrUpdateAnchorFeature_();
+        this.createOrUpdateArrowFeature_();
     }
 
+    /**
+     * @private
+     */
     reset_() {
         [this.anchorFeature_, this.arrowFeature_].forEach(feature => {
             if (feature) {
@@ -133,53 +144,79 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
             }
         });
 
-        this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = undefined;
+        this.anchorFeature_ = this.arrowFeature_ =
+            this.lastCoordinate_ = this.featuresExtent_ = undefined;
         this.anchorMoving_ = false;
     }
 
     /**
-     * @param {ol.Coordinate} coordinate
      * @private
      */
-    createOrUpdateAnchorFeature_(coordinate : ol.Coordinate) {
+    createOrUpdateAnchorFeature_() {
+        const firstFeature = this.features_.item(0);
+        var coordinate, angle;
+
+        if (firstFeature) {
+            angle = firstFeature.get(this.angleProperty_) || 0;
+            coordinate = firstFeature.get(this.anchorProperty_);
+        }
+
+        if (!coordinate || !coordinate.length) {
+            coordinate = ol.extent.getCenter(this.featuresExtent_);
+        }
+
         if (this.anchorFeature_) {
             this.anchorFeature_.getGeometry().setCoordinates(coordinate);
         } else {
             this.anchorFeature_ = new ol.Feature({
                 geometry: new ol.geom.Point(coordinate),
-                [ANCHOR_KEY]: true
+                [ANCHOR_KEY]: true,
+                [this.angleProperty_]: angle
             });
             this.overlay_.addFeature(this.anchorFeature_);
+
+            this.features_.forEach(feature => feature.set(this.anchorProperty_, coordinate));
         }
     }
 
-    /**
-     * @param {ol.geom.SimpleGeometry[]} geometries
-     * @private
-     */
-    createOrUpdateGhostFeature_(geometries : Array<ol.geom.SimpleGeometry>) {
-        if (this.ghostFeature_) {
-            this.ghostFeature_.getGeometry().setGeometries(geometries);
-        } else {
-            this.ghostFeature_ = new ol.Feature({
-                geometry: new ol.geom.GeometryCollection(geometries),
-                [GHOST_KEY]: true
-            });
-            this.overlay_.addFeature(this.ghostFeature_);
-        }
-    }
+//    /**
+//     * @private
+//     */
+//    createOrUpdateGhostFeature_() {
+//        if (this.ghostFeature_) {
+//            this.ghostFeature_.getGeometry().setGeometries(geometries);
+//        } else {
+//            this.ghostFeature_ = new ol.Feature({
+//                geometry: new ol.geom.GeometryCollection(geometries),
+//                [GHOST_KEY]: true
+//            });
+//            this.overlay_.addFeature(this.ghostFeature_);
+//        }
+//    }
 
     /**
-     * @param {ol.Coordinate} coordinate
      * @private
      */
-    createOrUpdateArrowFeature_(coordinate : ol.Coordinate) {
+    createOrUpdateArrowFeature_() {
+        const firstFeature = this.features_.item(0);
+        var coordinate, angle;
+
+        if (firstFeature) {
+            angle = firstFeature.get(this.angleProperty_) || 0;
+            coordinate = firstFeature.get(this.anchorProperty_);
+        }
+
+        if (!coordinate || !coordinate.length) {
+            coordinate = ol.extent.getCenter(this.featuresExtent_);
+        }
+
         if (this.arrowFeature_) {
             this.arrowFeature_.getGeometry().setCoordinates(coordinate);
         } else {
             this.arrowFeature_ = new ol.Feature({
                 geometry: new ol.geom.Point(coordinate),
-                [ARROW_KEY]: true
+                [ARROW_KEY]: true,
+                [this.angleProperty_]: angle
             });
             this.overlay_.addFeature(this.arrowFeature_);
         }
@@ -215,6 +252,15 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
  * @public
  */
 RotateFeatureInteraction.handleEvent = function (evt : ol.MapBrowserEvent) : boolean {
+    // disable selection of inner features
+    const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
+    if (
+        ['click', 'singleclick'].includes(evt.type) &&
+        foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)
+    ) {
+        return false;
+    }
+
     return ol.interaction.Pointer.handleEvent.call(this, evt);
 };
 
@@ -316,6 +362,8 @@ function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
 
         this.anchorFeature_.getGeometry().translate(deltaX, deltaY);
         this.arrowFeature_.getGeometry().translate(deltaX, deltaY);
+
+        this.features_.forEach(feature => feature.set(this.anchorProperty_, newCoordinate));
     }
 }
 
@@ -431,19 +479,20 @@ function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
             case feature.get(ARROW_KEY):
                 style = styles[ARROW_KEY];
 
-                const coordinate = feature.getGeometry().getCoordinates();
+                const coordinates = feature.getGeometry().getCoordinates();
                 // generate arrow polygon
                 const geom = new ol.geom.Polygon([
                     [
-                        [coordinate[0], coordinate[1] - 6 * resolution],
-                        [coordinate[0] + 8 * resolution, coordinate[1] - 12 * resolution],
-                        [coordinate[0], coordinate[1] + 30 * resolution],
-                        [coordinate[0] - 8 * resolution, coordinate[1] - 12 * resolution],
-                        [coordinate[0], coordinate[1] - 6 * resolution],
+                        [coordinates[0], coordinates[1] - 6 * resolution],
+                        [coordinates[0] + 8 * resolution, coordinates[1] - 12 * resolution],
+                        [coordinates[0], coordinates[1] + 30 * resolution],
+                        [coordinates[0] - 8 * resolution, coordinates[1] - 12 * resolution],
+                        [coordinates[0], coordinates[1] - 6 * resolution],
                     ]
                 ]);
+
                 // and rotate it according to current angle
-                rotateGeometry(geom, angle, coordinate);
+                rotateGeometry(geom, angle, coordinates);
                 style[0].setGeometry(geom);
                 style[1].setGeometry(geom);
                 style[0].getText().setText(Math.round(-angle * 180 / Math.PI) + '°');
@@ -451,4 +500,15 @@ function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
                 return style;
         }
     };
+}
+
+/**
+ * @param {ol.Collection<ol.Feature> | Array<ol.Feature>} features
+ * @returns {ol.Extent}
+ * @private
+ */
+function getFeaturesExtent(features : ol.Collection<ol.Feature> | Array<ol.Feature>) {
+    return new ol.geom.GeometryCollection(
+        ( Array.isArray(features) ? features : features.getArray() ).map(feature => feature.getGeometry())
+    ).getExtent();
 }
