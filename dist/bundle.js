@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.geometryHelpers = exports.RotateFeatureEventType = exports.RotateFeatureEvent = exports.RotateFeatureInteraction = undefined;
+	exports.rotateGeometry = exports.RotateFeatureEventType = exports.RotateFeatureEvent = exports.RotateFeatureInteraction = undefined;
 
 	var _rotatefeatureintraction = __webpack_require__(7);
 
@@ -78,18 +78,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _rotatefeatureevent = __webpack_require__(2);
 
-	var _geometry = __webpack_require__(1);
+	var _rotate = __webpack_require__(1);
 
-	var geometryHelpers = _interopRequireWildcard(_geometry);
-
-	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+	var _rotate2 = _interopRequireDefault(_rotate);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	exports.RotateFeatureInteraction = _rotatefeatureintraction2.default;
 	exports.RotateFeatureEvent = _rotatefeatureevent.RotateFeatureEvent;
 	exports.RotateFeatureEventType = _rotatefeatureevent.RotateFeatureEventType;
-	exports.geometryHelpers = geometryHelpers; /**
+	exports.rotateGeometry = _rotate2.default; /**
 	                                            * OpenLayers 3 rotate interaction.
 	                                            * Allows vector feature rotation.
 	                                            *
@@ -102,6 +100,351 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.rotate = rotate;
+	exports.default = rotateGeometry;
+
+	var _openlayers = __webpack_require__(4);
+
+	var _openlayers2 = _interopRequireDefault(_openlayers);
+
+	var _geometry = __webpack_require__(6);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	/**
+	 * @param {Array.<number>} flatCoordinates Flat coordinates.
+	 * @param {number} offset Offset.
+	 * @param {number} end End.
+	 * @param {number} stride Stride.
+	 * @param {number} angle Angle.
+	 * @param {Array.<number>} anchor Rotation anchor point.
+	 * @param {Array.<number>=} opt_dest Destination.
+	 * @return {Array.<number>} Transformed coordinates.
+	 * @link https://github.com/openlayers/ol3/blob/v3.16.0/src/ol/geom/flat/transformflatgeom.js#L48
+	 */
+	/**
+	 * Polyfill of OpenLayers 3 ol.geom.SimpleGeometry.prototype.rotate method.
+	 * Use it for old versions.
+	 */
+	function rotate(flatCoordinates, offset, end, stride, angle, anchor, opt_dest) {
+	    var dest = opt_dest ? opt_dest : [];
+	    var cos = Math.cos(angle);
+	    var sin = Math.sin(angle);
+	    var anchorX = anchor[0];
+	    var anchorY = anchor[1];
+	    var i = 0;
+
+	    for (var j = offset; j < end; j += stride) {
+	        var deltaX = flatCoordinates[j] - anchorX;
+	        var deltaY = flatCoordinates[j + 1] - anchorY;
+
+	        dest[i++] = anchorX + deltaX * cos - deltaY * sin;
+	        dest[i++] = anchorY + deltaX * sin + deltaY * cos;
+
+	        for (var k = j + 2; k < j + stride; ++k) {
+	            dest[i++] = flatCoordinates[k];
+	        }
+	    }
+
+	    if (opt_dest && dest.length != i) {
+	        dest.length = i;
+	    }
+
+	    return dest;
+	}
+
+	/**
+	 * @param {ol.geom.GeometryCollection | ol.geom.SimpleGeometry} geometry
+	 * @param {number} angle
+	 * @param {ol.Coordinate} anchor
+	 */
+	function rotateGeometry(geometry, angle, anchor) {
+	    if (geometry instanceof _openlayers2.default.geom.GeometryCollection) {
+	        var geometries = geometry.getGeometries();
+
+	        for (var i = 0, l = geometries.length; i < l; ++i) {
+	            rotateGeometry(geometries[i], angle, anchor);
+	        }
+	    } else {
+	        var flatCoordinates = [];
+	        var offsetOrEnds = (0, _geometry.deflateGeometryCoordinates)(geometry, flatCoordinates);
+
+	        if (flatCoordinates) {
+	            rotate(flatCoordinates, 0, flatCoordinates.length, (0, _geometry.getStrideForLayout)(geometry.getLayout()), angle, anchor, flatCoordinates);
+	            (0, _geometry.setGeometryCoordinatesFromFlatCoordinates)(geometry, flatCoordinates, offsetOrEnds);
+	        }
+	    }
+
+	    geometry.changed();
+	}
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.RotateFeatureEvent = exports.RotateFeatureEventType = undefined;
+
+	var _event = __webpack_require__(5);
+
+	var _event2 = _interopRequireDefault(_event);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	/**
+	 * @enum {string}
+	 */
+	var RotateFeatureEventType = exports.RotateFeatureEventType = {
+	  /**
+	   * Triggered upon feature draw start
+	   * @event RotateFeatureEvent#rotatestart
+	   */
+	  START: 'rotatefeaturestart',
+	  /**
+	   * Triggered upon feature draw start
+	   * @event RotateFeatureEvent#rotating
+	   */
+	  ROTATING: 'rotating',
+	  /**
+	   * Triggered upon feature draw start
+	   * @event RotateFeatureEvent#rotateend
+	   */
+	  END: 'rotatefeatureend'
+	};
+
+	/**
+	 * Events emitted by RotateFeatureInteraction instances are instances of this type.
+	 *
+	 * @class
+	 * @extends {olEvent|ol.events.Event}
+	 * @author Vladimir Vershinin
+	 */
+
+	var RotateFeatureEvent = exports.RotateFeatureEvent = function (_olEvent) {
+	  _inherits(RotateFeatureEvent, _olEvent);
+
+	  /**
+	   * @param {RotateFeatureEventType} type Type.
+	   * @param {ol.Collection<ol.Feature>} features Rotated features.
+	   */
+
+	  function RotateFeatureEvent(type, features) {
+	    _classCallCheck(this, RotateFeatureEvent);
+
+	    /**
+	     * The feature being drawn.
+	     * @type {ol.Feature}
+	     */
+
+	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RotateFeatureEvent).call(this, type));
+
+	    _this.features = features;
+	    return _this;
+	  }
+
+	  return RotateFeatureEvent;
+	}(_event2.default);
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	exports.assert = assert;
+	exports.assertInstanceOf = assertInstanceOf;
+	exports.noop = noop;
+	exports.identity = identity;
+	exports.getValueType = getValueType;
+
+	/**
+	 * @param {boolean} condition
+	 * @param {string} message
+	 * @throws Error
+	 */
+	function assert(condition) {
+	    var message = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+
+	    message = ['Assertion failed', message].join(': ');
+
+	    if (!condition) {
+	        throw new Error(message);
+	    }
+	}
+
+	/**
+	 * Checks if the value is an instance of the user-defined type.
+	 *
+	 * @param {*} value
+	 * @param {*} type
+	 * @throws Error
+	 */
+	function assertInstanceOf(value, type) {
+	    assert(value instanceof type, 'Expected instanceof ' + getValueType(type) + ' but got ' + getValueType(value) + '.');
+	}
+
+	/**
+	 * Null function. Do nothing.
+	 */
+	function noop() {}
+
+	/**
+	 * @param {*} arg
+	 * @returns {*}
+	 */
+	function identity(arg) {
+	    return arg;
+	}
+
+	/**
+	 * Returns the type of a value. If a constructor is passed, and a suitable
+	 * string cannot be found, 'unknown type name' will be returned.
+	 *
+	 * @param {*} value
+	 * @returns string
+	 */
+	function getValueType(value) {
+	    if (value instanceof Function) {
+	        return value.name || 'unknown type name';
+	    } else if (value instanceof Object) {
+	        return value.constructor.name || Object.prototype.toString.call(value);
+	    } else {
+	        return value === null ? 'null' : typeof value === 'undefined' ? 'undefined' : _typeof(value);
+	    }
+	}
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	/**
+	 * Polyfill of OpenLayers 3 new Event system.
+	 * Use it for old versions.
+	 */
+
+	/**
+	 * Stripped down implementation of the W3C DOM Level 2 Event interface.
+	 * @see {@link https://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface}
+	 *
+	 * This implementation only provides `type` and `target` properties, and
+	 * `stopPropagation` and `preventDefault` methods. It is meant as base class
+	 * for higher level events defined in the library, and works with
+	 * {@link ol.events.EventTarget}.
+	 *
+	 * @constructor
+	 * @implements {oli.events.Event}
+	 * @param {string} type Type.
+	 * @param {Object=} opt_target Target.
+	 */
+
+	var olEvent = function () {
+	  function olEvent(type, opt_target) {
+	    _classCallCheck(this, olEvent);
+
+	    /**
+	     * @type {boolean}
+	     */
+	    this.propagationStopped = undefined;
+
+	    /**
+	     * The event type.
+	     * @type {string}
+	     */
+	    this.type = type;
+
+	    /**
+	     * The event target.
+	     * @type {Object}
+	     */
+	    this.target = opt_target || null;
+	  }
+
+	  /**
+	   * Stop event propagation.
+	   * @function
+	   */
+
+
+	  _createClass(olEvent, [{
+	    key: "preventDefault",
+	    value: function preventDefault() {
+	      this.propagationStopped = true;
+	    }
+
+	    /**
+	     * Stop event propagation.
+	     * @function
+	     */
+
+	  }, {
+	    key: "stopPropagation",
+	    value: function stopPropagation() {
+	      this.propagationStopped = true;
+	    }
+	  }]);
+
+	  return olEvent;
+	}();
+
+	/**
+	 * @param {Event|ol.events.Event} evt Event
+	 */
+
+
+	olEvent.stopPropagation = function (evt) {
+	  evt.stopPropagation();
+	};
+
+	/**
+	 * @param {Event|ol.events.Event} evt Event
+	 */
+	olEvent.preventDefault = function (evt) {
+	  evt.preventDefault();
+	};
+
+	exports.default = olEvent;
+
+/***/ },
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -371,351 +714,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.RotateFeatureEvent = exports.RotateFeatureEventType = undefined;
-
-	var _event = __webpack_require__(5);
-
-	var _event2 = _interopRequireDefault(_event);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	/**
-	 * @enum {string}
-	 */
-	var RotateFeatureEventType = exports.RotateFeatureEventType = {
-	  /**
-	   * Triggered upon feature draw start
-	   * @event RotateFeatureEvent#rotatestart
-	   */
-	  START: 'rotatefeaturestart',
-	  /**
-	   * Triggered upon feature draw start
-	   * @event RotateFeatureEvent#rotating
-	   */
-	  ROTATING: 'rotating',
-	  /**
-	   * Triggered upon feature draw start
-	   * @event RotateFeatureEvent#rotateend
-	   */
-	  END: 'rotatefeatureend'
-	};
-
-	/**
-	 * Events emitted by RotateFeatureInteraction instances are instances of this type.
-	 *
-	 * @class
-	 * @extends {olEvent|ol.events.Event}
-	 * @author Vladimir Vershinin
-	 */
-
-	var RotateFeatureEvent = exports.RotateFeatureEvent = function (_olEvent) {
-	  _inherits(RotateFeatureEvent, _olEvent);
-
-	  /**
-	   * @param {RotateFeatureEventType} type Type.
-	   * @param {ol.Collection<ol.Feature>} features Rotated features.
-	   */
-
-	  function RotateFeatureEvent(type, features) {
-	    _classCallCheck(this, RotateFeatureEvent);
-
-	    /**
-	     * The feature being drawn.
-	     * @type {ol.Feature}
-	     */
-
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RotateFeatureEvent).call(this, type));
-
-	    _this.features = features;
-	    return _this;
-	  }
-
-	  return RotateFeatureEvent;
-	}(_event2.default);
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	exports.assert = assert;
-	exports.assertInstanceOf = assertInstanceOf;
-	exports.noop = noop;
-	exports.identity = identity;
-	exports.getValueType = getValueType;
-
-	/**
-	 * @param {boolean} condition
-	 * @param {string} message
-	 * @throws Error
-	 */
-	function assert(condition) {
-	    var message = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
-
-	    message = ['Assertion failed', message].join(': ');
-
-	    if (!condition) {
-	        throw new Error(message);
-	    }
-	}
-
-	/**
-	 * Checks if the value is an instance of the user-defined type.
-	 *
-	 * @param {*} value
-	 * @param {*} type
-	 * @throws Error
-	 */
-	function assertInstanceOf(value, type) {
-	    assert(value instanceof type, 'Expected instanceof ' + getValueType(type) + ' but got ' + getValueType(value) + '.');
-	}
-
-	/**
-	 * Null function. Do nothing.
-	 */
-	function noop() {}
-
-	/**
-	 * @param {*} arg
-	 * @returns {*}
-	 */
-	function identity(arg) {
-	    return arg;
-	}
-
-	/**
-	 * Returns the type of a value. If a constructor is passed, and a suitable
-	 * string cannot be found, 'unknown type name' will be returned.
-	 *
-	 * @param {*} value
-	 * @returns string
-	 */
-	function getValueType(value) {
-	    if (value instanceof Function) {
-	        return value.name || 'unknown type name';
-	    } else if (value instanceof Object) {
-	        return value.constructor.name || Object.prototype.toString.call(value);
-	    } else {
-	        return value === null ? 'null' : typeof value === 'undefined' ? 'undefined' : _typeof(value);
-	    }
-	}
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	/**
-	 * Polyfill of OpenLayers 3 new Event system.
-	 * Use it for old versions.
-	 */
-
-	/**
-	 * Stripped down implementation of the W3C DOM Level 2 Event interface.
-	 * @see {@link https://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface}
-	 *
-	 * This implementation only provides `type` and `target` properties, and
-	 * `stopPropagation` and `preventDefault` methods. It is meant as base class
-	 * for higher level events defined in the library, and works with
-	 * {@link ol.events.EventTarget}.
-	 *
-	 * @constructor
-	 * @implements {oli.events.Event}
-	 * @param {string} type Type.
-	 * @param {Object=} opt_target Target.
-	 */
-
-	var olEvent = function () {
-	  function olEvent(type, opt_target) {
-	    _classCallCheck(this, olEvent);
-
-	    /**
-	     * @type {boolean}
-	     */
-	    this.propagationStopped = undefined;
-
-	    /**
-	     * The event type.
-	     * @type {string}
-	     */
-	    this.type = type;
-
-	    /**
-	     * The event target.
-	     * @type {Object}
-	     */
-	    this.target = opt_target || null;
-	  }
-
-	  /**
-	   * Stop event propagation.
-	   * @function
-	   */
-
-
-	  _createClass(olEvent, [{
-	    key: "preventDefault",
-	    value: function preventDefault() {
-	      this.propagationStopped = true;
-	    }
-
-	    /**
-	     * Stop event propagation.
-	     * @function
-	     */
-
-	  }, {
-	    key: "stopPropagation",
-	    value: function stopPropagation() {
-	      this.propagationStopped = true;
-	    }
-	  }]);
-
-	  return olEvent;
-	}();
-
-	/**
-	 * @param {Event|ol.events.Event} evt Event
-	 */
-
-
-	olEvent.stopPropagation = function (evt) {
-	  evt.stopPropagation();
-	};
-
-	/**
-	 * @param {Event|ol.events.Event} evt Event
-	 */
-	olEvent.preventDefault = function (evt) {
-	  evt.preventDefault();
-	};
-
-	exports.default = olEvent;
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.rotate = rotate;
-	exports.default = rotateGeometry;
-
-	var _openlayers = __webpack_require__(4);
-
-	var _openlayers2 = _interopRequireDefault(_openlayers);
-
-	var _geometry = __webpack_require__(1);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	/**
-	 * @param {Array.<number>} flatCoordinates Flat coordinates.
-	 * @param {number} offset Offset.
-	 * @param {number} end End.
-	 * @param {number} stride Stride.
-	 * @param {number} angle Angle.
-	 * @param {Array.<number>} anchor Rotation anchor point.
-	 * @param {Array.<number>=} opt_dest Destination.
-	 * @return {Array.<number>} Transformed coordinates.
-	 * @link https://github.com/openlayers/ol3/blob/v3.16.0/src/ol/geom/flat/transformflatgeom.js#L48
-	 */
-	/**
-	 * Polyfill of OpenLayers 3 ol.geom.SimpleGeometry.prototype.rotate method.
-	 * Use it for old versions.
-	 */
-	function rotate(flatCoordinates, offset, end, stride, angle, anchor, opt_dest) {
-	    var dest = opt_dest ? opt_dest : [];
-	    var cos = Math.cos(angle);
-	    var sin = Math.sin(angle);
-	    var anchorX = anchor[0];
-	    var anchorY = anchor[1];
-	    var i = 0;
-
-	    for (var j = offset; j < end; j += stride) {
-	        var deltaX = flatCoordinates[j] - anchorX;
-	        var deltaY = flatCoordinates[j + 1] - anchorY;
-
-	        dest[i++] = anchorX + deltaX * cos - deltaY * sin;
-	        dest[i++] = anchorY + deltaX * sin + deltaY * cos;
-
-	        for (var k = j + 2; k < j + stride; ++k) {
-	            dest[i++] = flatCoordinates[k];
-	        }
-	    }
-
-	    if (opt_dest && dest.length != i) {
-	        dest.length = i;
-	    }
-
-	    return dest;
-	}
-
-	/**
-	 * @param {ol.geom.GeometryCollection | ol.geom.SimpleGeometry} geometry
-	 * @param {number} angle
-	 * @param {ol.Coordinate} anchor
-	 */
-	function rotateGeometry(geometry, angle, anchor) {
-	    if (geometry instanceof _openlayers2.default.geom.GeometryCollection) {
-	        var geometries = geometry.getGeometries();
-
-	        for (var i = 0, l = geometries.length; i < l; ++i) {
-	            rotateGeometry(geometries[i], angle, anchor);
-	        }
-	    } else {
-	        var flatCoordinates = [];
-	        var offsetOrEnds = (0, _geometry.deflateGeometryCoordinates)(geometry, flatCoordinates);
-
-	        if (flatCoordinates) {
-	            rotate(flatCoordinates, 0, flatCoordinates.length, (0, _geometry.getStrideForLayout)(geometry.getLayout()), angle, anchor, flatCoordinates);
-	            (0, _geometry.setGeometryCoordinatesFromFlatCoordinates)(geometry, flatCoordinates, offsetOrEnds);
-	        }
-	    }
-
-	    geometry.changed();
-	}
-
-/***/ },
 /* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -737,7 +735,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _rotatefeatureevent = __webpack_require__(2);
 
-	var _rotate = __webpack_require__(6);
+	var _rotate = __webpack_require__(1);
 
 	var _rotate2 = _interopRequireDefault(_rotate);
 

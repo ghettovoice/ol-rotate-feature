@@ -10,11 +10,11 @@
  */
 import RotateFeatureInteraction from "./rotatefeatureintraction";
 import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent";
-import * as geometryHelpers  from './geometry';
+import rotateGeometry  from './rotate';
 
 export {
     RotateFeatureInteraction,
     RotateFeatureEvent,
     RotateFeatureEventType,
-    geometryHelpers
+    rotateGeometry
 };
