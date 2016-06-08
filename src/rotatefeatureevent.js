@@ -6,20 +6,20 @@ import olEvent from './event';
  */
 export const RotateFeatureEventType = {
     /**
-     * Triggered upon feature draw start
+     * Triggered upon feature rotate start.
      * @event RotateFeatureEvent#rotatestart
      */
-    START: 'rotatefeaturestart',
+    START: 'rotatestart',
     /**
-     * Triggered upon feature draw start
+     * Triggered upon feature rotation.
      * @event RotateFeatureEvent#rotating
      */
     ROTATING: 'rotating',
     /**
-     * Triggered upon feature draw start
+     * Triggered upon feature rotation end.
      * @event RotateFeatureEvent#rotateend
      */
-    END: 'rotatefeatureend'
+    END: 'rotateend'
 };
 
 /**
@@ -38,7 +38,7 @@ export class RotateFeatureEvent extends olEvent {
         super(type);
 
         /**
-         * The feature being drawn.
+         * The features being rotated.
          * @type {ol.Feature}
          */
         this.features = features;

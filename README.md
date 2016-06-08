@@ -1,28 +1,62 @@
 # Rotate feature interaction for OpenLayers 3
+
 Plugin adds interaction that allows to rotate vector features around some anchor.
 
 ## Installation
+
 Install it thought NPM:
+
 ```shell
 npm install ol3-rotate-feature
 ```
+
 Or download the latest version archive and add it with script tag:
+
 ```html
 <script src="ol3-rotate-feature/dist/bundle.min.js"></script>
 ```
+
 ## Usage
-Plugin is packed into UMD wrapper and exports an object `ol3RotateFeature` with three properties:
-```js
+
+Plugin is packed into UMD wrapper and exports an object
+`ol3RotateFeature` with three properties:
+
+```jsx harmony
 export {
     RotateFeatureInteraction,
     RotateFeatureEvent,
     RotateFeatureEventType
 };
 ```
-In Browser environment it exports to `ol3RotateFeature` global variable. 
+
+In Browser environment it exports to `ol3RotateFeature` global variable.
+
+### Options
+
+| Option         | Type                                                                | Description                                                                            |
+|:---------------|:--------------------------------------------------------------------|:---------------------------------------------------------------------------------------|
+| features       | _ol.Collection<ol.Feature>_                                         | The features the interaction works on. Required.                                       |
+| style          | _ol.style.Style \| Array<ol.style.Style> \| ol.style.StyleFunction_ | Style of the overlay with interaction helper features.                                 |
+| angleProperty  | _string_                                                            | Property name where to save current rotation angle. Default is  'angle'.               |
+| anchorProperty | _string_                                                            | Property name where to save current rotation anchor coordinates. Default is  'anchor'. |
+
+### Events
+
+All events triggered by the interaction are instances of `RotateFeatureEvent`.
+
+##### Memebers
+
+- **features**    _ol.Collection_     The features being rotated.
+
+| Event       | Arguments            | Description                          |
+|:------------|:---------------------|:-------------------------------------|
+| rotatestart | _RotateFeatureEvent_ | Triggered upon feature rotate start. |
+| rotating    | _RotateFeatureEvent_ | Triggered upon feature rotating.     |
+| rotateend   | _RotateFeatureEvent_ | Triggered upon feature rotation end. |
 
 #### Example usage:
-```js
+
+```jsx harmony
 import ol from 'openlayers';
 import * as ol3RotateFeature from 'ol3-rotate-feature';
 
@@ -32,11 +66,19 @@ const point = new ol.Feature({
 });
 const line = new ol.Feature({
     name: 'line',
-    geometry: new ol.geom.LineString([[-603697.2100018249, -239432.60826165066], [4190433.20404443, 2930563.8287811787]])
+    geometry: new ol.geom.LineString([
+        [-603697.2100018249, -239432.60826165066], 
+        [4190433.20404443, 2930563.8287811787]
+    ])
 });
 const polygon = new ol.Feature({
     name: 'polygon',
-    geometry: new ol.geom.Polygon([[[-14482348.171434438, 6661491.741627443], [-9541458.663080638, 6221214.458704827], [-11473786.738129886, 3300708.4819848104], [-14482348.171434438, 6661491.741627443]]])
+    geometry: new ol.geom.Polygon([[
+        [-14482348.171434438, 6661491.741627443], 
+        [-9541458.663080638, 6221214.458704827], 
+        [-11473786.738129886, 3300708.4819848104], 
+        [-14482348.171434438, 6661491.741627443]
+    ]])
 });
 
 const map = new ol.Map({
@@ -65,13 +107,29 @@ const rotate = new ol3RotateFeature.RotateFeatureInteraction({
     features: select.getFeatures()
 });
 
-rotate.on(ol3RotateFeature.RotateFeatureEventType.START, evt => console.log('rotate start', evt.features));
-rotate.on(ol3RotateFeature.RotateFeatureEventType.ROTATING, evt => console.log('rotating', evt.features));
-rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => console.log('rotate end', evt.features));
+rotate.on(ol3RotateFeature.RotateFeatureEventType.START, evt => console.log('rotate start', evt));
+rotate.on(ol3RotateFeature.RotateFeatureEventType.ROTATING, evt => console.log('rotating', evt));
+rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => console.log('rotate end', evt));
 
 map.addInteraction(select);
 map.addInteraction(rotate);
 ```
+
 Example of usage in Browser environment in `index.html`.
-### Options
-TODO write options description
+
+Getting total angle or last anchor coordinates after rotation:
+
+```jsx harmony
+rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => {
+    evt.features.forEach(feature => {
+        // get total angle in radians (positive is counter-clockwise)
+        console.log(feature.get('angle') + ' is '+ (-1 * feature.get('angle') * 180 / Math.PI ) + '°');
+        // get las anchor coordinates
+        console.log(feature.get('anchor'));
+    });
+});
+```
+
+## License
+
+MIT (c) 2016, Vladimir Vershinin

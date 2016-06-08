@@ -88,7 +88,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @version 1.0.0
 	 * @licence MIT https://opensource.org/licenses/MIT
 	 *          Based on OpenLayers 3. Copyright 2005-2015 OpenLayers Contributors. All rights reserved. http://openlayers.org
-	 * @copyright (c) 2015, Vladimir Vershinin
+	 * @copyright (c) 2016, Vladimir Vershinin
 	 */
 	exports.RotateFeatureInteraction = _rotatefeatureintraction2.default;
 	exports.RotateFeatureEvent = _rotatefeatureevent.RotateFeatureEvent;
@@ -122,20 +122,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var RotateFeatureEventType = exports.RotateFeatureEventType = {
 	  /**
-	   * Triggered upon feature draw start
+	   * Triggered upon feature rotate start.
 	   * @event RotateFeatureEvent#rotatestart
 	   */
-	  START: 'rotatefeaturestart',
+	  START: 'rotatestart',
 	  /**
-	   * Triggered upon feature draw start
+	   * Triggered upon feature rotation.
 	   * @event RotateFeatureEvent#rotating
 	   */
 	  ROTATING: 'rotating',
 	  /**
-	   * Triggered upon feature draw start
+	   * Triggered upon feature rotation end.
 	   * @event RotateFeatureEvent#rotateend
 	   */
-	  END: 'rotatefeatureend'
+	  END: 'rotateend'
 	};
 
 	/**
@@ -158,7 +158,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _classCallCheck(this, RotateFeatureEvent);
 
 	    /**
-	     * The feature being drawn.
+	     * The features being rotated.
 	     * @type {ol.Feature}
 	     */
 
@@ -307,8 +307,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @typedef {Object} RotateFeatureInteractionOptions
 	 * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
-	 * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
-	 * @property {string} angleProperty Property name of the features where to save current angle. Used for exporting total angle value. Default is  'angle'.
+	 * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction} style  Style of the overlay.
+	 * @property {string} angleProperty Property name where to save current rotation angle. Default is  'angle'.
+	 * @property {string} anchorProperty Property name where to save current rotation anchor coordinates. Default is  'anchor'.
 	 */
 
 	var ANCHOR_KEY = 'anchor';
@@ -324,6 +325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @extends ol.interaction.Interaction
 	 * @author Vladimir Vershinin
 	 *
+	 * todo добавить опцию condition - для возможности переопределения клавиш
 	 * todo возможно добавить ghost feature для отображения начального угла
 	 */
 
@@ -362,6 +364,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        _this.angleProperty_ = options.angleProperty || 'angle';
 	        /**
+	         * @type {string}
+	         * @private
+	         */
+	        _this.anchorProperty_ = options.anchorProperty || 'anchor';
+	        /**
 	         * @type {ol.layer.Vector}
 	         * @private
 	         */
@@ -376,13 +383,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @private
 	         */
 	        _this.previousCursor_ = undefined;
-	        /**
-	         * Rotated feature.
-	         *
-	         * @type {ol.Feature}
-	         * @private
-	         */
-	        _this.ghostFeature_ = undefined;
+	        //        /**
+	        //         * Rotated feature.
+	        //         *
+	        //         * @type {ol.Feature}
+	        //         * @private
+	        //         */
+	        //        this.ghostFeature_ = undefined;
 	        /**
 	         * @type {ol.Feature}
 	         * @private
@@ -403,6 +410,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	         * @private
 	         */
 	        _this.anchorMoving_ = false;
+	        /**
+	         * @type {ol.Extent}
+	         * @private
+	         */
+	        _this.featuresExtent_ = undefined;
 
 	        _this.features_.on('add', _this.handleFeatureAdd_, _this);
 	        _this.features_.on('remove', _this.handleFeatureRemove_, _this);
@@ -419,7 +431,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function setMap(map) {
 	            this.overlay_.setMap(map);
 	            _get(Object.getPrototypeOf(RotateFeatureInteraction.prototype), "setMap", this).call(this, map);
-	            this.updateInteractionFeatures_();
+
+	            if (map) {
+	                this.updateInteractionFeatures_();
+	            } else {
+	                this.reset_();
+	            }
 	        }
 
 	        /**
@@ -430,23 +447,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "updateInteractionFeatures_",
 	        value: function updateInteractionFeatures_() {
-	            var geometries = this.features_.getArray().map(function (feature) {
-	                return feature.getGeometry();
-	            });
-
-	            if (geometries.length === 0) {
+	            if (!this.features_.getLength()) {
 	                this.reset_();
 
 	                return;
 	            }
 
-	            var extent = new _openlayers2.default.geom.GeometryCollection(geometries).getExtent();
-	            var anchorCoordinate = _openlayers2.default.extent.getCenter(extent);
+	            this.featuresExtent_ = getFeaturesExtent(this.features_);
 
-	            //        this.createOrUpdateGhostFeature_(geometries);
-	            this.createOrUpdateAnchorFeature_(anchorCoordinate);
-	            this.createOrUpdateArrowFeature_(anchorCoordinate);
+	            this.createOrUpdateAnchorFeature_();
+	            this.createOrUpdateArrowFeature_();
 	        }
+
+	        /**
+	         * @private
+	         */
+
 	    }, {
 	        key: "reset_",
 	        value: function reset_() {
@@ -458,60 +474,89 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            });
 
-	            this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = undefined;
+	            this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = this.featuresExtent_ = undefined;
 	            this.anchorMoving_ = false;
 	        }
 
 	        /**
-	         * @param {ol.Coordinate} coordinate
 	         * @private
 	         */
 
 	    }, {
 	        key: "createOrUpdateAnchorFeature_",
-	        value: function createOrUpdateAnchorFeature_(coordinate) {
+	        value: function createOrUpdateAnchorFeature_() {
+	            var _this3 = this;
+
+	            var firstFeature = this.features_.item(0);
+	            var coordinate, angle;
+
+	            if (firstFeature) {
+	                angle = firstFeature.get(this.angleProperty_) || 0;
+	                coordinate = firstFeature.get(this.anchorProperty_);
+	            }
+
+	            if (!coordinate || !coordinate.length) {
+	                coordinate = _openlayers2.default.extent.getCenter(this.featuresExtent_);
+	            }
+
 	            if (this.anchorFeature_) {
 	                this.anchorFeature_.getGeometry().setCoordinates(coordinate);
 	            } else {
-	                this.anchorFeature_ = new _openlayers2.default.Feature(_defineProperty({
+	                var _ref;
+
+	                this.anchorFeature_ = new _openlayers2.default.Feature((_ref = {
 	                    geometry: new _openlayers2.default.geom.Point(coordinate)
-	                }, ANCHOR_KEY, true));
+	                }, _defineProperty(_ref, ANCHOR_KEY, true), _defineProperty(_ref, this.angleProperty_, angle), _ref));
 	                this.overlay_.getSource().addFeature(this.anchorFeature_);
+
+	                this.features_.forEach(function (feature) {
+	                    return feature.set(_this3.anchorProperty_, coordinate);
+	                });
 	            }
 	        }
 
-	        /**
-	         * @param {ol.geom.SimpleGeometry[]} geometries
-	         * @private
-	         */
-
-	    }, {
-	        key: "createOrUpdateGhostFeature_",
-	        value: function createOrUpdateGhostFeature_(geometries) {
-	            if (this.ghostFeature_) {
-	                this.ghostFeature_.getGeometry().setGeometries(geometries);
-	            } else {
-	                this.ghostFeature_ = new _openlayers2.default.Feature(_defineProperty({
-	                    geometry: new _openlayers2.default.geom.GeometryCollection(geometries)
-	                }, GHOST_KEY, true));
-	                this.overlay_.getSource().addFeature(this.ghostFeature_);
-	            }
-	        }
+	        //    /**
+	        //     * @private
+	        //     */
+	        //    createOrUpdateGhostFeature_() {
+	        //        if (this.ghostFeature_) {
+	        //            this.ghostFeature_.getGeometry().setGeometries(geometries);
+	        //        } else {
+	        //            this.ghostFeature_ = new ol.Feature({
+	        //                geometry: new ol.geom.GeometryCollection(geometries),
+	        //                [GHOST_KEY]: true
+	        //            });
+	        //            this.overlay_.addFeature(this.ghostFeature_);
+	        //        }
+	        //    }
 
 	        /**
-	         * @param {ol.Coordinate} coordinate
 	         * @private
 	         */
 
 	    }, {
 	        key: "createOrUpdateArrowFeature_",
-	        value: function createOrUpdateArrowFeature_(coordinate) {
+	        value: function createOrUpdateArrowFeature_() {
+	            var firstFeature = this.features_.item(0);
+	            var coordinate, angle;
+
+	            if (firstFeature) {
+	                angle = firstFeature.get(this.angleProperty_) || 0;
+	                coordinate = firstFeature.get(this.anchorProperty_);
+	            }
+
+	            if (!coordinate || !coordinate.length) {
+	                coordinate = _openlayers2.default.extent.getCenter(this.featuresExtent_);
+	            }
+
 	            if (this.arrowFeature_) {
 	                this.arrowFeature_.getGeometry().setCoordinates(coordinate);
 	            } else {
-	                this.arrowFeature_ = new _openlayers2.default.Feature(_defineProperty({
+	                var _ref2;
+
+	                this.arrowFeature_ = new _openlayers2.default.Feature((_ref2 = {
 	                    geometry: new _openlayers2.default.geom.Point(coordinate)
-	                }, ARROW_KEY, true));
+	                }, _defineProperty(_ref2, ARROW_KEY, true), _defineProperty(_ref2, this.angleProperty_, angle), _ref2));
 	                this.overlay_.getSource().addFeature(this.arrowFeature_);
 	            }
 	        }
@@ -524,8 +569,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: "handleFeatureAdd_",
-	        value: function handleFeatureAdd_(_ref4) {
-	            var element = _ref4.element;
+	        value: function handleFeatureAdd_(_ref3) {
+	            var element = _ref3.element;
 
 	            (0, _util.assertInstanceOf)(element, _openlayers2.default.Feature);
 
@@ -540,8 +585,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    }, {
 	        key: "handleFeatureRemove_",
-	        value: function handleFeatureRemove_(_ref5) {
-	            var element = _ref5.element;
+	        value: function handleFeatureRemove_(_ref4) {
+	            var element = _ref4.element;
 
 	            (0, _util.assertInstanceOf)(element, _openlayers2.default.Feature);
 
@@ -562,6 +607,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.default = RotateFeatureInteraction;
 	RotateFeatureInteraction.handleEvent = function (evt) {
+	    // disable selection of inner features
+	    var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+	        return feature;
+	    });
+	    if (['click', 'singleclick'].includes(evt.type) && foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)) {
+	        return false;
+	    }
+
 	    return _openlayers2.default.interaction.Pointer.handleEvent.call(this, evt);
 	};
 
@@ -630,37 +683,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @private
 	 */
 	function handleDragEvent(evt) {
-	    var _this3 = this;
+	    var _this4 = this;
 
 	    var newCoordinate = evt.coordinate;
 	    var anchorCoordinate = this.anchorFeature_.getGeometry().getCoordinates();
 
 	    var updateAngleProperty = function updateAngleProperty(feature, angle) {
-	        return feature.set(_this3.angleProperty_, (feature.get(_this3.angleProperty_) || 0) + angle);
+	        return feature.set(_this4.angleProperty_, (feature.get(_this4.angleProperty_) || 0) + angle);
 	    };
 
 	    // handle drag of features by angle
 	    if (this.lastCoordinate_) {
 	        (function () {
 	            // calculate vectors of last and current pointer positions
-	            var lastVector = [_this3.lastCoordinate_[0] - anchorCoordinate[0], _this3.lastCoordinate_[1] - anchorCoordinate[1]];
+	            var lastVector = [_this4.lastCoordinate_[0] - anchorCoordinate[0], _this4.lastCoordinate_[1] - anchorCoordinate[1]];
 	            var newVector = [newCoordinate[0] - anchorCoordinate[0], newCoordinate[1] - anchorCoordinate[1]];
 
 	            // calculate angle between last and current vectors (positive angle counter-clockwise)
 	            var angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
 
-	            _this3.features_.forEach(function (feature) {
+	            _this4.features_.forEach(function (feature) {
 	                feature.getGeometry().rotate(angle, anchorCoordinate);
 	                updateAngleProperty(feature, angle);
 	            });
 
-	            [_this3.anchorFeature_, _this3.arrowFeature_].forEach(function (feature) {
+	            [_this4.anchorFeature_, _this4.arrowFeature_].forEach(function (feature) {
 	                return updateAngleProperty(feature, angle);
 	            });
 
-	            _this3.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, _this3.features_));
+	            _this4.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, _this4.features_));
 
-	            _this3.lastCoordinate_ = evt.coordinate;
+	            _this4.lastCoordinate_ = evt.coordinate;
 	        })();
 	    }
 	    // handle drag of the anchor
@@ -670,6 +723,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.anchorFeature_.getGeometry().translate(deltaX, deltaY);
 	            this.arrowFeature_.getGeometry().translate(deltaX, deltaY);
+
+	            this.features_.forEach(function (feature) {
+	                return feature.set(_this4.anchorProperty_, newCoordinate);
+	            });
 	        }
 	}
 
@@ -783,11 +840,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            case feature.get(ARROW_KEY):
 	                style = styles[ARROW_KEY];
 
-	                var coordinate = feature.getGeometry().getCoordinates();
+	                var coordinates = feature.getGeometry().getCoordinates();
 	                // generate arrow polygon
-	                var geom = new _openlayers2.default.geom.Polygon([[[coordinate[0], coordinate[1] - 6 * resolution], [coordinate[0] + 8 * resolution, coordinate[1] - 12 * resolution], [coordinate[0], coordinate[1] + 30 * resolution], [coordinate[0] - 8 * resolution, coordinate[1] - 12 * resolution], [coordinate[0], coordinate[1] - 6 * resolution]]]);
+	                var geom = new _openlayers2.default.geom.Polygon([[[coordinates[0], coordinates[1] - 6 * resolution], [coordinates[0] + 8 * resolution, coordinates[1] - 12 * resolution], [coordinates[0], coordinates[1] + 30 * resolution], [coordinates[0] - 8 * resolution, coordinates[1] - 12 * resolution], [coordinates[0], coordinates[1] - 6 * resolution]]]);
+
 	                // and rotate it according to current angle
-	                geom.rotate(angle, coordinate);
+	                geom.rotate(angle, coordinates);
 	                style[0].setGeometry(geom);
 	                style[1].setGeometry(geom);
 	                style[0].getText().setText(Math.round(-angle * 180 / Math.PI) + '°');
@@ -795,6 +853,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return style;
 	        }
 	    };
+	}
+
+	/**
+	 * @param {ol.Collection<ol.Feature> | Array<ol.Feature>} features
+	 * @returns {ol.Extent}
+	 * @private
+	 */
+	function getFeaturesExtent(features) {
+	    return new _openlayers2.default.geom.GeometryCollection((Array.isArray(features) ? features : features.getArray()).map(function (feature) {
+	        return feature.getGeometry();
+	    })).getExtent();
 	}
 
 /***/ },
