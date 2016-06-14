@@ -6,7 +6,7 @@
  * @author Vladimir Vershinin <ghettovoice@gmail.com>
  * @version 1.0.0
  * @licence MIT https://opensource.org/licenses/MIT
- *          Based on OpenLayers 3. Copyright 2005-2015 OpenLayers Contributors. All rights reserved. http://openlayers.org
+ *          Based on OpenLayers 3. Copyright 2005-2016 OpenLayers Contributors. All rights reserved. http://openlayers.org
  * @copyright (c) 2016, Vladimir Vershinin <ghettovoice@gmail.com>
  */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -422,12 +422,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    /**
-	     * @param {ol.Map} map
+	     * @param {ol.MapBrowserEvent} evt Map browser event.
+	     * @return {boolean} `false` to stop event propagation.
+	     * @this {RotateFeatureInteraction}
+	     * @public
 	     */
 
 
 	    _createClass(RotateFeatureInteraction, [{
 	        key: "setMap",
+
+
+	        /**
+	         * @param {ol.Map} map
+	         */
 	        value: function setMap(map) {
 	            this.overlay_.setMap(map);
 	            _get(Object.getPrototypeOf(RotateFeatureInteraction.prototype), "setMap", this).call(this, map);
@@ -592,31 +600,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.updateInteractionFeatures_();
 	        }
+	    }], [{
+	        key: "handleEvent",
+	        value: function handleEvent(evt) {
+	            // disable selection of inner features
+	            var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+	                return feature;
+	            });
+	            if (['click', 'singleclick'].includes(evt.type) && foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)) {
+	                return false;
+	            }
+
+	            return _openlayers2.default.interaction.Pointer.handleEvent.call(this, evt);
+	        }
 	    }]);
 
 	    return RotateFeatureInteraction;
 	}(_openlayers2.default.interaction.Pointer);
-
-	/**
-	 * @param {ol.MapBrowserEvent} evt Map browser event.
-	 * @return {boolean} `false` to stop event propagation.
-	 * @this {RotateFeatureInteraction}
-	 * @public
-	 */
-
-
-	exports.default = RotateFeatureInteraction;
-	RotateFeatureInteraction.handleEvent = function (evt) {
-	    // disable selection of inner features
-	    var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, function (feature) {
-	        return feature;
-	    });
-	    if (['click', 'singleclick'].includes(evt.type) && foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)) {
-	        return false;
-	    }
-
-	    return _openlayers2.default.interaction.Pointer.handleEvent.call(this, evt);
-	};
 
 	/**
 	 * @param {ol.MapBrowserEvent} evt Event.
@@ -624,6 +624,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @this {RotateFeatureInteraction}
 	 * @private
 	 */
+
+
+	exports.default = RotateFeatureInteraction;
 	function handleDownEvent(evt) {
 	    var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, function (feature) {
 	        return feature;

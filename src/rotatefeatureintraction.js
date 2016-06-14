@@ -111,6 +111,25 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     }
 
     /**
+     * @param {ol.MapBrowserEvent} evt Map browser event.
+     * @return {boolean} `false` to stop event propagation.
+     * @this {RotateFeatureInteraction}
+     * @public
+     */
+    static handleEvent(evt : ol.MapBrowserEvent) : boolean {
+        // disable selection of inner features
+        const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
+        if (
+            ['click', 'singleclick'].includes(evt.type) &&
+            foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)
+        ) {
+            return false;
+        }
+
+        return ol.interaction.Pointer.handleEvent.call(this, evt);
+    }
+
+    /**
      * @param {ol.Map} map
      */
     setMap(map) {
@@ -251,25 +270,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
         this.updateInteractionFeatures_();
     }
 }
-
-/**
- * @param {ol.MapBrowserEvent} evt Map browser event.
- * @return {boolean} `false` to stop event propagation.
- * @this {RotateFeatureInteraction}
- * @public
- */
-RotateFeatureInteraction.handleEvent = function (evt : ol.MapBrowserEvent) : boolean {
-    // disable selection of inner features
-    const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
-    if (
-        ['click', 'singleclick'].includes(evt.type) &&
-        foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)
-    ) {
-        return false;
-    }
-
-    return ol.interaction.Pointer.handleEvent.call(this, evt);
-};
 
 /**
  * @param {ol.MapBrowserEvent} evt Event.
