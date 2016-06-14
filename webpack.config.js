@@ -2,7 +2,6 @@ const webpack = require('webpack');
 const path = require('path');
 const glob = require('glob');
 const _ = require('lodash');
-const AssetsPlugin = require('assets-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const chalk = require('chalk');
 const packageJson = require('./package.json');
