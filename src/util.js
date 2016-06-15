@@ -43,7 +43,7 @@ export function identity(arg) {
  * @param {*} value
  * @returns string
  */
-export function getValueType(value):string {
+export function getValueType(value) : string {
     if (value instanceof Function) {
         return value.name || 'unknown type name';
     } else if (value instanceof Object) {

@@ -1,15 +1,16 @@
 // @flow
 import ol from "openlayers";
 import { assertInstanceOf } from "./util";
-import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent";
+import { RotateFeatureEvent, RotateFeatureEventType } from "./event";
 
 /**
- * @typedef {Object} RotateFeatureInteractionOptions
+ * @typedef {Object} InteractionOptions
  * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
  * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction} style  Style of the overlay.
  * @property {string} angleProperty Property name where to save current rotation angle. Default is  'angle'.
  * @property {string} anchorProperty Property name where to save current rotation anchor coordinates. Default is  'anchor'.
  */
+var InteractionOptions;
 
 const ANCHOR_KEY = 'anchor';
 const ARROW_KEY = 'arrow';
@@ -29,9 +30,9 @@ const GHOST_KEY = 'ghost';
  */
 export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     /**
-     * @param {RotateFeatureInteractionOptions} options
+     * @param {InteractionOptions} options
      */
-    constructor(options : RotateFeatureInteractionOptions = {}) {
+    constructor(options : InteractionOptions = {}) {
         super({
             handleEvent: RotateFeatureInteraction.handleEvent,
             handleDownEvent: handleDownEvent,

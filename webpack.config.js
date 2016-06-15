@@ -20,7 +20,7 @@ const nodeModulesDir = path.join(__dirname, 'node_modules');
 const srcDir = path.join(__dirname, 'src');
 const outDir = path.join(__dirname, 'dist');
 const bundleName = RELEASE ? 'bundle.min.js' : 'bundle.js';
-const exportName = _.camelCase(packageJson.name);
+const exportName = ['ol', 'interaction', 'RotateFeature'];
 const entry = path.join(srcDir, 'index.js');
 
 const banner =
@@ -38,7 +38,7 @@ const plugins = [
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.DefinePlugin(GLOBALS),
     new ProgressBarPlugin({
-        format: ' build ' + chalk.magenta.bold('[ol3-rotate-interaction]') + ' ' + chalk.cyan.bold('[:bar]') + ' ' + chalk.green.bold(':percent') + ' (:elapsed seconds)'
+        format: ' build ' + chalk.magenta.bold('[ol3-rotate-feature]') + ' ' + chalk.cyan.bold('[:bar]') + ' ' + chalk.green.bold(':percent') + ' (:elapsed seconds)'
     })
 ];
 

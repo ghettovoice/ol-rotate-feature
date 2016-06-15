@@ -1,24 +1,37 @@
-/**
- * Polyfill of OpenLayers 3 new Event system.
- * Use it for old versions.
- */
 // @flow
 /**
- * Stripped down implementation of the W3C DOM Level 2 Event interface.
- * @see {@link https://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface}
- *
- * This implementation only provides `type` and `target` properties, and
- * `stopPropagation` and `preventDefault` methods. It is meant as base class
- * for higher level events defined in the library, and works with
- * {@link ol.events.EventTarget}.
- *
- * @constructor
- * @implements {oli.events.Event}
- * @param {string} type Type.
- * @param {Object=} opt_target Target.
+ * @enum {string}
  */
-class olEvent {
-    constructor(type, opt_target) {
+export const RotateFeatureEventType = {
+    /**
+     * Triggered upon feature rotate start.
+     * @event RotateFeatureEvent#rotatestart
+     */
+    START: 'rotatestart',
+    /**
+     * Triggered upon feature rotation.
+     * @event RotateFeatureEvent#rotating
+     */
+    ROTATING: 'rotating',
+    /**
+     * Triggered upon feature rotation end.
+     * @event RotateFeatureEvent#rotateend
+     */
+    END: 'rotateend'
+};
+
+/**
+ * Events emitted by RotateFeatureInteraction instances are instances of this type.
+ *
+ * @class
+ * @author Vladimir Vershinin
+ */
+export class RotateFeatureEvent {
+    /**
+     * @param {RotateFeatureEventType} type Type.
+     * @param {ol.Collection<ol.Feature>} features Rotated features.
+     */
+    constructor(type, features) {
         /**
          * @type {boolean}
          */
@@ -26,15 +39,15 @@ class olEvent {
 
         /**
          * The event type.
-         * @type {string}
+         * @type {RotateFeatureEventType}
          */
         this.type = type;
 
         /**
-         * The event target.
-         * @type {Object}
+         * The features being rotated.
+         * @type {ol.Collection<ol.Feature>}
          */
-        this.target = opt_target || null;
+        this.features = features;
     }
 
     /**
@@ -53,20 +66,3 @@ class olEvent {
         this.propagationStopped = true;
     }
 }
-
-/**
- * @param {Event|ol.events.Event} evt Event
- */
-olEvent.stopPropagation = function (evt) {
-    evt.stopPropagation();
-};
-
-
-/**
- * @param {Event|ol.events.Event} evt Event
- */
-olEvent.preventDefault = function (evt) {
-    evt.preventDefault();
-};
-
-export default olEvent;

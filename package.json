@@ -1,6 +1,6 @@
 {
   "name": "ol3-rotate-feature",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "OpenLayers 3 interaction that allows to rotate vector features",
   "main": "dist/bundle.js",
   "scripts": {
@@ -16,8 +16,18 @@
   ],
   "author": "Vladimir Vershinin <ghettovoice@gmail.com>",
   "license": "MIT",
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ghettovoice/ol3-rotate-feature.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ghettovoice/ol3-rotate-feature/issues"
+  },
+  "homepage": "http://ghettovoice.github.io/ol3-rotate-feature/",
   "devDependencies": {
     "babel-loader": "^6.2.4",
+    "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-flow-strip-types": "^6.8.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-stage-0": "^6.5.0",
@@ -35,16 +45,8 @@
       "stage-0"
     ],
     "plugins": [
-      "transform-flow-strip-types"
+      "transform-flow-strip-types",
+      "add-module-exports"
     ]
-  },
-  "dependencies": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ghettovoice/ol3-rotate-feature.git"
-  },
-  "bugs": {
-    "url": "https://github.com/ghettovoice/ol3-rotate-feature/issues"
-  },
-  "homepage": "http://ghettovoice.github.io/ol3-rotate-feature/"
+  }
 }

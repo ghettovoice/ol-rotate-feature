@@ -18,33 +18,29 @@ Or download the latest version archive and add it with script tag:
 
 ## Usage
 
-Plugin is packed into UMD wrapper and exports an object
-`ol3RotateFeature` with three properties:
-
+Plugin is packed into UMD wrapper, import it with CommonJS or ES6:
+                                 
 ```js
-export {
-    RotateFeatureInteraction,
-    RotateFeatureEvent,
-    RotateFeatureEventType
-};
+import RotateFeature from 'ol3-rotate-feature';
+const RotateFeature = require('ol3-rotate-feature');
 ```
 
-In Browser environment it exports to `ol3RotateFeature` global variable.
+In Browser environment it is available as `ol.control.RotateFeature`.
 
 ### Options
 
-| Option         | Type                                                                | Description                                                                            |
-|:---------------|:--------------------------------------------------------------------|:---------------------------------------------------------------------------------------|
-| features       | _ol.Collection<ol.Feature>_                                         | The features the interaction works on. Required.                                       |
-| style          | _ol.style.Style \| Array<ol.style.Style> \| ol.style.StyleFunction_ | Style of the overlay with interaction helper features.                                 |
-| angleProperty  | _string_                                                            | Property name where to save current rotation angle. Default is  'angle'.               |
-| anchorProperty | _string_                                                            | Property name where to save current rotation anchor coordinates. Default is  'anchor'. |
+| Option         | Type                                                                        | Description                                                                            |
+|:---------------|:----------------------------------------------------------------------------|:---------------------------------------------------------------------------------------|
+| features       | _ol.Collection<ol.Feature>_                                                 | The features the interaction works on. Required.                                       |
+| style          | _ol.style.Style &#124; Array<ol.style.Style> &#124; ol.style.StyleFunction_ | Style of the overlay with interaction helper features.                                 |
+| angleProperty  | _string_                                                                    | Property name where to save current rotation angle. Default is  'angle'.               |
+| anchorProperty | _string_                                                                    | Property name where to save current rotation anchor coordinates. Default is  'anchor'. |
 
 ### Events
 
 All events triggered by the interaction are instances of `RotateFeatureEvent`.
 
-##### Memebers
+##### Members
 
 - **features**    _ol.Collection_     The features being rotated.
 
@@ -54,7 +50,7 @@ All events triggered by the interaction are instances of `RotateFeatureEvent`.
 | rotating    | _RotateFeatureEvent_ | Triggered upon feature rotating.     |
 | rotateend   | _RotateFeatureEvent_ | Triggered upon feature rotation end. |
 
-#### Example usage:
+### Example usage:
 
 ```js
 import ol from 'openlayers';
@@ -66,19 +62,11 @@ const point = new ol.Feature({
 });
 const line = new ol.Feature({
     name: 'line',
-    geometry: new ol.geom.LineString([
-        [-603697.2100018249, -239432.60826165066], 
-        [4190433.20404443, 2930563.8287811787]
-    ])
+    geometry: new ol.geom.LineString([[-603697.2100018249, -239432.60826165066], [4190433.20404443, 2930563.8287811787]])
 });
 const polygon = new ol.Feature({
     name: 'polygon',
-    geometry: new ol.geom.Polygon([[
-        [-14482348.171434438, 6661491.741627443], 
-        [-9541458.663080638, 6221214.458704827], 
-        [-11473786.738129886, 3300708.4819848104], 
-        [-14482348.171434438, 6661491.741627443]
-    ]])
+    geometry: new ol.geom.Polygon([[[-14482348.171434438, 6661491.741627443], [-9541458.663080638, 6221214.458704827], [-11473786.738129886, 3300708.4819848104], [-14482348.171434438, 6661491.741627443]]])
 });
 
 const map = new ol.Map({
@@ -103,13 +91,13 @@ const map = new ol.Map({
 
 const features = new ol.Collection();
 const select = new ol.interaction.Select();
-const rotate = new ol3RotateFeature.RotateFeatureInteraction({
+const rotate = new ol.interaction.RotateFeature({
     features: select.getFeatures()
 });
 
-rotate.on(ol3RotateFeature.RotateFeatureEventType.START, evt => console.log('rotate start', evt));
-rotate.on(ol3RotateFeature.RotateFeatureEventType.ROTATING, evt => console.log('rotating', evt));
-rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => console.log('rotate end', evt));
+rotate.on('rotatestart', evt => console.log('rotate start', evt));
+rotate.on('rotating', evt => console.log('rotating', evt));
+rotate.on('rotateend', evt => console.log('rotate end', evt));
 
 map.addInteraction(select);
 map.addInteraction(rotate);
@@ -120,7 +108,7 @@ Example of usage in Browser environment in `index.html`.
 Getting total angle or last anchor coordinates after rotation:
 
 ```js
-rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => {
+rotate.on('rotateend', evt => {
     evt.features.forEach(feature => {
         // get total angle in radians (positive is counter-clockwise)
         console.log(feature.get('angle') + ' is '+ (-1 * feature.get('angle') * 180 / Math.PI ) + '°');
