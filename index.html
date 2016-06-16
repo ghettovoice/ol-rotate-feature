@@ -55,13 +55,13 @@
 
         const features = new ol.Collection();
         const select = new ol.interaction.Select();
-        const rotate = new ol3RotateFeature.RotateFeatureInteraction({
+        const rotate = new ol.interaction.RotateFeature({
             features: select.getFeatures()
         });
 
-        rotate.on(ol3RotateFeature.RotateFeatureEventType.START, evt => console.log('rotate start', evt));
-        rotate.on(ol3RotateFeature.RotateFeatureEventType.ROTATING, evt => console.log('rotating', evt));
-        rotate.on(ol3RotateFeature.RotateFeatureEventType.END, evt => console.log('rotate end', evt));
+        rotate.on('rotatestart', evt => console.log('rotate start', evt));
+        rotate.on('rotating', evt => console.log('rotating', evt));
+        rotate.on('rotateend', evt => console.log('rotate end', evt));
 
         map.addInteraction(select);
         map.addInteraction(rotate);

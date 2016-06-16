@@ -2,7 +2,6 @@ const webpack = require('webpack');
 const path = require('path');
 const glob = require('glob');
 const _ = require('lodash');
-const AssetsPlugin = require('assets-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const chalk = require('chalk');
 const packageJson = require('./package.json');
@@ -21,7 +20,7 @@ const nodeModulesDir = path.join(__dirname, 'node_modules');
 const srcDir = path.join(__dirname, 'src');
 const outDir = path.join(__dirname, 'dist');
 const bundleName = RELEASE ? 'bundle.min.js' : 'bundle.js';
-const exportName = _.camelCase(packageJson.name);
+const exportName = ['ol', 'interaction', 'RotateFeature'];
 const entry = path.join(srcDir, 'index.js');
 
 const banner =
@@ -32,14 +31,14 @@ Allows vector feature rotation.
 @author ${packageJson.author}
 @version ${packageJson.version}
 @licence MIT https://opensource.org/licenses/MIT
-         Based on OpenLayers 3. Copyright 2005-2015 OpenLayers Contributors. All rights reserved. http://openlayers.org
+         Based on OpenLayers 3. Copyright 2005-2016 OpenLayers Contributors. All rights reserved. http://openlayers.org
 @copyright (c) 2016, ${packageJson.author}`;
 
 const plugins = [
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.DefinePlugin(GLOBALS),
     new ProgressBarPlugin({
-        format: ' build ' + chalk.magenta.bold('[ol3-rotate-interaction]') + ' ' + chalk.cyan.bold('[:bar]') + ' ' + chalk.green.bold(':percent') + ' (:elapsed seconds)'
+        format: ' build ' + chalk.magenta.bold('[ol3-rotate-feature]') + ' ' + chalk.cyan.bold('[:bar]') + ' ' + chalk.green.bold(':percent') + ' (:elapsed seconds)'
     })
 ];
 

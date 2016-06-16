@@ -1,16 +1,17 @@
 // @flow
 import ol from "openlayers";
 import { assertInstanceOf } from "./util";
-import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent";
+import { RotateFeatureEvent, RotateFeatureEventType } from "./event";
 import rotateGeometry from "./rotate";
 
 /**
- * @typedef {Object} RotateFeatureInteractionOptions
+ * @typedef {Object} InteractionOptions
  * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
  * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
  * @property {string} angleProperty Property name where to save current rotation angle. Default is  'angle'.
  * @property {string} anchorProperty Property name where to save current rotation anchor coordinates. Default is  'anchor'.
  */
+var InteractionOptions;
 
 const ANCHOR_KEY = 'anchor';
 const ARROW_KEY = 'arrow';
@@ -30,9 +31,9 @@ const GHOST_KEY = 'ghost';
  */
 export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     /**
-     * @param {RotateFeatureInteractionOptions} options
+     * @param {InteractionOptions} options
      */
-    constructor(options : RotateFeatureInteractionOptions = {}) {
+    constructor(options : InteractionOptions = {}) {
         super({
             handleEvent: RotateFeatureInteraction.handleEvent,
             handleDownEvent: handleDownEvent,
@@ -109,12 +110,36 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     }
 
     /**
+     * @param {ol.MapBrowserEvent} evt Map browser event.
+     * @return {boolean} `false` to stop event propagation.
+     * @this {RotateFeatureInteraction}
+     * @public
+     */
+    static handleEvent(evt : ol.MapBrowserEvent) : boolean {
+        // disable selection of inner features
+        const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
+        if (
+            ['click', 'singleclick'].includes(evt.type) &&
+            foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)
+        ) {
+            return false;
+        }
+
+        return ol.interaction.Pointer.handleEvent.call(this, evt);
+    }
+
+    /**
      * @param {ol.Map} map
      */
     setMap(map) {
         this.overlay_.setMap(map);
         super.setMap(map);
-        this.updateInteractionFeatures_();
+
+        if (map) {
+            this.updateInteractionFeatures_();
+        } else {
+            this.reset_();
+        }
     }
 
     /**

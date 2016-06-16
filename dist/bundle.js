@@ -6,7 +6,7 @@
  * @author Vladimir Vershinin <ghettovoice@gmail.com>
  * @version 1.0.0
  * @licence MIT https://opensource.org/licenses/MIT
- *          Based on OpenLayers 3. Copyright 2005-2015 OpenLayers Contributors. All rights reserved. http://openlayers.org
+ *          Based on OpenLayers 3. Copyright 2005-2016 OpenLayers Contributors. All rights reserved. http://openlayers.org
  * @copyright (c) 2016, Vladimir Vershinin <ghettovoice@gmail.com>
  */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -15,10 +15,10 @@
 	else if(typeof define === 'function' && define.amd)
 		define(["ol"], factory);
 	else if(typeof exports === 'object')
-		exports["ol3RotateFeature"] = factory(require("ol"));
+		exports["RotateFeature"] = factory(require("ol"));
 	else
-		root["ol3RotateFeature"] = factory(root["ol"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_4__) {
+		root["ol"] = root["ol"] || {}, root["ol"]["interaction"] = root["ol"]["interaction"] || {}, root["ol"]["interaction"]["RotateFeature"] = factory(root["ol"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_3__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -70,13 +70,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.rotateGeometry = exports.RotateFeatureEventType = exports.RotateFeatureEvent = exports.RotateFeatureInteraction = undefined;
 
-	var _rotatefeatureintraction = __webpack_require__(7);
+	var _intraction = __webpack_require__(6);
 
-	var _rotatefeatureintraction2 = _interopRequireDefault(_rotatefeatureintraction);
-
-	var _rotatefeatureevent = __webpack_require__(2);
+	var _intraction2 = _interopRequireDefault(_intraction);
 
 	var _rotate = __webpack_require__(1);
 
@@ -84,19 +81,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	exports.RotateFeatureInteraction = _rotatefeatureintraction2.default;
-	exports.RotateFeatureEvent = _rotatefeatureevent.RotateFeatureEvent;
-	exports.RotateFeatureEventType = _rotatefeatureevent.RotateFeatureEventType;
-	exports.rotateGeometry = _rotate2.default; /**
-	                                            * OpenLayers 3 rotate interaction.
-	                                            * Allows vector feature rotation.
-	                                            *
-	                                            * @author Vladimir Vershinin <ghettovoice@gmail.com>
-	                                            * @version 1.0.0
-	                                            * @licence MIT https://opensource.org/licenses/MIT
-	                                            *          Based on OpenLayers 3. Copyright 2005-2015 OpenLayers Contributors. All rights reserved. http://openlayers.org
-	                                            * @copyright (c) 2015, Vladimir Vershinin
-	                                            */
+	/**
+	 * OpenLayers 3 rotate interaction.
+	 * Allows vector feature rotation.
+	 *
+	 * @author Vladimir Vershinin <ghettovoice@gmail.com>
+	 * @licence MIT https://opensource.org/licenses/MIT
+	 *          Based on OpenLayers 3. Copyright 2005-2015 OpenLayers Contributors. All rights reserved. http://openlayers.org
+	 * @copyright (c) 2016, Vladimir Vershinin
+	 */
+
+
+	_intraction2.default.rotateGeometry = _rotate2.default;
+	exports.default = _intraction2.default;
+	module.exports = exports["default"];
 
 /***/ },
 /* 1 */
@@ -110,11 +108,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.rotate = rotate;
 	exports.default = rotateGeometry;
 
-	var _openlayers = __webpack_require__(4);
+	var _openlayers = __webpack_require__(3);
 
 	var _openlayers2 = _interopRequireDefault(_openlayers);
 
-	var _geometry = __webpack_require__(6);
+	var _geometry = __webpack_require__(5);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -187,83 +185,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	exports.RotateFeatureEvent = exports.RotateFeatureEventType = undefined;
-
-	var _event = __webpack_require__(5);
-
-	var _event2 = _interopRequireDefault(_event);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	/**
-	 * @enum {string}
-	 */
-	var RotateFeatureEventType = exports.RotateFeatureEventType = {
-	  /**
-	   * Triggered upon feature draw start
-	   * @event RotateFeatureEvent#rotatestart
-	   */
-	  START: 'rotatestart',
-	  /**
-	   * Triggered upon feature draw start
-	   * @event RotateFeatureEvent#rotating
-	   */
-	  ROTATING: 'rotating',
-	  /**
-	   * Triggered upon feature draw start
-	   * @event RotateFeatureEvent#rotateend
-	   */
-	  END: 'rotateend'
-	};
-
-	/**
-	 * Events emitted by RotateFeatureInteraction instances are instances of this type.
-	 *
-	 * @class
-	 * @extends {olEvent|ol.events.Event}
-	 * @author Vladimir Vershinin
-	 */
-
-	var RotateFeatureEvent = exports.RotateFeatureEvent = function (_olEvent) {
-	  _inherits(RotateFeatureEvent, _olEvent);
-
-	  /**
-	   * @param {RotateFeatureEventType} type Type.
-	   * @param {ol.Collection<ol.Feature>} features Rotated features.
-	   */
-
-	  function RotateFeatureEvent(type, features) {
-	    _classCallCheck(this, RotateFeatureEvent);
-
-	    /**
-	     * The feature being drawn.
-	     * @type {ol.Feature}
-	     */
-
-	    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RotateFeatureEvent).call(this, type));
-
-	    _this.features = features;
-	    return _this;
-	  }
-
-	  return RotateFeatureEvent;
-	}(_event2.default);
-
-/***/ },
-/* 3 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -337,16 +258,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ },
 /* 4 */
 /***/ function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
@@ -357,28 +278,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	/**
-	 * Polyfill of OpenLayers 3 new Event system.
-	 * Use it for old versions.
+	 * @enum {string}
 	 */
+	var RotateFeatureEventType = exports.RotateFeatureEventType = {
+	  /**
+	   * Triggered upon feature rotate start.
+	   * @event RotateFeatureEvent#rotatestart
+	   */
+	  START: 'rotatestart',
+	  /**
+	   * Triggered upon feature rotation.
+	   * @event RotateFeatureEvent#rotating
+	   */
+	  ROTATING: 'rotating',
+	  /**
+	   * Triggered upon feature rotation end.
+	   * @event RotateFeatureEvent#rotateend
+	   */
+	  END: 'rotateend'
+	};
 
 	/**
-	 * Stripped down implementation of the W3C DOM Level 2 Event interface.
-	 * @see {@link https://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface}
+	 * Events emitted by RotateFeatureInteraction instances are instances of this type.
 	 *
-	 * This implementation only provides `type` and `target` properties, and
-	 * `stopPropagation` and `preventDefault` methods. It is meant as base class
-	 * for higher level events defined in the library, and works with
-	 * {@link ol.events.EventTarget}.
-	 *
-	 * @constructor
-	 * @implements {oli.events.Event}
-	 * @param {string} type Type.
-	 * @param {Object=} opt_target Target.
+	 * @class
+	 * @author Vladimir Vershinin
 	 */
 
-	var olEvent = function () {
-	  function olEvent(type, opt_target) {
-	    _classCallCheck(this, olEvent);
+	var RotateFeatureEvent = exports.RotateFeatureEvent = function () {
+	  /**
+	   * @param {RotateFeatureEventType} type Type.
+	   * @param {ol.Collection<ol.Feature>} features Rotated features.
+	   */
+
+	  function RotateFeatureEvent(type, features) {
+	    _classCallCheck(this, RotateFeatureEvent);
 
 	    /**
 	     * @type {boolean}
@@ -387,15 +321,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    /**
 	     * The event type.
-	     * @type {string}
+	     * @type {RotateFeatureEventType}
 	     */
 	    this.type = type;
 
 	    /**
-	     * The event target.
-	     * @type {Object}
+	     * The features being rotated.
+	     * @type {ol.Collection<ol.Feature>}
 	     */
-	    this.target = opt_target || null;
+	    this.features = features;
 	  }
 
 	  /**
@@ -404,8 +338,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   */
 
 
-	  _createClass(olEvent, [{
-	    key: "preventDefault",
+	  _createClass(RotateFeatureEvent, [{
+	    key: 'preventDefault',
 	    value: function preventDefault() {
 	      this.propagationStopped = true;
 	    }
@@ -416,35 +350,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 
 	  }, {
-	    key: "stopPropagation",
+	    key: 'stopPropagation',
 	    value: function stopPropagation() {
 	      this.propagationStopped = true;
 	    }
 	  }]);
 
-	  return olEvent;
+	  return RotateFeatureEvent;
 	}();
 
-	/**
-	 * @param {Event|ol.events.Event} evt Event
-	 */
-
-
-	olEvent.stopPropagation = function (evt) {
-	  evt.stopPropagation();
-	};
-
-	/**
-	 * @param {Event|ol.events.Event} evt Event
-	 */
-	olEvent.preventDefault = function (evt) {
-	  evt.preventDefault();
-	};
-
-	exports.default = olEvent;
-
 /***/ },
-/* 6 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -464,7 +380,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.deflateGeometryCoordinates = deflateGeometryCoordinates;
 	exports.setGeometryCoordinatesFromFlatCoordinates = setGeometryCoordinatesFromFlatCoordinates;
 
-	var _util = __webpack_require__(3);
+	var _util = __webpack_require__(2);
 
 	/**
 	 * @enum {string}
@@ -714,7 +630,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 7 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -727,13 +643,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-	var _openlayers = __webpack_require__(4);
+	var _openlayers = __webpack_require__(3);
 
 	var _openlayers2 = _interopRequireDefault(_openlayers);
 
-	var _util = __webpack_require__(3);
+	var _util = __webpack_require__(2);
 
-	var _rotatefeatureevent = __webpack_require__(2);
+	var _event = __webpack_require__(4);
 
 	var _rotate = __webpack_require__(1);
 
@@ -750,12 +666,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	/**
-	 * @typedef {Object} RotateFeatureInteractionOptions
+	 * @typedef {Object} InteractionOptions
 	 * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
 	 * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
 	 * @property {string} angleProperty Property name where to save current rotation angle. Default is  'angle'.
 	 * @property {string} anchorProperty Property name where to save current rotation anchor coordinates. Default is  'anchor'.
 	 */
+	var InteractionOptions;
 
 	var ANCHOR_KEY = 'anchor';
 	var ARROW_KEY = 'arrow';
@@ -778,7 +695,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _inherits(RotateFeatureInteraction, _ol$interaction$Point);
 
 	    /**
-	     * @param {RotateFeatureInteractionOptions} options
+	     * @param {InteractionOptions} options
 	     */
 
 	    function RotateFeatureInteraction() {
@@ -864,16 +781,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    /**
-	     * @param {ol.Map} map
+	     * @param {ol.MapBrowserEvent} evt Map browser event.
+	     * @return {boolean} `false` to stop event propagation.
+	     * @this {RotateFeatureInteraction}
+	     * @public
 	     */
 
 
 	    _createClass(RotateFeatureInteraction, [{
 	        key: "setMap",
+
+
+	        /**
+	         * @param {ol.Map} map
+	         */
 	        value: function setMap(map) {
 	            this.overlay_.setMap(map);
 	            _get(Object.getPrototypeOf(RotateFeatureInteraction.prototype), "setMap", this).call(this, map);
-	            this.updateInteractionFeatures_();
+
+	            if (map) {
+	                this.updateInteractionFeatures_();
+	            } else {
+	                this.reset_();
+	            }
 	        }
 
 	        /**
@@ -1029,6 +959,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.updateInteractionFeatures_();
 	        }
+	    }], [{
+	        key: "handleEvent",
+	        value: function handleEvent(evt) {
+	            // disable selection of inner features
+	            var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+	                return feature;
+	            });
+	            if (['click', 'singleclick'].includes(evt.type) && foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)) {
+	                return false;
+	            }
+
+	            return _openlayers2.default.interaction.Pointer.handleEvent.call(this, evt);
+	        }
 	    }]);
 
 	    return RotateFeatureInteraction;
@@ -1071,7 +1014,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.lastCoordinate_ = evt.coordinate;
 
 	        handleMoveEvent.call(this, evt);
-	        this.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.START, this.features_));
+	        this.dispatchEvent(new _event.RotateFeatureEvent(_event.RotateFeatureEventType.START, this.features_));
 
 	        return true;
 	    }
@@ -1098,7 +1041,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.lastCoordinate_ = undefined;
 
 	        handleMoveEvent.call(this, evt);
-	        this.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.END, this.features_));
+	        this.dispatchEvent(new _event.RotateFeatureEvent(_event.RotateFeatureEventType.END, this.features_));
 
 	        return true;
 	    }
@@ -1148,7 +1091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return updateAngleProperty(feature, angle);
 	            });
 
-	            _this4.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, _this4.features_));
+	            _this4.dispatchEvent(new _event.RotateFeatureEvent(_event.RotateFeatureEventType.ROTATING, _this4.features_));
 
 	            _this4.lastCoordinate_ = evt.coordinate;
 	        })();
@@ -1302,6 +1245,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return feature.getGeometry();
 	    })).getExtent();
 	}
+	module.exports = exports["default"];
 
 /***/ }
 /******/ ])
