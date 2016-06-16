@@ -25,7 +25,7 @@ import RotateFeature from 'ol3-rotate-feature';
 const RotateFeature = require('ol3-rotate-feature');
 ```
 
-In Browser environment it is available as `ol.control.RotateFeature`.
+In Browser environment it is available as `ol.interaction.RotateFeature`.
 
 ### Options
 
