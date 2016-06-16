@@ -1,6 +1,6 @@
 {
   "name": "ol3-rotate-feature",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "OpenLayers 3 interaction that allows to rotate vector features",
   "main": "dist/bundle.js",
   "scripts": {
