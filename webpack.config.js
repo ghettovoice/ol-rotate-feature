@@ -91,9 +91,16 @@ module.exports = {
     profile: PROFILE,
     debug: DEBUG,
     entry: entry,
-    externals: {
-        openlayers: 'ol'
-    },
+    externals: [
+        {
+            openlayers: {
+                root: 'ol',
+                amd: 'openlayers',
+                commonjs: 'openlayers',
+                commonjs2: 'openlayers'
+            }
+        }
+    ],
     output: {
         path: outDir,
         filename: bundleName,

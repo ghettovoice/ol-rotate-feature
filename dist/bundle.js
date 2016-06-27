@@ -4,18 +4,18 @@
  * 
  * @package ol3-rotate-feature
  * @author Vladimir Vershinin <ghettovoice@gmail.com>
- * @version 1.1.1
+ * @version 1.1.2
  * @licence MIT https://opensource.org/licenses/MIT
  *          Based on OpenLayers 3. Copyright 2005-2016 OpenLayers Contributors. All rights reserved. http://openlayers.org
  * @copyright (c) 2016, Vladimir Vershinin <ghettovoice@gmail.com>
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("ol"));
+		module.exports = factory(require("openlayers"));
 	else if(typeof define === 'function' && define.amd)
-		define(["ol"], factory);
+		define(["openlayers"], factory);
 	else if(typeof exports === 'object')
-		exports["RotateFeature"] = factory(require("ol"));
+		exports["RotateFeature"] = factory(require("openlayers"));
 	else
 		root["ol"] = root["ol"] || {}, root["ol"]["interaction"] = root["ol"]["interaction"] || {}, root["ol"]["interaction"]["RotateFeature"] = factory(root["ol"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_4__) {
