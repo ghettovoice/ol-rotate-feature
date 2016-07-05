@@ -16,7 +16,6 @@
   ],
   "author": "Vladimir Vershinin <ghettovoice@gmail.com>",
   "license": "MIT",
-  "dependencies": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ghettovoice/ol3-rotate-feature.git"
@@ -25,6 +24,10 @@
     "url": "https://github.com/ghettovoice/ol3-rotate-feature/issues"
   },
   "homepage": "http://ghettovoice.github.io/ol3-rotate-feature/",
+  "dependencies": {},
+  "peerDependencies": {
+    "openlayers": ">= 3.14"
+  },
   "devDependencies": {
     "babel-loader": "^6.2.4",
     "babel-plugin-add-module-exports": "^0.2.1",
@@ -34,7 +37,7 @@
     "chalk": "^1.1.3",
     "glob": "^7.0.3",
     "lodash": "^4.13.1",
-    "openlayers": "^3.16.0",
+    "openlayers": "^3.17.1",
     "progress-bar-webpack-plugin": "^1.8.0",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1"
