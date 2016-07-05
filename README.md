@@ -32,7 +32,7 @@ In Browser environment it is available as `ol.interaction.RotateFeature`.
 | Option         | Type                                                                        | Description                                                                            |
 |:---------------|:----------------------------------------------------------------------------|:---------------------------------------------------------------------------------------|
 | features       | _ol.Collection<ol.Feature>_                                                 | The features the interaction works on. Required.                                       |
-| style          | _ol.style.Style &#124; Array<ol.style.Style> &#124; ol.style.StyleFunction_ | Style of the overlay with interaction helper features.                                 |
+| style          | _ol.style.Style &#124; Array&lt;ol.style.Style&gt; &#124; ol.style.StyleFunction_ | Style of the overlay with interaction helper features.                                 |
 | angleProperty  | _string_                                                                    | Property name where to save current rotation angle. Default is  'angle'.               |
 | anchorProperty | _string_                                                                    | Property name where to save current rotation anchor coordinates. Default is  'anchor'. |
 
