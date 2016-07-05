@@ -1,3 +1,5 @@
+[![view on npm](http://img.shields.io/npm/v/ol3-rotate-feature.svg)](https://www.npmjs.org/package/ol3-rotate-feature)
+
 # Rotate feature interaction for OpenLayers 3
 
 Plugin adds interaction that allows to rotate vector features around some anchor.
