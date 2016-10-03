@@ -1,6 +1,6 @@
-const assert = chai.assert;
+var assert = chai.assert;
 
-const map = new ol.Map({
+var map = new ol.Map({
     target: 'map',
     view: new ol.View({
         center: [ 0, 0 ],
@@ -13,10 +13,7 @@ const map = new ol.Map({
     ],
 });
 
-const ANGLE_PROP = 'angle';
-const ANCHOR_PROP = 'anchor';
-
-const feature = new ol.Feature(new ol.geom.Polygon([
+var feature = new ol.Feature(new ol.geom.Polygon([
     [
         [ 0, 0 ],
         [ 0, 10 ],
@@ -25,10 +22,10 @@ const feature = new ol.Feature(new ol.geom.Polygon([
         [ 0, 0 ]
     ]
 ]));
-const features = new ol.Collection([
+var features = new ol.Collection([
     feature
 ]);
-const rotate = new ol.interaction.RotateFeature({
+var rotate = new ol.interaction.RotateFeature({
     features: features,
     angle: -1.5708 // 90 degrees
 });
@@ -56,7 +53,7 @@ describe('Rotate feature interaction', function () {
 
 
     it('Check angle / anchor setters', function () {
-        const checkFeature = feature.clone();
+        var checkFeature = feature.clone();
         checkFeature.getGeometry().rotate(-0.785398, rotate.getAnchor());
 
         // rotate to 45 degrees

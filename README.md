@@ -23,20 +23,42 @@ Or download the latest version archive and add it with script tag:
 Plugin is packed into UMD wrapper, import it with CommonJS or ES6:
                                  
 ```js
-import RotateFeature from 'ol3-rotate-feature';
-const RotateFeature = require('ol3-rotate-feature');
+import RotateFeatureInteraction from 'ol3-rotate-feature';
+const RotateFeatureInteraction = require('ol3-rotate-feature');
 ```
 
 In Browser environment it is available as `ol.interaction.RotateFeature`.
 
 ### Options
 
-| Option         | Type                                                                        | Description                                                                            |
-|:---------------|:----------------------------------------------------------------------------|:---------------------------------------------------------------------------------------|
-| features       | _ol.Collection<ol.Feature>_                                                 | The features the interaction works on. Required.                                       |
-| style          | _ol.style.Style &#124; Array&lt;ol.style.Style&gt; &#124; ol.style.StyleFunction_ | Style of the overlay with interaction helper features.                                 |
-| angleProperty  | _string_                                                                    | Property name where to save current rotation angle. Default is  'angle'.               |
-| anchorProperty | _string_                                                                    | Property name where to save current rotation anchor coordinates. Default is  'anchor'. |
+| Option         | Type                                                                                               | Description                                                                                                                 |
+|:---------------|:---------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------|
+| features       | _ol.Collection<ol.Feature>_                                                                        | The features the interaction works on. Required.                                                                            |
+| style          | _ol.style.Style &#124; Array&lt;ol.style.Style&gt; &#124; ol.style.StyleFunction &#124; undefined_ | Style of the overlay with interaction helper features.                                                                      |
+| angle          | _number &#124; undefined_                                                                          | Initial angle in radians (positive is counter-clockwise), applied for features already added to collection. Default is `0`. |
+| anchor         | _number[] &#124; ol.Coordinate &#124; undefined_                                                   | Initial anchor coordinate. Default is center of features extent.                                                            |
+
+### Methods
+
+```js
+// Set current angle of interaction features.
+RotateFeatureInteraction.prototype.setAngle(angle : number)
+```
+
+```js
+// Returns current angle of interaction features.
+RotateFeatureInteraction.prototype.getAngle() : number
+```
+
+```js
+// Set current anchor position.
+RotateFeatureInteraction.prototype.setAnchor(anchor? : number[] | ol.Coordinate)
+```
+
+```js
+// Returns current anchor position.
+RotateFeatureInteraction.prototype.getAnchor() : number[] | ol.Coordinate | undefined 
+```
 
 ### Events
 
@@ -45,6 +67,8 @@ All events triggered by the interaction are instances of `RotateFeatureEvent`.
 ##### Members
 
 - **features**    _ol.Collection_     The features being rotated.
+- **angle**       _number_            Current angle in radians.
+- **anchor**      _ol.Coordinate_     Current anchor position.
 
 | Event       | Arguments            | Description                          |
 |:------------|:---------------------|:-------------------------------------|
@@ -111,12 +135,10 @@ Getting total angle or last anchor coordinates after rotation:
 
 ```js
 rotate.on('rotateend', evt => {
-    evt.features.forEach(feature => {
-        // get total angle in radians (positive is counter-clockwise)
-        console.log(feature.get('angle') + ' is '+ (-1 * feature.get('angle') * 180 / Math.PI ) + '°');
-        // get las anchor coordinates
-        console.log(feature.get('anchor'));
-    });
+    // get total angle in degrees
+    console.log(evt.angle + ' is '+ (-1 * evt.angle * 180 / Math.PI ) + '°');
+    // get last anchor coordinates
+    console.log(evt.anchor);
 });
 ```
 

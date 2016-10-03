@@ -9,16 +9,25 @@
     <div id="map" style="display: none"></div>
     <div id="mocha"></div>
 
-    <script src="../node_modules/openlayers/dist/ol.js"></script>
-    <script src="../dist/bundle.js"></script>
+    <script src="./polyfills.js"></script>
     <script src="../node_modules/mocha/mocha.js"></script>
     <script src="../node_modules/chai/chai.js"></script>
+    <script src="../node_modules/openlayers/dist/ol-debug.js"></script>
+    <script src="../dist/bundle.js"></script>
 
-    <script>mocha.setup('bdd')</script>
+    <script>
+        if (typeof initMochaPhantomJS === 'function') {
+            initMochaPhantomJS()
+        }
+
+        mocha.setup({
+            ui: 'bdd',
+            ignoreLeaks: false,
+            globals: ['ol']
+        });
+    </script>
     <script src="./test.js"></script>
     <script>
-        mocha.checkLeaks();
-        mocha.globals(['ol']);
         mocha.run();
     </script>
 </body>

@@ -1,7 +1,7 @@
 // @flow
 import ol from "openlayers";
 import { assert, assertInstanceOf, coalesce } from "./util";
-import { RotateFeatureEvent, RotateFeatureEventType } from "./event";
+import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent";
 
 /**
  * @typedef {Object} InteractionOptions
@@ -105,7 +105,8 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
 
         this.features_.on('add', this.onFeatureAdd_, this);
         this.features_.on('remove', this.onFeatureRemove_, this);
-
+        //noinspection JSUnresolvedFunction
+        this.on('change:active', this.onChangeActive_, this);
         //noinspection JSUnresolvedFunction
         this.on('change:' + ANGLE_PROP, this.onAngleChange_, this);
         //noinspection JSUnresolvedFunction
@@ -146,14 +147,12 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
         }
     }
 
-    //noinspection JSUnusedGlobalSymbols
     /**
-     * @param {boolean} active
+     * @private
      */
-    setActive(active) {
-        super.setActive(active);
-
-        if (active) {
+    onChangeActive_() {
+        //noinspection JSUnresolvedFunction
+        if (this.getActive()) {
             this.updateInteractionFeatures_();
         } else {
             this.reset_(true);
@@ -165,7 +164,7 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      *
      * @param {number} angle
      */
-    setAngle(angle) {
+    setAngle(angle : number) {
         assert(!isNaN(parseFloat(angle)), 'Numeric value passed');
 
         //noinspection JSUnresolvedFunction
@@ -187,7 +186,7 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      *
      * @param {number[] | ol.Coordinate | undefined} anchor
      */
-    setAnchor(anchor) {
+    setAnchor(anchor? : ol.Coordinate) {
         assert(anchor == null || Array.isArray(anchor) && anchor.length === 2, 'Array of two elements passed');
         //noinspection JSUnresolvedFunction
         this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : undefined);
