@@ -1,22 +1,28 @@
 // @flow
 import ol from "openlayers";
-import { assertInstanceOf } from "./util";
+import { assert, assertInstanceOf, coalesce } from "./util";
 import { RotateFeatureEvent, RotateFeatureEventType } from "./event";
 
 /**
  * @typedef {Object} InteractionOptions
  * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
- * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction} style  Style of the overlay.
- * @property {string} angleProperty Property name where to save current rotation angle. Default is  'angle'.
- * @property {string} anchorProperty Property name where to save current rotation anchor coordinates. Default is  'anchor'.
+ * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
+ * @property {number | undefined} angle Initial angle in radians (positive is counter-clockwise),
+ *                                      applied for features already added to collection. Default is `0`.
+ * @property {number[] | ol.Coordinate | undefined} anchor Initial anchor coordinate. Default is center of features extent.
  */
 var InteractionOptions;
 
 const ANCHOR_KEY = 'anchor';
 const ARROW_KEY = 'arrow';
-const GHOST_KEY = 'ghost';
+// const GHOST_KEY = 'ghost';
+
+const ANGLE_PROP = 'angle';
+const ANCHOR_PROP = 'anchor';
 
 /**
+ * todo добавить опцию condition - для возможности переопределения клавиш
+ *
  * Rotate interaction class.
  * Adds controls to rotate vector features.
  * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
@@ -24,9 +30,6 @@ const GHOST_KEY = 'ghost';
  * @class
  * @extends ol.interaction.Interaction
  * @author Vladimir Vershinin
- *
- * todo добавить опцию condition - для возможности переопределения клавиш
- * todo возможно добавить ghost feature для отображения начального угла
  */
 export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     /**
@@ -41,6 +44,14 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
             handleMoveEvent: handleMoveEvent
         });
 
+        if (options.angle != null) {
+            this.setAngle(options.angle);
+        }
+
+        if (options.anchor != null) {
+            this.setAnchor(options.anchor);
+        }
+
         /**
          * @type {ol.Collection.<ol.Feature>}
          * @private
@@ -50,21 +61,11 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
         assertInstanceOf(this.features_, ol.Collection);
 
         /**
-         * @type {string}
-         * @private
-         */
-        this.angleProperty_ = options.angleProperty || 'angle';
-        /**
-         * @type {string}
-         * @private
-         */
-        this.anchorProperty_ = options.anchorProperty || 'anchor';
-        /**
          * @type {ol.layer.Vector}
          * @private
          */
         this.overlay_ = new ol.layer.Vector({
-            style: options.style || getDefaultStyle.call(this, this.angleProperty_),
+            style: options.style || getDefaultStyle(),
             source: new ol.source.Vector({
                 features: new ol.Collection()
             })
@@ -101,14 +102,14 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
          * @private
          */
         this.anchorMoving_ = false;
-        /**
-         * @type {ol.Extent}
-         * @private
-         */
-        this.featuresExtent_ = undefined;
 
-        this.features_.on('add', this.handleFeatureAdd_, this);
-        this.features_.on('remove', this.handleFeatureRemove_, this);
+        this.features_.on('add', this.onFeatureAdd_, this);
+        this.features_.on('remove', this.onFeatureRemove_, this);
+
+        //noinspection JSUnresolvedFunction
+        this.on('change:' + ANGLE_PROP, this.onAngleChange_, this);
+        //noinspection JSUnresolvedFunction
+        this.on('change:' + ANCHOR_PROP, this.onAnchorChange_, this);
     }
 
     /**
@@ -121,7 +122,7 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
         // disable selection of inner features
         const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
         if (
-            ['click', 'singleclick'].includes(evt.type) &&
+            [ 'click', 'singleclick' ].includes(evt.type) &&
             foundFeature && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)
         ) {
             return false;
@@ -130,6 +131,7 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
         return ol.interaction.Pointer.handleEvent.call(this, evt);
     }
 
+    //noinspection JSUnusedGlobalSymbols
     /**
      * @param {ol.Map} map
      */
@@ -140,8 +142,65 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
         if (map) {
             this.updateInteractionFeatures_();
         } else {
-            this.reset_();
+            this.reset_(true);
         }
+    }
+
+    //noinspection JSUnusedGlobalSymbols
+    /**
+     * @param {boolean} active
+     */
+    setActive(active) {
+        super.setActive(active);
+
+        if (active) {
+            this.updateInteractionFeatures_();
+        } else {
+            this.reset_(true);
+        }
+    }
+
+    /**
+     * Set current angle of interaction features.
+     *
+     * @param {number} angle
+     */
+    setAngle(angle) {
+        assert(!isNaN(parseFloat(angle)), 'Numeric value passed');
+
+        //noinspection JSUnresolvedFunction
+        this.set(ANGLE_PROP, parseFloat(angle));
+    }
+
+    /**
+     * Returns current angle of interaction features.
+     *
+     * @return {number}
+     */
+    getAngle() : number {
+        //noinspection JSUnresolvedFunction
+        return coalesce(this.get(ANGLE_PROP), 0);
+    }
+
+    /**
+     * Set current anchor position.
+     *
+     * @param {number[] | ol.Coordinate | undefined} anchor
+     */
+    setAnchor(anchor) {
+        assert(anchor == null || Array.isArray(anchor) && anchor.length === 2, 'Array of two elements passed');
+        //noinspection JSUnresolvedFunction
+        this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : undefined);
+    }
+
+    /**
+     * Returns current anchor position.
+     *
+     * @return {number[] | ol.Coordinate | undefined}
+     */
+    getAnchor() : ol.Coordinate {
+        //noinspection JSUnresolvedFunction
+        return coalesce(this.get(ANCHOR_PROP), getFeaturesCentroid(this.features_));
     }
 
     /**
@@ -155,16 +214,19 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
             return;
         }
 
-        this.featuresExtent_ = getFeaturesExtent(this.features_);
-
         this.createOrUpdateAnchorFeature_();
         this.createOrUpdateArrowFeature_();
     }
 
     /**
+     * @param {boolean} [resetAngleAndAnchor]
      * @private
      */
-    reset_() {
+    reset_(resetAngleAndAnchor = false) {
+        if (resetAngleAndAnchor) {
+            this.resetAngleAndAnchor_();
+        }
+
         [this.anchorFeature_, this.arrowFeature_].forEach(feature => {
             if (feature) {
                 this.overlay_.getSource().removeFeature(feature);
@@ -172,37 +234,57 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
         });
 
         this.anchorFeature_ = this.arrowFeature_ =
-            this.lastCoordinate_ = this.featuresExtent_ = undefined;
+            this.lastCoordinate_ = undefined;
         this.anchorMoving_ = false;
     }
 
     /**
      * @private
      */
+    resetAngleAndAnchor_() {
+        this.resetAngle_();
+        this.resetAnchor_();
+    }
+
+    /**
+     * @private
+     */
+    resetAngle_() {
+        //noinspection JSUnresolvedFunction
+        this.set(ANGLE_PROP, 0, true);
+        this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle());
+        this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle());
+    }
+
+    /**
+     * @private
+     */
+    resetAnchor_() {
+        //noinspection JSUnresolvedFunction
+        this.set(ANCHOR_PROP, getFeaturesCentroid(this.features_), true);
+
+        if (this.getAnchor()) {
+            this.arrowFeature_ && this.arrowFeature_.getGeometry().setCoordinates(this.getAnchor());
+            this.anchorFeature_ && this.anchorFeature_.getGeometry().setCoordinates(this.getAnchor());
+        }
+    }
+
+    /**
+     * @private
+     */
     createOrUpdateAnchorFeature_() {
-        const firstFeature = this.features_.item(0);
-        var coordinate, angle;
-
-        if (firstFeature) {
-            angle = firstFeature.get(this.angleProperty_) || 0;
-            coordinate = firstFeature.get(this.anchorProperty_);
-        }
-
-        if (!coordinate || !coordinate.length) {
-            coordinate = ol.extent.getCenter(this.featuresExtent_);
-        }
+        const angle = this.getAngle();
+        const anchor = this.getAnchor();
 
         if (this.anchorFeature_) {
-            this.anchorFeature_.getGeometry().setCoordinates(coordinate);
+            this.anchorFeature_.getGeometry().setCoordinates(anchor);
         } else {
             this.anchorFeature_ = new ol.Feature({
-                geometry: new ol.geom.Point(coordinate),
+                geometry: new ol.geom.Point(anchor),
                 [ANCHOR_KEY]: true,
-                [this.angleProperty_]: angle
+                [ANGLE_PROP]: angle
             });
             this.overlay_.getSource().addFeature(this.anchorFeature_);
-
-            this.features_.forEach(feature => feature.set(this.anchorProperty_, coordinate));
         }
     }
 
@@ -225,25 +307,16 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     createOrUpdateArrowFeature_() {
-        const firstFeature = this.features_.item(0);
-        var coordinate, angle;
-
-        if (firstFeature) {
-            angle = firstFeature.get(this.angleProperty_) || 0;
-            coordinate = firstFeature.get(this.anchorProperty_);
-        }
-
-        if (!coordinate || !coordinate.length) {
-            coordinate = ol.extent.getCenter(this.featuresExtent_);
-        }
+        const angle = this.getAngle();
+        const anchor = this.getAnchor();
 
         if (this.arrowFeature_) {
-            this.arrowFeature_.getGeometry().setCoordinates(coordinate);
+            this.arrowFeature_.getGeometry().setCoordinates(anchor);
         } else {
             this.arrowFeature_ = new ol.Feature({
-                geometry: new ol.geom.Point(coordinate),
+                geometry: new ol.geom.Point(anchor),
                 [ARROW_KEY]: true,
-                [this.angleProperty_]: angle
+                [ANGLE_PROP]: angle
             });
             this.overlay_.getSource().addFeature(this.arrowFeature_);
         }
@@ -251,24 +324,103 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
 
     /**
      * @param {ol.Feature} element
-     * @this RotateFeatureInteraction
      * @private
      */
-    handleFeatureAdd_({ element }) {
+    onFeatureAdd_({ element }) {
+        //noinspection JSUnresolvedFunction
+        if (!this.getActive()) {
+            return;
+        }
+
         assertInstanceOf(element, ol.Feature);
 
+        this.resetAngleAndAnchor_();
         this.updateInteractionFeatures_();
     }
 
     /**
      * @param {ol.Feature} element
-     * @this RotateFeatureInteraction
      * @private
      */
-    handleFeatureRemove_({ element }) {
+    onFeatureRemove_({ element }) {
+        //noinspection JSUnresolvedFunction
+        if (!this.getActive()) {
+            return;
+        }
+
         assertInstanceOf(element, ol.Feature);
 
+        this.resetAngleAndAnchor_();
         this.updateInteractionFeatures_();
+    }
+
+    /**
+     * @private
+     */
+    onAngleChange_({ oldValue }) {
+        this.features_.forEach(feature => feature.getGeometry().rotate(this.getAngle() - oldValue, this.anchorFeature_.getGeometry().getCoordinates()));
+        this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle());
+        this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle());
+    }
+
+    /**
+     * @private
+     */
+    onAnchorChange_() {
+        const anchor = this.getAnchor();
+
+        if (anchor) {
+            this.anchorFeature_ && this.anchorFeature_.getGeometry().setCoordinates(anchor);
+            this.arrowFeature_ && this.arrowFeature_.getGeometry().setCoordinates(anchor);
+        }
+    }
+
+    /**
+     * @param {ol.Collection<ol.Feature>} features
+     * @private
+     */
+    dispatchRotateStartEvent_(features) {
+        //noinspection JSUnresolvedFunction
+        this.dispatchEvent(
+            new RotateFeatureEvent(
+                RotateFeatureEventType.START,
+                features,
+                this.getAngle(),
+                this.getAnchor()
+            )
+        );
+    }
+
+    /**
+     * @param {ol.Collection<ol.Feature>} features
+     * @private
+     */
+    dispatchRotatingEvent_(features) {
+        //noinspection JSUnresolvedFunction
+        this.dispatchEvent(
+            new RotateFeatureEvent(
+                RotateFeatureEventType.ROTATING,
+                features,
+                this.getAngle(),
+                this.getAnchor()
+            )
+        );
+    }
+
+    /**
+     * @param {ol.Collection<ol.Feature>} features
+     * @private
+     */
+    dispatchRotateEndEvent_(features) {
+        //noinspection JSUnresolvedFunction
+        this.dispatchEvent(
+            new RotateFeatureEvent(
+                RotateFeatureEventType.END,
+                features,
+                this.getAngle(),
+                this.getAnchor()
+            )
+        );
     }
 }
 
@@ -278,7 +430,8 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
+function handleDownEvent(evt : ol.MapBrowserEvent) : boolean
+{
     const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
 
     // handle click & drag on features for rotation
@@ -289,7 +442,7 @@ function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
         this.lastCoordinate_ = evt.coordinate;
 
         handleMoveEvent.call(this, evt);
-        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.START, this.features_));
+        this.dispatchRotateStartEvent_(this.features_);
 
         return true;
     }
@@ -310,13 +463,14 @@ function handleDownEvent(evt : ol.MapBrowserEvent) : boolean {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleUpEvent(evt : ol.MapBrowserEvent) : boolean {
+function handleUpEvent(evt : ol.MapBrowserEvent) : boolean
+{
     // stop drag sequence of features
     if (this.lastCoordinate_) {
         this.lastCoordinate_ = undefined;
 
         handleMoveEvent.call(this, evt);
-        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.END, this.features_));
+        this.dispatchRotateEndEvent_(this.features_);
 
         return true;
     }
@@ -337,11 +491,10 @@ function handleUpEvent(evt : ol.MapBrowserEvent) : boolean {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
+function handleDragEvent(evt : ol.MapBrowserEvent) : boolean
+{
     const newCoordinate = evt.coordinate;
     const anchorCoordinate = this.anchorFeature_.getGeometry().getCoordinates();
-
-    const updateAngleProperty = (feature, angle) => feature.set(this.angleProperty_, ( feature.get(this.angleProperty_) || 0 ) + angle);
 
     // handle drag of features by angle
     if (this.lastCoordinate_) {
@@ -352,26 +505,14 @@ function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
         // calculate angle between last and current vectors (positive angle counter-clockwise)
         let angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
 
-        this.features_.forEach(feature => {
-            feature.getGeometry().rotate(angle, anchorCoordinate);
-            updateAngleProperty(feature, angle);
-        });
-
-        [this.anchorFeature_, this.arrowFeature_].forEach(feature => updateAngleProperty(feature, angle));
-
-        this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.ROTATING, this.features_));
+        this.setAngle(this.getAngle() + angle);
+        this.dispatchRotatingEvent_(this.features_);
 
         this.lastCoordinate_ = evt.coordinate;
     }
     // handle drag of the anchor
     else if (this.anchorMoving_) {
-        let deltaX = newCoordinate[0] - anchorCoordinate[0];
-        let deltaY = newCoordinate[1] - anchorCoordinate[1];
-
-        this.anchorFeature_.getGeometry().translate(deltaX, deltaY);
-        this.arrowFeature_.getGeometry().translate(deltaX, deltaY);
-
-        this.features_.forEach(feature => feature.set(this.anchorProperty_, newCoordinate));
+        this.setAnchor(newCoordinate);
     }
 }
 
@@ -381,7 +522,8 @@ function handleDragEvent(evt : ol.MapBrowserEvent) : boolean {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleMoveEvent(evt : ol.MapBrowserEvent) : boolean {
+function handleMoveEvent(evt : ol.MapBrowserEvent) : boolean
+{
     const elem = evt.map.getTargetElement();
     const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
 
@@ -410,12 +552,11 @@ function handleMoveEvent(evt : ol.MapBrowserEvent) : boolean {
 }
 
 /**
- * @param {string} angleProperty
  * @returns {ol.style.StyleFunction}
- * @this {RotateFeatureInteraction}
  * @private
  */
-function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
+function getDefaultStyle() : ol.style.StyleFunction
+{
     const white = [255, 255, 255, 0.8];
     const blue = [0, 153, 255, 0.8];
     const transparent = [255, 255, 255, 0.01];
@@ -476,7 +617,7 @@ function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
 
     return function (feature, resolution) {
         var style;
-        const angle = feature.get(angleProperty) || 0;
+        const angle = feature.get(ANGLE_PROP) || 0;
 
         switch (true) {
             case feature.get(ANCHOR_KEY):
@@ -512,11 +653,29 @@ function getDefaultStyle(angleProperty : string) : ol.style.StyleFunction {
 
 /**
  * @param {ol.Collection<ol.Feature> | Array<ol.Feature>} features
- * @returns {ol.Extent}
+ * @returns {ol.Extent | undefined}
  * @private
  */
-function getFeaturesExtent(features : ol.Collection<ol.Feature> | Array<ol.Feature>) {
+function getFeaturesExtent(features : ol.Collection<ol.Feature> | Array<ol.Feature>) : ol.Extent
+{
+    if (!features.getLength()) {
+        return undefined;
+    }
+
     return new ol.geom.GeometryCollection(
         ( Array.isArray(features) ? features : features.getArray() ).map(feature => feature.getGeometry())
     ).getExtent();
+}
+
+/**
+ * @param {ol.Collection<ol.Feature> | Array<ol.Feature>} features
+ * @return {ol.Coordinate | undefined}
+ */
+function getFeaturesCentroid(features : ol.Collection<ol.Feature> | Array<ol.Feature>) : ol.Coordinate
+{
+    if (!features.getLength()) {
+        return undefined;
+    }
+
+    return ol.extent.getCenter(getFeaturesExtent(features));
 }

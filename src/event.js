@@ -30,8 +30,10 @@ export class RotateFeatureEvent {
     /**
      * @param {RotateFeatureEventType} type Type.
      * @param {ol.Collection<ol.Feature>} features Rotated features.
+     * @param {number} angle Angle in radians.
+     * @param {ol.Coordinate} anchor Anchor position.
      */
-    constructor(type, features) {
+    constructor(type, features, angle, anchor) {
         /**
          * @type {boolean}
          */
@@ -48,6 +50,16 @@ export class RotateFeatureEvent {
          * @type {ol.Collection<ol.Feature>}
          */
         this.features = features;
+        /**
+         * Current angle in radians.
+         * @type {number}
+         */
+        this.angle = angle;
+        /**
+         * Current rotation anchor.
+         * @type {number[] | ol.Coordinate}
+         */
+        this.anchor = anchor;
     }
 
     /**

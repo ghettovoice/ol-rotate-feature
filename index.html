@@ -53,10 +53,12 @@
             projection: 'EPSG:3857'
         });
 
-        const features = new ol.Collection();
         const select = new ol.interaction.Select();
+        select.getFeatures().extend([point, line, polygon]);
+
         const rotate = new ol.interaction.RotateFeature({
-            features: select.getFeatures()
+            features: select.getFeatures(),
+            angle: -1.5708
         });
 
         rotate.on('rotatestart', evt => console.log('rotate start', evt));

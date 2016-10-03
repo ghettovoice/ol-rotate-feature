@@ -52,3 +52,11 @@ export function getValueType(value) : string {
         return value === null ? 'null' : typeof value;
     }
 }
+
+/**
+ * @param {...*} values
+ * @return {*}
+ */
+export function coalesce(...values) {
+    return values.find(value => value != null);
+}

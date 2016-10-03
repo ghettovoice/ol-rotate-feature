@@ -7,7 +7,7 @@
     "release": "webpack --release --verbose",
     "build": "webpack --build --verbose",
     "serv": "webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha -c --check-leaks --harmony tests/*.js"
   },
   "keywords": [
     "ol3",
@@ -34,9 +34,11 @@
     "babel-plugin-transform-flow-strip-types": "^6.8.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-stage-0": "^6.5.0",
+    "chai": "^3.5.0",
     "chalk": "^1.1.3",
     "glob": "^7.0.3",
     "lodash": "^4.13.1",
+    "mocha": "^3.1.0",
     "openlayers": "^3.17.1",
     "progress-bar-webpack-plugin": "^1.8.0",
     "webpack": "^1.13.1",
@@ -49,6 +51,7 @@
     ],
     "plugins": [
       "transform-flow-strip-types",
+      "transform-function-bind",
       "add-module-exports"
     ]
   }
