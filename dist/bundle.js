@@ -71,13 +71,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 
-	var _rotatefeatureinteraction = __webpack_require__(2);
+	var _RotateFeatureInteraction = __webpack_require__(2);
 
-	var _rotatefeatureinteraction2 = _interopRequireDefault(_rotatefeatureinteraction);
+	var _RotateFeatureInteraction2 = _interopRequireDefault(_RotateFeatureInteraction);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	exports.default = _rotatefeatureinteraction2.default; /**
+	exports.default = _RotateFeatureInteraction2.default; /**
 	                                                       * OpenLayers 3 rotate interaction.
 	                                                       * Allows vector feature rotation.
 	                                                       *
@@ -217,7 +217,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _util = __webpack_require__(3);
 
-	var _rotatefeatureevent = __webpack_require__(1);
+	var _RotateFeatureEvent = __webpack_require__(1);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -253,8 +253,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Adds controls to rotate vector features.
 	 * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
 	 *
-	 * @class
-	 * @extends ol.interaction.Interaction
 	 * @author Vladimir Vershinin
 	 */
 
@@ -266,11 +264,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 
 	    function RotateFeatureInteraction() {
-	        var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 	        _classCallCheck(this, RotateFeatureInteraction);
 
-	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(RotateFeatureInteraction).call(this, {
+	        var _this = _possibleConstructorReturn(this, (RotateFeatureInteraction.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction)).call(this, {
 	            handleEvent: RotateFeatureInteraction.handleEvent,
 	            handleDownEvent: handleDownEvent,
 	            handleUpEvent: handleUpEvent,
@@ -339,11 +337,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        _this.features_.on('add', _this.onFeatureAdd_, _this);
 	        _this.features_.on('remove', _this.onFeatureRemove_, _this);
-	        //noinspection JSUnresolvedFunction
+
 	        _this.on('change:active', _this.onChangeActive_, _this);
-	        //noinspection JSUnresolvedFunction
 	        _this.on('change:' + ANGLE_PROP, _this.onAngleChange_, _this);
-	        //noinspection JSUnresolvedFunction
 	        _this.on('change:' + ANCHOR_PROP, _this.onAnchorChange_, _this);
 	        return _this;
 	    }
@@ -366,7 +362,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	         */
 	        value: function setMap(map) {
 	            this.overlay_.setMap(map);
-	            _get(Object.getPrototypeOf(RotateFeatureInteraction.prototype), "setMap", this).call(this, map);
+	            _get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), "setMap", this).call(this, map);
 
 	            if (map) {
 	                this.updateInteractionFeatures_();
@@ -382,7 +378,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "onChangeActive_",
 	        value: function onChangeActive_() {
-	            //noinspection JSUnresolvedFunction
 	            if (this.getActive()) {
 	                this.updateInteractionFeatures_();
 	            } else {
@@ -401,7 +396,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function setAngle(angle) {
 	            (0, _util.assert)(!isNaN(parseFloat(angle)), 'Numeric value passed');
 
-	            //noinspection JSUnresolvedFunction
 	            this.set(ANGLE_PROP, parseFloat(angle));
 	        }
 
@@ -414,7 +408,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "getAngle",
 	        value: function getAngle() {
-	            //noinspection JSUnresolvedFunction
 	            return (0, _util.coalesce)(this.get(ANGLE_PROP), 0);
 	        }
 
@@ -428,7 +421,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: "setAnchor",
 	        value: function setAnchor(anchor) {
 	            (0, _util.assert)(anchor == null || Array.isArray(anchor) && anchor.length === 2, 'Array of two elements passed');
-	            //noinspection JSUnresolvedFunction
 	            this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : undefined);
 	        }
 
@@ -441,7 +433,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "getAnchor",
 	        value: function getAnchor() {
-	            //noinspection JSUnresolvedFunction
 	            return (0, _util.coalesce)(this.get(ANCHOR_PROP), getFeaturesCentroid(this.features_));
 	        }
 
@@ -473,7 +464,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function reset_() {
 	            var _this2 = this;
 
-	            var resetAngleAndAnchor = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+	            var resetAngleAndAnchor = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
 	            if (resetAngleAndAnchor) {
 	                this.resetAngleAndAnchor_();
@@ -507,7 +498,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "resetAngle_",
 	        value: function resetAngle_() {
-	            //noinspection JSUnresolvedFunction
 	            this.set(ANGLE_PROP, 0, true);
 	            this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle());
 	            this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle());
@@ -520,7 +510,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "resetAnchor_",
 	        value: function resetAnchor_() {
-	            //noinspection JSUnresolvedFunction
 	            this.set(ANCHOR_PROP, getFeaturesCentroid(this.features_), true);
 
 	            if (this.getAnchor()) {
@@ -598,7 +587,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function onFeatureAdd_(_ref3) {
 	            var element = _ref3.element;
 
-	            //noinspection JSUnresolvedFunction
 	            if (!this.getActive()) {
 	                return;
 	            }
@@ -619,7 +607,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function onFeatureRemove_(_ref4) {
 	            var element = _ref4.element;
 
-	            //noinspection JSUnresolvedFunction
 	            if (!this.getActive()) {
 	                return;
 	            }
@@ -671,8 +658,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "dispatchRotateStartEvent_",
 	        value: function dispatchRotateStartEvent_(features) {
-	            //noinspection JSUnresolvedFunction
-	            this.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.START, features, this.getAngle(), this.getAnchor()));
+	            this.dispatchEvent(new _RotateFeatureEvent.RotateFeatureEvent(_RotateFeatureEvent.RotateFeatureEventType.START, features, this.getAngle(), this.getAnchor()));
 	        }
 
 	        /**
@@ -683,8 +669,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "dispatchRotatingEvent_",
 	        value: function dispatchRotatingEvent_(features) {
-	            //noinspection JSUnresolvedFunction
-	            this.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.ROTATING, features, this.getAngle(), this.getAnchor()));
+	            this.dispatchEvent(new _RotateFeatureEvent.RotateFeatureEvent(_RotateFeatureEvent.RotateFeatureEventType.ROTATING, features, this.getAngle(), this.getAnchor()));
 	        }
 
 	        /**
@@ -695,8 +680,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: "dispatchRotateEndEvent_",
 	        value: function dispatchRotateEndEvent_(features) {
-	            //noinspection JSUnresolvedFunction
-	            this.dispatchEvent(new _rotatefeatureevent.RotateFeatureEvent(_rotatefeatureevent.RotateFeatureEventType.END, features, this.getAngle(), this.getAnchor()));
+	            this.dispatchEvent(new _RotateFeatureEvent.RotateFeatureEvent(_RotateFeatureEvent.RotateFeatureEventType.END, features, this.getAngle(), this.getAnchor()));
 	        }
 	    }], [{
 	        key: "handleEvent",
@@ -820,7 +804,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    var setCursor = function setCursor(cursor) {
-	        var vendor = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+	        var vendor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
 	        if (vendor) {
 	            elem.style.cursor = '-webkit-' + cursor;
@@ -983,7 +967,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @throws Error
 	 */
 	function assert(condition) {
-	    var message = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+	    var message = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
 
 	    message = ['Assertion failed', message].join(': ');
 

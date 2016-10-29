@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/ghettovoice/ol3-rotate-feature/issues"
   },
-  "homepage": "http://ghettovoice.github.io/ol3-rotate-feature/",
+  "homepage": "https://ghettovoice.github.io/ol3-rotate-feature/",
   "dependencies": {},
   "peerDependencies": {
     "openlayers": ">= 3.14"
@@ -46,6 +46,13 @@
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1"
   },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist",
+    "src",
+    "index.html"
+  ],
   "babel": {
     "presets": [
       "es2015",

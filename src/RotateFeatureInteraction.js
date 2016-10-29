@@ -1,7 +1,7 @@
 // @flow
 import ol from "openlayers";
 import { assert, assertInstanceOf, coalesce } from "./util";
-import { RotateFeatureEvent, RotateFeatureEventType } from "./rotatefeatureevent";
+import { RotateFeatureEvent, RotateFeatureEventType } from "./RotateFeatureEvent";
 
 /**
  * @typedef {Object} InteractionOptions
@@ -27,8 +27,6 @@ const ANCHOR_PROP = 'anchor';
  * Adds controls to rotate vector features.
  * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
  *
- * @class
- * @extends ol.interaction.Interaction
  * @author Vladimir Vershinin
  */
 export default class RotateFeatureInteraction extends ol.interaction.Pointer {
@@ -105,11 +103,9 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
 
         this.features_.on('add', this.onFeatureAdd_, this);
         this.features_.on('remove', this.onFeatureRemove_, this);
-        //noinspection JSUnresolvedFunction
+
         this.on('change:active', this.onChangeActive_, this);
-        //noinspection JSUnresolvedFunction
         this.on('change:' + ANGLE_PROP, this.onAngleChange_, this);
-        //noinspection JSUnresolvedFunction
         this.on('change:' + ANCHOR_PROP, this.onAnchorChange_, this);
     }
 
@@ -151,7 +147,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     onChangeActive_() {
-        //noinspection JSUnresolvedFunction
         if (this.getActive()) {
             this.updateInteractionFeatures_();
         } else {
@@ -167,7 +162,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
     setAngle(angle : number) {
         assert(!isNaN(parseFloat(angle)), 'Numeric value passed');
 
-        //noinspection JSUnresolvedFunction
         this.set(ANGLE_PROP, parseFloat(angle));
     }
 
@@ -177,7 +171,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @return {number}
      */
     getAngle() : number {
-        //noinspection JSUnresolvedFunction
         return coalesce(this.get(ANGLE_PROP), 0);
     }
 
@@ -188,7 +181,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      */
     setAnchor(anchor? : ol.Coordinate) {
         assert(anchor == null || Array.isArray(anchor) && anchor.length === 2, 'Array of two elements passed');
-        //noinspection JSUnresolvedFunction
         this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : undefined);
     }
 
@@ -198,7 +190,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @return {number[] | ol.Coordinate | undefined}
      */
     getAnchor() : ol.Coordinate {
-        //noinspection JSUnresolvedFunction
         return coalesce(this.get(ANCHOR_PROP), getFeaturesCentroid(this.features_));
     }
 
@@ -249,7 +240,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     resetAngle_() {
-        //noinspection JSUnresolvedFunction
         this.set(ANGLE_PROP, 0, true);
         this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle());
         this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle());
@@ -259,7 +249,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     resetAnchor_() {
-        //noinspection JSUnresolvedFunction
         this.set(ANCHOR_PROP, getFeaturesCentroid(this.features_), true);
 
         if (this.getAnchor()) {
@@ -326,7 +315,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     onFeatureAdd_({ element }) {
-        //noinspection JSUnresolvedFunction
         if (!this.getActive()) {
             return;
         }
@@ -342,7 +330,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     onFeatureRemove_({ element }) {
-        //noinspection JSUnresolvedFunction
         if (!this.getActive()) {
             return;
         }
@@ -379,7 +366,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     dispatchRotateStartEvent_(features) {
-        //noinspection JSUnresolvedFunction
         this.dispatchEvent(
             new RotateFeatureEvent(
                 RotateFeatureEventType.START,
@@ -395,7 +381,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     dispatchRotatingEvent_(features) {
-        //noinspection JSUnresolvedFunction
         this.dispatchEvent(
             new RotateFeatureEvent(
                 RotateFeatureEventType.ROTATING,
@@ -411,7 +396,6 @@ export default class RotateFeatureInteraction extends ol.interaction.Pointer {
      * @private
      */
     dispatchRotateEndEvent_(features) {
-        //noinspection JSUnresolvedFunction
         this.dispatchEvent(
             new RotateFeatureEvent(
                 RotateFeatureEventType.END,
