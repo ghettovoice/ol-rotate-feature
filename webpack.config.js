@@ -24,8 +24,7 @@ const exportName = ['ol', 'interaction', 'RotateFeature'];
 const entry = path.join(srcDir, 'index.js');
 
 const banner =
-    `OpenLayers 3 rotate interaction.
-Allows vector feature rotation.
+`${packageJson.description}
 
 @package ${packageJson.name}
 @author ${packageJson.author}

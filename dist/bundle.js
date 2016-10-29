@@ -1,10 +1,9 @@
 /*!
- * OpenLayers 3 rotate interaction.
- * Allows vector feature rotation.
+ * OpenLayers 3 interaction that allows to rotate vector features
  * 
  * @package ol3-rotate-feature
  * @author Vladimir Vershinin <ghettovoice@gmail.com>
- * @version 1.2.0
+ * @version 1.2.1
  * @licence MIT https://opensource.org/licenses/MIT
  *          Based on OpenLayers 3. Copyright 2005-2016 OpenLayers Contributors. All rights reserved. http://openlayers.org
  * @copyright (c) 2016, Vladimir Vershinin <ghettovoice@gmail.com>
