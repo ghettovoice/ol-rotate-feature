@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/ghettovoice/ol3-rotate-feature.svg?branch=master)](https://travis-ci.org/ghettovoice/ol3-rotate-feature)
 [![view on npm](http://img.shields.io/npm/v/ol3-rotate-feature.svg)](https://www.npmjs.org/package/ol3-rotate-feature)
 
 # Rotate feature interaction for OpenLayers 3
