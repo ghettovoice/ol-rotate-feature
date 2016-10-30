@@ -41,7 +41,6 @@
     "mocha": "^3.1.0",
     "mocha-phantomjs": "^4.1.0",
     "openlayers": "^3.17.1",
-    "phantomjs-polyfill-find": "github:ptim/phantomjs-polyfill-find",
     "progress-bar-webpack-plugin": "^1.8.0",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1"
@@ -50,18 +49,6 @@
     "LICENSE",
     "README.md",
     "dist",
-    "src",
-    "index.html"
-  ],
-  "babel": {
-    "presets": [
-      "es2015",
-      "stage-0"
-    ],
-    "plugins": [
-      "transform-flow-strip-types",
-      "transform-function-bind",
-      "add-module-exports"
-    ]
-  }
+    "src"
+  ]
 }
