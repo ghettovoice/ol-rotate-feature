@@ -7,10 +7,11 @@ Plugin adds interaction that allows to rotate vector features around some anchor
 
 ## Installation
 
-Install it thought NPM:
+Install it thought NPM or Bower:
 
 ```shell
 npm install ol3-rotate-feature
+bower install ol3-rotate-feature
 ```
 
 Or download the latest version archive and add it with script tag:

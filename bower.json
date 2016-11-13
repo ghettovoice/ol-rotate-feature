@@ -1,0 +1,31 @@
+{
+  "name": "ol3-rotate-feature",
+  "description": "OpenLayers 3 interaction that allows to rotate vector features",
+  "main": "dist/bundle.js",
+  "authors": [
+    "Vladimir Vershinin <ghettovoice@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "ol3",
+    "openlayers",
+    "ol3-rotate-feature"
+  ],
+  "homepage": "https://ghettovoice.github.io/ol3-rotate-feature/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ghettovoice/ol3-rotate-feature.git"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "moduleType": [
+    "globals",
+    "amd",
+    "node"
+  ]
+}
