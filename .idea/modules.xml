@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ol3-rotate-feature.iml" filepath="$PROJECT_DIR$/ol3-rotate-feature.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ol-rotate-feature.iml" filepath="$PROJECT_DIR$/ol-rotate-feature.iml" />
     </modules>
   </component>
 </project>

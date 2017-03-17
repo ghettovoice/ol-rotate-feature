@@ -30,14 +30,13 @@ const banner =
 @author ${packageJson.author}
 @version ${packageJson.version}
 @licence MIT https://opensource.org/licenses/MIT
-         Based on OpenLayers 3. Copyright 2005-2016 OpenLayers Contributors. All rights reserved. http://openlayers.org
-@copyright (c) 2016, ${packageJson.author}`;
+@copyright (c) 2016-${new Date().getFullYear()}, ${packageJson.author}`;
 
 const plugins = [
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.DefinePlugin(GLOBALS),
     new ProgressBarPlugin({
-        format: ' build ' + chalk.magenta.bold('[ol3-rotate-feature]') + ' ' + chalk.cyan.bold('[:bar]') + ' ' + chalk.green.bold(':percent') + ' (:elapsed seconds)'
+        format: ' build ' + chalk.magenta.bold('[ol-rotate-feature]') + ' ' + chalk.cyan.bold('[:bar]') + ' ' + chalk.green.bold(':percent') + ' (:elapsed seconds)'
     })
 ];
 

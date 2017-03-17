@@ -1,34 +1,36 @@
 {
-  "name": "ol3-rotate-feature",
-  "version": "1.2.3",
-  "description": "OpenLayers 3 interaction that allows to rotate vector features",
+  "name": "ol-rotate-feature",
+  "version": "1.2.4",
+  "description": "Rotate vector features interaction for OpenLayers",
   "main": "dist/bundle.js",
   "scripts": {
     "release": "webpack --release --verbose",
     "build": "webpack --build --verbose",
     "serv": "webpack-dev-server",
+    "start": "npm run serv",
     "test": "mocha-phantomjs tests/test.html"
   },
   "keywords": [
-    "ol3",
+    "ol",
     "openlayers",
-    "ol3-rotate-feature"
+    "ol-rotate-feature"
   ],
   "author": "Vladimir Vershinin <ghettovoice@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ghettovoice/ol3-rotate-feature.git"
+    "url": "git+https://github.com/ghettovoice/ol-rotate-feature.git"
   },
   "bugs": {
-    "url": "https://github.com/ghettovoice/ol3-rotate-feature/issues"
+    "url": "https://github.com/ghettovoice/ol-rotate-feature/issues"
   },
-  "homepage": "https://ghettovoice.github.io/ol3-rotate-feature/",
+  "homepage": "https://ghettovoice.github.io/ol-rotate-feature/",
   "dependencies": {},
   "peerDependencies": {
-    "openlayers": ">= 3.14"
+    "openlayers": ">=3.14"
   },
   "devDependencies": {
+    "babel-core": "^6.24.0",
     "babel-loader": "^6.2.4",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-flow-strip-types": "^6.8.0",
@@ -40,7 +42,7 @@
     "lodash": "^4.13.1",
     "mocha": "^3.1.0",
     "mocha-phantomjs": "^4.1.0",
-    "openlayers": "^3.17.1",
+    "openlayers": "^4.0.1",
     "progress-bar-webpack-plugin": "^1.8.0",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1"

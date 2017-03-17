@@ -1,12 +1,11 @@
 /*!
- * OpenLayers 3 interaction that allows to rotate vector features
+ * Rotate vector features interaction for OpenLayers
  * 
- * @package ol3-rotate-feature
+ * @package ol-rotate-feature
  * @author Vladimir Vershinin <ghettovoice@gmail.com>
- * @version 1.2.2
+ * @version 1.2.4
  * @licence MIT https://opensource.org/licenses/MIT
- *          Based on OpenLayers 3. Copyright 2005-2016 OpenLayers Contributors. All rights reserved. http://openlayers.org
- * @copyright (c) 2016, Vladimir Vershinin <ghettovoice@gmail.com>
+ * @copyright (c) 2016-2017, Vladimir Vershinin <ghettovoice@gmail.com>
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -73,17 +72,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _RotateFeatureInteraction = __webpack_require__(2);
 	
 	var _RotateFeatureInteraction2 = _interopRequireDefault(_RotateFeatureInteraction);
-
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
+	
 	exports.default = _RotateFeatureInteraction2.default; /**
-	                                                       * OpenLayers 3 rotate interaction.
+	                                                       * Rotate interaction for OpenLayers.
 	                                                       * Allows vector feature rotation.
 	                                                       *
 	                                                       * @author Vladimir Vershinin <ghettovoice@gmail.com>
 	                                                       * @licence MIT https://opensource.org/licenses/MIT
-	                                                       *          Based on OpenLayers 3. Copyright 2005-2015 OpenLayers Contributors. All rights reserved. http://openlayers.org
-	                                                       * @copyright (c) 2016, Vladimir Vershinin
+	                                                       * @copyright (c) 2016-2017, Vladimir Vershinin
 	                                                       */
 
 	module.exports = exports["default"];
@@ -137,7 +135,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {number} angle Angle in radians.
 	   * @param {ol.Coordinate} anchor Anchor position.
 	   */
-	
 	  function RotateFeatureEvent(type, features, angle, anchor) {
 	    _classCallCheck(this, RotateFeatureEvent);
 	
@@ -261,7 +258,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    /**
 	     * @param {InteractionOptions} options
 	     */
-	
 	    function RotateFeatureInteraction() {
 	        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	
@@ -951,7 +947,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: true
 	});
 	
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 	
 	exports.assert = assert;
 	exports.assertInstanceOf = assertInstanceOf;

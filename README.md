@@ -1,7 +1,8 @@
-[![Build Status](https://travis-ci.org/ghettovoice/ol3-rotate-feature.svg?branch=master)](https://travis-ci.org/ghettovoice/ol3-rotate-feature)
-[![view on npm](http://img.shields.io/npm/v/ol3-rotate-feature.svg)](https://www.npmjs.org/package/ol3-rotate-feature)
+[![Build Status](https://travis-ci.org/ghettovoice/ol-rotate-feature.svg?branch=master)](https://travis-ci.org/ghettovoice/ol-rotate-feature)
+[![view on npm](http://img.shields.io/npm/v/ol-rotate-feature.svg)](https://www.npmjs.org/package/ol-rotate-feature)
+[![License](https://img.shields.io/github/license/ghettovoice/ol-rotate-feature.svg)](https://github.com/ghettovoice/ol-rotate-feature/blob/master/LICENSE)
 
-# Rotate feature interaction for OpenLayers 3
+# Rotate feature interaction for OpenLayers
 
 Plugin adds interaction that allows to rotate vector features around some anchor.
 
@@ -10,14 +11,14 @@ Plugin adds interaction that allows to rotate vector features around some anchor
 Install it thought NPM or Bower:
 
 ```shell
-npm install ol3-rotate-feature
-bower install ol3-rotate-feature
+npm install ol-rotate-feature
+bower install ol-rotate-feature
 ```
 
 Or download the latest version archive and add it with script tag:
 
 ```html
-<script src="ol3-rotate-feature/dist/bundle.min.js"></script>
+<script src="ol-rotate-feature/dist/bundle.min.js"></script>
 ```
 
 ## Usage
@@ -25,8 +26,8 @@ Or download the latest version archive and add it with script tag:
 Plugin is packed into UMD wrapper, import it with CommonJS or ES6:
                                  
 ```js
-import RotateFeatureInteraction from 'ol3-rotate-feature';
-const RotateFeatureInteraction = require('ol3-rotate-feature');
+import RotateFeatureInteraction from 'ol-rotate-feature';
+const RotateFeatureInteraction = require('ol-rotate-feature');
 ```
 
 In Browser environment it is available as `ol.interaction.RotateFeature`.
@@ -35,7 +36,7 @@ In Browser environment it is available as `ol.interaction.RotateFeature`.
 
 | Option         | Type                                                                                               | Description                                                                                                                 |
 |:---------------|:---------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------|
-| features       | _ol.Collection<ol.Feature>_                                                                        | The features the interaction works on. Required.                                                                            |
+| features       | _ol.Collection<ol.Feature>_                                                                        | The features the interaction works on. **Required**.                                                                        |
 | style          | _ol.style.Style &#124; Array&lt;ol.style.Style&gt; &#124; ol.style.StyleFunction &#124; undefined_ | Style of the overlay with interaction helper features.                                                                      |
 | angle          | _number &#124; undefined_                                                                          | Initial angle in radians (positive is counter-clockwise), applied for features already added to collection. Default is `0`. |
 | anchor         | _number[] &#124; ol.Coordinate &#124; undefined_                                                   | Initial anchor coordinate. Default is center of features extent.                                                            |
@@ -82,7 +83,7 @@ All events triggered by the interaction are instances of `RotateFeatureEvent`.
 
 ```js
 import ol from 'openlayers';
-import * as ol3RotateFeature from 'ol3-rotate-feature';
+import * as olRotateFeature from 'ol-rotate-feature';
 
 const point = new ol.Feature({
     name: 'point',
@@ -146,4 +147,4 @@ rotate.on('rotateend', evt => {
 
 ## License
 
-MIT (c) 2016, Vladimir Vershinin
+MIT (c) 2016-2017, Vladimir Vershinin
