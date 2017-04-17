@@ -1,11 +1,28 @@
 {
-    "presets": [
-        "es2015",
-        "stage-0"
-    ],
-    "plugins": [
-        "transform-flow-strip-types",
-        "transform-function-bind",
-        "add-module-exports"
-    ]
+  "presets": [
+    "latest",
+    "stage-0"
+  ],
+  "plugins": [
+    "transform-flow-strip-types"
+  ],
+  "env": {
+    "test": {
+      "plugins": [
+        "istanbul"
+      ]
+    },
+    "umd": {
+      "plugins": [
+        [
+          "./modules/babel-plugin-transform-nested-import",
+          {
+            "pkg": "openlayers",
+            "pkgVar": "_ol_",
+            "regex": "^ol(?:\/(.*))?$"
+          }
+        ]
+      ]
+    }
+  }
 }
