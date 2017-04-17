@@ -12,9 +12,8 @@
     "ol-rotate-feature",
     "rotate feature",
     "transform feature",
-    "vector feature",
-    "vector layer",
-    "map"
+    "map",
+    "mapping"
   ],
   "homepage": "https://ghettovoice.github.io/ol-rotate-feature/",
   "repository": {

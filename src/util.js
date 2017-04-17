@@ -1,15 +1,14 @@
-// @flow
 /**
  * @param {boolean} condition
  * @param {string} message
  * @throws Error
  */
-export function assert(condition:boolean, message = '') {
-    message = ['Assertion failed', message].join(': ');
+export function assert (condition, message = '') {
+  message = [ 'Assertion failed', message ].join(': ')
 
-    if (!condition) {
-        throw new Error(message);
-    }
+  if (!condition) {
+    throw new Error(message)
+  }
 }
 
 /**
@@ -19,21 +18,21 @@ export function assert(condition:boolean, message = '') {
  * @param {*} type
  * @throws Error
  */
-export function assertInstanceOf(value, type) {
-    assert(value instanceof type, `Expected instanceof ${getValueType(type)} but got ${getValueType(value)}.`);
+export function assertInstanceOf (value, type) {
+  assert(value instanceof type, `Expected instanceof ${getValueType(type)} but got ${getValueType(value)}.`)
 }
 
 /**
  * Null function. Do nothing.
  */
-export function noop() {}
+export function noop () {}
 
 /**
  * @param {*} arg
  * @returns {*}
  */
-export function identity(arg) {
-    return arg;
+export function identity (arg) {
+  return arg
 }
 
 /**
@@ -43,20 +42,20 @@ export function identity(arg) {
  * @param {*} value
  * @returns string
  */
-export function getValueType(value) : string {
-    if (value instanceof Function) {
-        return value.name || 'unknown type name';
-    } else if (value instanceof Object) {
-        return value.constructor.name || Object.prototype.toString.call(value);
-    } else {
-        return value === null ? 'null' : typeof value;
-    }
+export function getValueType (value) {
+  if (value instanceof Function) {
+    return value.name || 'unknown type name'
+  } else if (value instanceof Object) {
+    return value.constructor.name || Object.prototype.toString.call(value)
+  } else {
+    return value === null ? 'null' : typeof value
+  }
 }
 
 /**
  * @param {...*} values
  * @return {*}
  */
-export function coalesce(...values) {
-    return values.find(value => value != null);
+export function coalesce (...values) {
+  return values.find(value => value != null)
 }

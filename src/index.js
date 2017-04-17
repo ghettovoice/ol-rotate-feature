@@ -6,6 +6,6 @@
  * @licence MIT https://opensource.org/licenses/MIT
  * @copyright (c) 2016-2017, Vladimir Vershinin
  */
-import RotateFeatureInteraction from "./RotateFeatureInteraction";
+import RotateFeature from "./rotate-feature-interaction"
 
-export default RotateFeatureInteraction;
+export default RotateFeature
