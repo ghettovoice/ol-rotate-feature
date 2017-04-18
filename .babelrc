@@ -1,27 +1,26 @@
 {
   "presets": [
-    "latest",
+    ["latest", {
+      "es2015": {
+        "modules": false
+      }
+    }],
     "stage-0"
   ],
   "plugins": [
-    "transform-flow-strip-types"
+    "transform-runtime"
   ],
   "env": {
     "test": {
-      "plugins": [
-        "istanbul"
-      ]
+      "plugins": [ "istanbul" ]
     },
     "umd": {
       "plugins": [
-        [
-          "./modules/babel-plugin-transform-nested-import",
-          {
-            "pkg": "openlayers",
-            "pkgVar": "_ol_",
-            "regex": "^ol(?:\/(.*))?$"
-          }
-        ]
+        ["./modules/babel-plugin-merge-imports", {
+          "pkg": "openlayers",
+            "pkgVar": "__ol",
+            "regex": "^ol(?:/(.*))?$"
+        }]
       ]
     }
   }

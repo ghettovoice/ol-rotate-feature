@@ -53,9 +53,9 @@ export function getValueType (value) {
 }
 
 /**
- * @param {...*} values
+ * @param {...*} args
  * @return {*}
  */
-export function coalesce (...values) {
-  return values.find(value => value != null)
+export function coalesce (...args) {
+  return args.filter(value => value != null).shift()
 }

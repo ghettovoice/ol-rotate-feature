@@ -1,79 +1,286 @@
+/* global describe, it, expect, sinon, beforeEach, afterEach */
 import Map from 'ol/map'
 import View from 'ol/view'
-import TileLayer from 'ol/layer/tile'
-import OSMSource from 'ol/source/osm'
 import Feature from 'ol/feature'
-import Polygon from 'ol/geom/polygon'
+import Point from 'ol/geom/point'
 import Collection from 'ol/collection'
-import RotateFeature from '../../../src'
+import VectorLayer from 'ol/layer/vector'
+import VectorSource from 'ol/source/vector'
+import RotateFeatureInteraction from '../../../src'
+
+Object.defineProperties(RotateFeatureInteraction.prototype, /** @lends RotateFeatureInteraction.prototype */{
+  overlay: {
+    get () {
+      return this.overlay_
+    }
+  },
+  anchorFeature: {
+    get () {
+      return this.anchorFeature_
+    }
+  },
+  arrowFeature: {
+    get () {
+      return this.arrowFeature_
+    }
+  }
+})
 
 describe('rotate feature interaction', function () {
-  let map, feature, features, rotate
+  let map, features
 
   beforeEach(() => {
+    features = new Collection([
+      new Feature(new Point([ 10000000, 10000000 ])),
+      new Feature(new Point([ 0, 0 ]))
+    ])
     map = new Map({
-      target: 'map',
+      target: createTargetElement(),
       view: new View({
         center: [ 0, 0 ],
-        zoom: 2
+        zoom: 1
       }),
       layers: [
-        new TileLayer({
-          source: new OSMSource()
+        new VectorLayer({
+          source: new VectorSource({ features })
         })
       ]
     })
-
-    feature = new Feature(new Polygon([
-      [
-        [ 0, 0 ],
-        [ 0, 10 ],
-        [ 10, 10 ],
-        [ 10, 0 ],
-        [ 0, 0 ]
-      ]
-    ]))
-
-    features = new Collection()
-
-    rotate = new RotateFeature({
-      features: features,
-      angle: -1.5708 // 90 degrees
-    })
-
-    map.addInteraction(rotate)
   })
 
   afterEach(() => {
     map.setTarget(undefined)
-    map = feature = features = rotate = undefined
+    map = features = undefined
   })
 
-  it('should correct setup anchor and angle by default', function () {
-    expect(rotate.anchor).to.be.undefined
-    expect(rotate.angle).to.be.equal(-1.5708)
+  /** @test RotateFeatureInteraction */
+  describe('constructor', () => {
+    it('should throws on invalid options', () => {
+      expect(() => new RotateFeatureInteraction({
+        features: 'wrong value'
+      })).to.throw(Error, /features option should be an array or collection of features/i)
+    })
 
-    features.push(feature)
-    expect(rotate.anchor).to.be.deep.equal([ 5, 5 ])
+    it('should initialize with empty collection', () => {
+      const rotate = new RotateFeatureInteraction()
 
-    features.remove(feature)
-    expect(rotate.anchor).to.be.undefined
+      expect(rotate.features).to.be.instanceof(Collection)
+      expect(rotate.features.getLength()).to.be.equal(0)
+      expect(rotate.angle).to.be.equal(0)
+      expect(rotate.anchor).to.be.undefined
+    })
+
+    it('should initialize with features as array', () => {
+      const features = [
+        new Feature(new Point([ 10, 10 ])),
+        new Feature(new Point([ 0, 0 ]))
+      ]
+      const rotate = new RotateFeatureInteraction({ features })
+
+      expect(rotate.features).to.be.instanceof(Collection)
+      expect(rotate.features.getLength()).to.be.equal(2)
+      expect(rotate.features.getArray().every((feature, i) => feature === features[ i ])).to.be.true
+      expect(rotate.angle).to.be.equal(0)
+      expect(rotate.anchor).to.be.deep.equal([ 5, 5 ])
+    })
+
+    it('should initialize with features as collection', () => {
+      const features = new Collection([
+        new Feature(new Point([ -10, -10 ])),
+        new Feature(new Point([ -5, -5 ]))
+      ])
+      const rotate = new RotateFeatureInteraction({ features })
+
+      expect(rotate.features).to.be.equal(features)
+      expect(rotate.features.getLength()).to.be.equal(2)
+      expect(rotate.angle).to.be.equal(0)
+      expect(rotate.anchor).to.be.deep.equal([ -7.5, -7.5 ])
+    })
+
+    it('should initialize with initial angle and anchor', () => {
+      const angle = 90 * Math.PI / 180
+      const anchor = [ 10, 10 ]
+      const rotate = new RotateFeatureInteraction({ angle, anchor })
+
+      expect(rotate.angle).to.be.equal(angle)
+      expect(rotate.anchor).to.be.deep.equal(anchor)
+    })
   })
 
+  /**
+   * @test RotateFeatureInteraction#setAngle
+   * @test RotateFeatureInteraction#getAngle
+   */
+  describe('angle setter/getter', () => {
+    it('should throw on invalid value', () => {
+      expect(() => new RotateFeatureInteraction({ angle: 'qwerty' })).to.throw(Error, /numeric value passed/i)
 
-  it('Check angle / anchor setters', function () {
-    const checkFeature = feature.clone()
-    checkFeature.getGeometry().rotate(-0.785398, rotate.getAnchor())
+      const rotate = new RotateFeatureInteraction()
+      expect(() => { rotate.angle = 'qwerty' }).to.throw(Error, /numeric value passed/i)
+    })
 
-    // rotate to 45 degrees
-    rotate.setAngle(-0.785398)
+    it('should get/set through ES5 setter/getter', () => {
+      const rotate = new RotateFeatureInteraction({
+        angle: 0.5,
+        features: [ new Feature(new Point([ 10, 10 ])) ]
+      })
+      expect(rotate.angle).to.be.equal(0.5)
+      expect(rotate.arrowFeature.get('angle')).to.be.equal(0.5)
 
-    assert.strictEqual(rotate.getAngle(), -0.785398, 'Angle is -0.785398 = 45 degrees')
-    assert.strictEqual(rotate.anchorFeature_.get('angle'), -0.785398, 'Anchor feature angle is -0.785398')
-    assert.strictEqual(rotate.arrowFeature_.get('angle'), -0.785398, 'Arrow feature angle is -0.785398')
-    assert.deepEqual(rotate.anchorFeature_.getGeometry().getCoordinates(), [ 5, 5 ], 'Anchor feature coordinate is [5, 5]')
-    assert.deepEqual(rotate.arrowFeature_.getGeometry().getCoordinates(), [ 5, 5 ], 'Arrow feature coordinate is [5, 5]')
-    assert.deepEqual(feature.getGeometry().getCoordinates(), checkFeature.getGeometry().getCoordinates(), 'Rotated feature coordinates are valid')
+      rotate.angle = 0.75
+      expect(rotate.angle).to.be.equal(0.75)
+      expect(rotate.arrowFeature.get('angle')).to.be.equal(0.75)
+    })
+  })
+
+  /**
+   * @test RotateFeatureInteraction#setAnchor
+   * @test RotateFeatureInteraction#getAnchor
+   */
+  describe('anchor setter/getter', () => {
+    it('should throw on invalid value', () => {
+      expect(() => new RotateFeatureInteraction({ anchor: 'qwerty' })).to.throw(Error, /array of two elements passed/i)
+
+      const rotate = new RotateFeatureInteraction()
+      expect(() => { rotate.anchor = 'qwerty' }).to.throw(Error, /array of two elements passed/i)
+    })
+
+    it('should get/set through ES5 setter/getter', () => {
+      const rotate = new RotateFeatureInteraction({
+        anchor: [ 5, 10 ],
+        features: [ new Feature(new Point([ 10, 10 ])) ]
+      })
+      expect(rotate.anchor).to.be.deep.equal([ 5, 10 ])
+      expect(rotate.anchorFeature.getGeometry().getCoordinates()).to.be.deep.equal([ 5, 10 ])
+
+      rotate.anchor = [ -5, 0 ]
+      expect(rotate.anchor).to.be.deep.equal([ -5, 0 ])
+      expect(rotate.anchorFeature.getGeometry().getCoordinates()).to.be.deep.equal([ -5, 0 ])
+    })
+  })
+
+  describe('features collection listener', () => {
+    it('should update anchor/angle/internal features on feature add', () => {
+      const rotate = new RotateFeatureInteraction()
+      expect(rotate.angle).to.be.equal(0)
+      expect(rotate.anchor).to.be.undefined
+      expect(rotate.arrowFeature).to.be.undefined
+      expect(rotate.anchorFeature).to.be.undefined
+
+      rotate.features.push(new Feature(new Point([ 10, 10 ])))
+      expect(rotate.angle).to.be.equal(0)
+      expect(rotate.anchor).to.be.deep.equal([ 10, 10 ])
+      expect(rotate.arrowFeature.get('angle')).to.be.equal(0)
+      expect(rotate.anchorFeature.getGeometry().getCoordinates()).to.be.deep.equal([ 10, 10 ])
+
+      rotate.angle = 90 * Math.PI / 180
+      rotate.features.push(new Feature(new Point([ 5, 5 ])))
+      expect(rotate.angle).to.be.equal(0)
+      expect(rotate.anchor).to.be.deep.equal([ 7.5, 7.5 ])
+      expect(rotate.arrowFeature.get('angle')).to.be.equal(0)
+      expect(rotate.anchorFeature.getGeometry().getCoordinates()).to.be.deep.equal([ 7.5, 7.5 ])
+    })
+
+    it('should update anchor/angle/internal features on feature remove', () => {
+      const rotate = new RotateFeatureInteraction({
+        features: [
+          new Feature(new Point([ 10, 10 ])),
+          new Feature(new Point([ 5, 5 ]))
+        ]
+      })
+      expect(rotate.angle).to.be.equal(0)
+      expect(rotate.anchor).to.be.deep.equal([ 7.5, 7.5 ])
+      expect(rotate.arrowFeature.get('angle')).to.be.equal(0)
+      expect(rotate.anchorFeature.getGeometry().getCoordinates()).to.be.deep.equal([ 7.5, 7.5 ])
+
+      rotate.angle = 90 * Math.PI / 180
+      rotate.features.pop()
+      expect(rotate.angle).to.be.equal(0)
+      expect(rotate.anchor).to.be.deep.equal([ 5, 10 ])
+      expect(rotate.arrowFeature.get('angle')).to.be.equal(0)
+      expect(rotate.anchorFeature.getGeometry().getCoordinates()).to.be.deep.equal([ 5, 10 ])
+
+      rotate.angle = 1
+      rotate.features.pop()
+      expect(rotate.angle).to.be.equal(0)
+      expect(rotate.anchor).to.be.undefined
+      expect(rotate.arrowFeature).to.be.undefined
+      expect(rotate.anchorFeature).to.be.undefined
+    })
+  })
+
+  /** @test RotateFeatureInteraction#setMap */
+  describe('map setup/deinit', () => {
+    it('should add internal features to map', done => {
+      const rotate = new RotateFeatureInteraction({
+        angle: 90 * Math.PI / 180,
+        features
+      })
+
+      map.addInteraction(rotate)
+      expect(rotate.getMap()).to.be.equal(map)
+
+      map.once('postrender', () => {
+        const arrowAndAnchorPixel = map.getPixelFromCoordinate(rotate.anchor)
+        const internalFeatures = rotate.overlay.getSource().getFeatures()
+
+        let internalFoundNum = 0
+        map.forEachFeatureAtPixel(
+          arrowAndAnchorPixel,
+          feature => {
+            if (internalFeatures.indexOf(feature) !== -1) {
+              internalFoundNum++
+            }
+          }
+        )
+        expect(internalFoundNum).to.be.equal(2)
+
+        done()
+      })
+    })
+
+    it('should remove internal features from map', done => {
+      const rotate = new RotateFeatureInteraction({
+        angle: 90 * Math.PI / 180,
+        features
+      })
+
+      map.addInteraction(rotate)
+      expect(rotate.getMap()).to.be.equal(map)
+
+      map.once('postrender', () => {
+        const arrowAndAnchorPixel = map.getPixelFromCoordinate(rotate.anchor)
+        map.removeInteraction(rotate)
+
+        map.once('postrender', () => {
+          expect(rotate.getMap()).to.be.null
+
+          const internalFeatures = rotate.overlay.getSource().getFeatures()
+
+          let internalFoundNum = 0
+          map.forEachFeatureAtPixel(
+            arrowAndAnchorPixel,
+            feature => {
+              if (internalFeatures.indexOf(feature) !== -1) {
+                internalFoundNum++
+              }
+            }
+          )
+          expect(internalFoundNum).to.be.equal(0)
+
+          done()
+        })
+      })
+    })
   })
 })
 
+function createTargetElement () {
+  let target = document.createElement('div')
+  let style = target.style
+  style.width = '500px'
+  style.height = '500px'
+  document.body.appendChild(target)
+
+  return target
+}

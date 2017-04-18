@@ -42,6 +42,23 @@ export default class RotateFeatureInteraction extends PointerInteraction {
       handleMoveEvent: handleMoveEvent
     })
 
+    /**
+     * @type {ol.Collection<ol.Feature>}
+     * @private
+     */
+    this.features_ = undefined
+    if (options.features) {
+      if (Array.isArray(options.features)) {
+        this.features_ = new Collection(options.features)
+      } else if (options.features instanceof Collection) {
+        this.features_ = options.features
+      } else {
+        throw new Error('Features option should be an array or collection of features, got ' + (typeof options.features))
+      }
+    } else {
+      this.features_ = new Collection()
+    }
+
     if (options.angle != null) {
       this.setAngle(options.angle)
     }
@@ -49,14 +66,6 @@ export default class RotateFeatureInteraction extends PointerInteraction {
     if (options.anchor != null) {
       this.setAnchor(options.anchor)
     }
-
-    /**
-     * @type {ol.Collection<ol.Feature>}
-     * @private
-     */
-    this.features_ = options.features
-
-    assertInstanceOf(this.features_, Collection)
 
     /**
      * @type {ol.layer.Vector}
@@ -107,6 +116,8 @@ export default class RotateFeatureInteraction extends PointerInteraction {
     this.on('change:active', this.onChangeActive_, this)
     this.on('change:' + ANGLE_PROP, this.onAngleChange_, this)
     this.on('change:' + ANCHOR_PROP, this.onAnchorChange_, this)
+
+    this.updateInteractionFeatures_()
   }
 
   /**
@@ -126,7 +137,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * @param {number} angle
    */
-  set angle(angle) {
+  set angle (angle) {
     this.setAngle(angle)
   }
 
@@ -380,7 +391,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
     this.features_.forEach(feature => {
       feature.getGeometry()
         .rotate(
-          this.getAngle() - oldValue,
+          this.getAngle() - (oldValue || 0),
           this.anchorFeature_.getGeometry().getCoordinates()
         )
     })
