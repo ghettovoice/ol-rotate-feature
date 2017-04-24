@@ -209,70 +209,7 @@ describe('rotate feature interaction', function () {
     })
   })
 
-  /** @test RotateFeatureInteraction#setMap */
-  describe('map setup/deinit', () => {
-    it('should add internal features to map', done => {
-      const rotate = new RotateFeatureInteraction({
-        angle: 90 * Math.PI / 180,
-        features
-      })
-
-      map.addInteraction(rotate)
-      expect(rotate.getMap()).to.be.equal(map)
-
-      map.once('postrender', () => {
-        const arrowAndAnchorPixel = map.getPixelFromCoordinate(rotate.anchor)
-        const internalFeatures = rotate.overlay.getSource().getFeatures()
-
-        let internalFoundNum = 0
-        map.forEachFeatureAtPixel(
-          arrowAndAnchorPixel,
-          feature => {
-            if (internalFeatures.indexOf(feature) !== -1) {
-              internalFoundNum++
-            }
-          }
-        )
-        expect(internalFoundNum).to.be.equal(2)
-
-        done()
-      })
-    })
-
-    it('should remove internal features from map', done => {
-      const rotate = new RotateFeatureInteraction({
-        angle: 90 * Math.PI / 180,
-        features
-      })
-
-      map.addInteraction(rotate)
-      expect(rotate.getMap()).to.be.equal(map)
-
-      map.once('postrender', () => {
-        const arrowAndAnchorPixel = map.getPixelFromCoordinate(rotate.anchor)
-        map.removeInteraction(rotate)
-
-        map.once('postrender', () => {
-          expect(rotate.getMap()).to.be.null
-
-          const internalFeatures = rotate.overlay.getSource().getFeatures()
-
-          let internalFoundNum = 0
-          map.forEachFeatureAtPixel(
-            arrowAndAnchorPixel,
-            feature => {
-              if (internalFeatures.indexOf(feature) !== -1) {
-                internalFoundNum++
-              }
-            }
-          )
-          expect(internalFoundNum).to.be.equal(0)
-
-          done()
-        })
-      })
-    })
-  })
+  // todo add tests on rotations events, features update and etc.
 })
 
 function createTargetElement () {

@@ -13,7 +13,7 @@ const banner =
 @package ${packageJson.name}
 @author ${packageJson.author}
 @version ${packageJson.version}
-@licence MIT https://opensource.org/licenses/MIT
+@licence MIT
 @copyright (c) 2016-${new Date().getFullYear()}, ${packageJson.author}`
 
 const nodeEnv = process.env.NODE_ENV || 'development'

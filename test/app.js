@@ -54,7 +54,8 @@ select.getFeatures().extend([ point, line, polygon ])
 
 const rotate = new RotateFeature({
   features: select.getFeatures(),
-  angle: -1.5708
+  anchor: [ 0, 0 ],
+  angle: -90 * Math.PI / 180
 })
 
 rotate.on('rotatestart', evt => console.log('rotate start', evt))

@@ -1,6 +1,8 @@
 const path = require('path')
 const replace = require('rollup-plugin-replace')
 const babel = require('rollup-plugin-babel')
+const resolve = require('rollup-plugin-node-resolve')
+const cjs = require('rollup-plugin-commonjs')
 const packageJson = require('../package.json')
 
 const nodeEnv = process.env.NODE_ENV || 'development'
@@ -11,7 +13,7 @@ ${packageJson.description}
 @package ${packageJson.name}
 @author ${packageJson.author}
 @version ${packageJson.version}
-@licence MIT https://opensource.org/licenses/MIT
+@licence MIT
 @copyright (c) 2016-${new Date().getFullYear()}, ${packageJson.author}
 */`
 
@@ -25,10 +27,23 @@ module.exports = {
       'process.env.NODE_ENV': `'${nodeEnv}'`,
       PKG_VERSION: `'${packageJson.version}'`
     }),
-    babel()
+    babel({
+      runtimeHelpers: true,
+      sourceMap: true,
+      include: [
+        'src/**/*'
+      ]
+    }),
+    resolve({
+      main: true,
+      module: true,
+      jsnext: true,
+      browser: true
+    }),
+    cjs()
   ],
   external (id) {
-    return /^(openlayers|ol.*)$/i.test(id)
+    return /node_modules\/.*$/i.test(id)
   },
   sourceMap: true
 }

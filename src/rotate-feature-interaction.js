@@ -1,3 +1,10 @@
+/**
+ * todo добавить опцию condition - для возможности переопределения клавиш
+ *
+ * Rotate interaction class.
+ * Adds controls to rotate vector features.
+ * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
+ */
 import PointerInteraction from 'ol/interaction/pointer'
 import Collection from 'ol/collection'
 import VectorLayer from 'ol/layer/vector'
@@ -12,83 +19,32 @@ import Stroke from 'ol/style/stroke'
 import Fill from 'ol/style/fill'
 import Text from 'ol/style/text'
 import extentHelper from 'ol/extent'
-import { assert, assertInstanceOf, coalesce, identity } from './util'
+import { assert, coalesce, identity } from './util'
 import RotateFeatureEvent, { RotateFeatureEventType } from './rotate-feature-event'
 
-const ANCHOR_KEY = 'anchor'
-const ARROW_KEY = 'arrow'
-// const GHOST_KEY = 'ghost'
+const ANCHOR_KEY = 'rotate-anchor'
+const ARROW_KEY = 'rotate-arrow'
 
 const ANGLE_PROP = 'angle'
 const ANCHOR_PROP = 'anchor'
 
-/**
- * todo добавить опцию condition - для возможности переопределения клавиш
- *
- * Rotate interaction class.
- * Adds controls to rotate vector features.
- * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
- */
 export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * @param {InteractionOptions} options
    */
   constructor (options = {}) {
     super({
-      handleEvent: RotateFeatureInteraction.handleEvent,
+      // handleEvent: handleEvent,
       handleDownEvent: handleDownEvent,
       handleUpEvent: handleUpEvent,
       handleDragEvent: handleDragEvent,
       handleMoveEvent: handleMoveEvent
-    })
-
-    /**
-     * @type {ol.Collection<ol.Feature>}
-     * @private
-     */
-    this.features_ = undefined
-    if (options.features) {
-      if (Array.isArray(options.features)) {
-        this.features_ = new Collection(options.features)
-      } else if (options.features instanceof Collection) {
-        this.features_ = options.features
-      } else {
-        throw new Error('Features option should be an array or collection of features, got ' + (typeof options.features))
-      }
-    } else {
-      this.features_ = new Collection()
-    }
-
-    if (options.angle != null) {
-      this.setAngle(options.angle)
-    }
-
-    if (options.anchor != null) {
-      this.setAnchor(options.anchor)
-    }
-
-    /**
-     * @type {ol.layer.Vector}
-     * @private
-     */
-    this.overlay_ = new VectorLayer({
-      style: options.style || getDefaultStyle(),
-      source: new VectorSource({
-        features: new Collection()
-      })
     })
     /**
      * @type {string}
      * @private
      */
     this.previousCursor_ = undefined
-//        /**
-//         * Rotated feature.
-//         *
-//         * @type {ol.Feature}
-//         * @private
-//         */
-//        this.ghostFeature_ = undefined
     /**
      * @type {ol.Feature}
      * @private
@@ -109,15 +65,44 @@ export default class RotateFeatureInteraction extends PointerInteraction {
      * @private
      */
     this.anchorMoving_ = false
+    /**
+     * @type {ol.layer.Vector}
+     * @private
+     */
+    this.overlay_ = new VectorLayer({
+      style: options.style || getDefaultStyle(),
+      source: new VectorSource({
+        features: new Collection()
+      })
+    })
+    /**
+     * @type {ol.Collection<ol.Feature>}
+     * @private
+     */
+    this.features_ = undefined
+    if (options.features) {
+      if (Array.isArray(options.features)) {
+        this.features_ = new Collection(options.features)
+      } else if (options.features instanceof Collection) {
+        this.features_ = options.features
+      } else {
+        throw new Error('Features option should be an array or collection of features, ' +
+                        'got ' + (typeof options.features))
+      }
+    } else {
+      this.features_ = new Collection()
+    }
 
-    this.features_.on('add', this.onFeatureAdd_, this)
-    this.features_.on('remove', this.onFeatureRemove_, this)
+    this.setAnchor(options.anchor || getFeaturesCentroid(this.features_))
+    this.setAngle(options.angle || 0)
 
-    this.on('change:active', this.onChangeActive_, this)
-    this.on('change:' + ANGLE_PROP, this.onAngleChange_, this)
-    this.on('change:' + ANCHOR_PROP, this.onAnchorChange_, this)
+    this.features_.on('add', ::this.onFeatureAdd_)
+    this.features_.on('remove', ::this.onFeatureRemove_)
+    this.on('change:' + ANGLE_PROP, ::this.onAngleChange_)
+    this.on('change:' + ANCHOR_PROP, ::this.onAnchorChange_)
 
-    this.updateInteractionFeatures_()
+    this.createOrUpdateAnchorFeature_()
+    this.createOrUpdateArrowFeature_()
   }
 
   /**
@@ -156,22 +141,31 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   }
 
   /**
-   * @param {ol.MapBrowserEvent} evt Map browser event.
-   * @return {boolean} `false` to stop event propagation.
-   * @this {RotateFeatureInteraction}
-   * @public
+   * @param {ol.Map} map
    */
-  static handleEvent (evt) {
-    // disable selection of inner features
-    const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
-    if (
-      [ 'click', 'singleclick' ].includes(evt.type) &&
-      [ this.anchorFeature_, this.arrowFeature_ ].includes(foundFeature)
-    ) {
-      return false
-    }
+  set map (map) {
+    this.setMap(map)
+  }
 
-    return this::PointerInteraction.handleEvent(evt)
+  /**
+   * @type {ol.Map}
+   */
+  get map() {
+    return this.getMap()
+  }
+
+  /**
+   * @param {boolean} active
+   */
+  set active (active) {
+    this.setActive(active)
+  }
+
+  /**
+   * @type {boolean}
+   */
+  get active () {
+    return this.getActive()
   }
 
   /**
@@ -180,23 +174,17 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   setMap (map) {
     this.overlay_.setMap(map)
     super.setMap(map)
-
-    if (map) {
-      this.updateInteractionFeatures_()
-    } else {
-      this.reset_(true)
-    }
   }
 
   /**
-   * @private
+   * @param {boolean} active
    */
-  onChangeActive_ () {
-    if (this.getActive()) {
-      this.updateInteractionFeatures_()
-    } else {
-      this.reset_(true)
+  setActive (active) {
+    if (this.overlay_) {
+      this.overlay_.setMap(active ? this.map : undefined)
     }
+
+    super.setActive(active)
   }
 
   /**
@@ -216,7 +204,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
    * @return {number}
    */
   getAngle () {
-    return coalesce(this.get(ANGLE_PROP), 0)
+    return this.get(ANGLE_PROP)
   }
 
   /**
@@ -226,7 +214,8 @@ export default class RotateFeatureInteraction extends PointerInteraction {
    */
   setAnchor (anchor) {
     assert(anchor == null || Array.isArray(anchor) && anchor.length === 2, 'Array of two elements passed')
-    this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : undefined)
+
+    this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : getFeaturesCentroid(this.features_))
   }
 
   /**
@@ -235,70 +224,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
    * @return {ol.Coordinate | undefined}
    */
   getAnchor () {
-    return coalesce(this.get(ANCHOR_PROP), getFeaturesCentroid(this.features_))
-  }
-
-  /**
-   * Creates or updates all interaction helper features.
-   * @private
-   */
-  updateInteractionFeatures_ () {
-    if (!this.features_.getLength()) {
-      this.reset_()
-
-      return
-    }
-
-    this.createOrUpdateAnchorFeature_()
-    this.createOrUpdateArrowFeature_()
-  }
-
-  /**
-   * @param {boolean} [resetAngleAndAnchor]
-   * @private
-   */
-  reset_ (resetAngleAndAnchor = false) {
-    if (resetAngleAndAnchor) {
-      this.resetAngleAndAnchor_()
-    }
-
-    [ this.anchorFeature_, this.arrowFeature_ ].forEach(feature => {
-      if (feature) {
-        this.overlay_.getSource().removeFeature(feature)
-      }
-    })
-
-    this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = undefined
-    this.anchorMoving_ = false
-  }
-
-  /**
-   * @private
-   */
-  resetAngleAndAnchor_ () {
-    this.resetAngle_()
-    this.resetAnchor_()
-  }
-
-  /**
-   * @private
-   */
-  resetAngle_ () {
-    this.set(ANGLE_PROP, 0, true)
-    this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle())
-    this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle())
-  }
-
-  /**
-   * @private
-   */
-  resetAnchor_ () {
-    this.set(ANCHOR_PROP, getFeaturesCentroid(this.features_), true)
-
-    if (this.getAnchor()) {
-      this.arrowFeature_ && this.arrowFeature_.getGeometry().setCoordinates(this.getAnchor())
-      this.anchorFeature_ && this.anchorFeature_.getGeometry().setCoordinates(this.getAnchor())
-    }
+    return this.get(ANCHOR_PROP)
   }
 
   /**
@@ -308,32 +234,20 @@ export default class RotateFeatureInteraction extends PointerInteraction {
     const angle = this.getAngle()
     const anchor = this.getAnchor()
 
+    if (!anchor) return
+
     if (this.anchorFeature_) {
       this.anchorFeature_.getGeometry().setCoordinates(anchor)
+      this.anchorFeature_.set(ANGLE_PROP, angle)
     } else {
       this.anchorFeature_ = new Feature({
         geometry: new Point(anchor),
-        [ANCHOR_KEY]: true,
-        [ANGLE_PROP]: angle
+        [ ANGLE_PROP ]: angle,
+        [ ANCHOR_KEY ]: true
       })
       this.overlay_.getSource().addFeature(this.anchorFeature_)
     }
   }
-
-//    /**
-//     * @private
-//     */
-//    createOrUpdateGhostFeature_() {
-//        if (this.ghostFeature_) {
-//            this.ghostFeature_.getGeometry().setGeometries(geometries)
-//        } else {
-//            this.ghostFeature_ = new ol.Feature({
-//                geometry: new ol.geom.GeometryCollection(geometries),
-//                [GHOST_KEY]: true
-//            })
-//            this.overlay_.addFeature(this.ghostFeature_)
-//        }
-//    }
 
   /**
    * @private
@@ -342,59 +256,79 @@ export default class RotateFeatureInteraction extends PointerInteraction {
     const angle = this.getAngle()
     const anchor = this.getAnchor()
 
+    if (!anchor) return
+
     if (this.arrowFeature_) {
       this.arrowFeature_.getGeometry().setCoordinates(anchor)
+      this.arrowFeature_.set(ANGLE_PROP, angle)
     } else {
       this.arrowFeature_ = new Feature({
         geometry: new Point(anchor),
-        [ARROW_KEY]: true,
-        [ANGLE_PROP]: angle
+        [ ANGLE_PROP ]: angle,
+        [ ARROW_KEY ]: true
       })
       this.overlay_.getSource().addFeature(this.arrowFeature_)
     }
   }
 
   /**
-   * @param {ol.Feature} element
    * @private
    */
-  onFeatureAdd_ ({ element }) {
-    if (!this.getActive()) {
-      return
-    }
-
-    assertInstanceOf(element, Feature)
-
-    this.resetAngleAndAnchor_()
-    this.updateInteractionFeatures_()
-  }
-
-  /**
-   * @param {ol.Feature} element
-   * @private
-   */
-  onFeatureRemove_ ({ element }) {
-    if (!this.getActive()) {
-      return
-    }
-
-    assertInstanceOf(element, Feature)
-
-    this.resetAngleAndAnchor_()
-    this.updateInteractionFeatures_()
+  resetAngleAndAnchor_() {
+    this.resetAngle_();
+    this.resetAnchor_();
   }
 
   /**
    * @private
    */
-  onAngleChange_ ({ oldValue }) {
-    this.features_.forEach(feature => {
-      feature.getGeometry()
-        .rotate(
-          this.getAngle() - (oldValue || 0),
-          this.anchorFeature_.getGeometry().getCoordinates()
-        )
-    })
+  resetAngle_() {
+    this.set(ANGLE_PROP, 0, true);
+    this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle());
+    this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle());
+  }
+
+  /**
+   * @private
+   */
+  resetAnchor_() {
+    this.set(ANCHOR_PROP, getFeaturesCentroid(this.features_), true);
+
+    if (this.getAnchor()) {
+      this.arrowFeature_ && this.arrowFeature_.getGeometry().setCoordinates(this.getAnchor());
+      this.anchorFeature_ && this.anchorFeature_.getGeometry().setCoordinates(this.getAnchor());
+    }
+  }
+
+  /**
+   * @private
+   */
+  onFeatureAdd_ () {
+    this.resetAngleAndAnchor_()
+    this.createOrUpdateAnchorFeature_()
+    this.createOrUpdateArrowFeature_()
+  }
+
+  /**
+   * @private
+   */
+  onFeatureRemove_ () {
+    this.resetAngleAndAnchor_()
+
+    if (this.features_.getLength()) {
+      this.createOrUpdateAnchorFeature_()
+      this.createOrUpdateArrowFeature_()
+    } else {
+      this.overlay_.getSource().clear()
+      this.anchorFeature_ = this.arrowFeature_ = undefined
+    }
+  }
+
+  /**
+   * @private
+   */
+  onAngleChange_({ oldValue }) {
+    this.features_.forEach(feature => feature.getGeometry().rotate(this.getAngle() - oldValue, this.getAnchor()))
     this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle())
     this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle())
   }
@@ -402,7 +336,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * @private
    */
-  onAnchorChange_ () {
+  onAnchorChange_() {
     const anchor = this.getAnchor()
 
     if (anchor) {
@@ -457,6 +391,29 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   }
 }
 
+// /**
+//  * @param {ol.MapBrowserEvent} evt Map browser event.
+//  * @return {boolean} `false` to stop event propagation.
+//  * @this {RotateFeatureInteraction}
+//  * @private
+//  */
+// function handleEvent (evt) {
+//   if (evt.type !== '') {
+//     return true
+//   }
+//
+//   // disable selection of inner features
+//   const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
+//   if (
+//     [ 'click', 'singleclick' ].includes(evt.type) &&
+//     [ this.anchorFeature_, this.arrowFeature_ ].includes(foundFeature)
+//   ) {
+//     return false
+//   }
+//
+//   return this::PointerInteraction.handleEvent(evt)
+// }
+
 /**
  * @param {ol.MapBrowserEvent} evt Event.
  * @return {boolean}
@@ -476,7 +433,7 @@ function handleDownEvent (evt) {
   ) {
     this.lastCoordinate_ = evt.coordinate
 
-    handleMoveEvent.call(this, evt)
+    this::handleMoveEvent(evt)
     this.dispatchRotateStartEvent_(this.features_)
 
     return true
@@ -484,7 +441,7 @@ function handleDownEvent (evt) {
   // handle click & drag on rotation anchor feature
   else if (foundFeature && foundFeature === this.anchorFeature_) {
     this.anchorMoving_ = true
-    handleMoveEvent.call(this, evt)
+    this::handleMoveEvent(evt)
 
     return true
   }
@@ -503,7 +460,7 @@ function handleUpEvent (evt) {
   if (this.lastCoordinate_) {
     this.lastCoordinate_ = undefined
 
-    handleMoveEvent.call(this, evt)
+    this::handleMoveEvent(evt)
     this.dispatchRotateEndEvent_(this.features_)
 
     return true
@@ -511,7 +468,7 @@ function handleUpEvent (evt) {
   // stop drag sequence of the anchors
   else if (this.anchorMoving_) {
     this.anchorMoving_ = false
-    handleMoveEvent.call(this, evt)
+    this::handleMoveEvent(evt)
 
     return true
   }
@@ -525,8 +482,7 @@ function handleUpEvent (evt) {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleDragEvent (evt) {
-  const newCoordinate = evt.coordinate
+function handleDragEvent ({ coordinate }) {
   const anchorCoordinate = this.anchorFeature_.getGeometry().getCoordinates()
 
   // handle drag of features by angle
@@ -537,8 +493,8 @@ function handleDragEvent (evt) {
       this.lastCoordinate_[ 1 ] - anchorCoordinate[ 1 ]
     ]
     const newVector = [
-      newCoordinate[ 0 ] - anchorCoordinate[ 0 ],
-      newCoordinate[ 1 ] - anchorCoordinate[ 1 ]
+      coordinate[ 0 ] - anchorCoordinate[ 0 ],
+      coordinate[ 1 ] - anchorCoordinate[ 1 ]
     ]
 
     // calculate angle between last and current vectors (positive angle counter-clockwise)
@@ -550,11 +506,11 @@ function handleDragEvent (evt) {
     this.setAngle(this.getAngle() + angle)
     this.dispatchRotatingEvent_(this.features_)
 
-    this.lastCoordinate_ = evt.coordinate
+    this.lastCoordinate_ = coordinate
   }
   // handle drag of the anchor
   else if (this.anchorMoving_) {
-    this.setAnchor(newCoordinate)
+    this.setAnchor(coordinate)
   }
 }
 
@@ -564,9 +520,9 @@ function handleDragEvent (evt) {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleMoveEvent (evt) {
-  const elem = evt.map.getTargetElement()
-  const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
+function handleMoveEvent ({ map, pixel }) {
+  const elem = map.getTargetElement()
+  const foundFeature = map.forEachFeatureAtPixel(pixel, identity)
 
   const setCursor = (cursor, vendor = false) => {
     if (vendor) {
