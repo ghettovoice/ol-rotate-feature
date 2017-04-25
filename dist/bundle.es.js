@@ -7,28 +7,28 @@ Rotate vector features interaction for OpenLayers
 @licence MIT
 @copyright (c) 2016-2017, Vladimir Vershinin <ghettovoice@gmail.com>
 */
-import _defineProperty from '../node_modules/babel-runtime/helpers/defineProperty.js';
-import _typeof from '../node_modules/babel-runtime/helpers/typeof.js';
-import _Object$getPrototypeOf from '../node_modules/babel-runtime/core-js/object/get-prototype-of.js';
-import _classCallCheck from '../node_modules/babel-runtime/helpers/classCallCheck.js';
-import _createClass from '../node_modules/babel-runtime/helpers/createClass.js';
-import _possibleConstructorReturn from '../node_modules/babel-runtime/helpers/possibleConstructorReturn.js';
-import _get from '../node_modules/babel-runtime/helpers/get.js';
-import _inherits from '../node_modules/babel-runtime/helpers/inherits.js';
-import PointerInteraction from '../node_modules/ol/interaction/pointer.js';
-import Collection from '../node_modules/ol/collection.js';
-import VectorLayer from '../node_modules/ol/layer/vector.js';
-import VectorSource from '../node_modules/ol/source/vector.js';
-import Feature from '../node_modules/ol/feature.js';
-import Point from '../node_modules/ol/geom/point.js';
-import Polygon from '../node_modules/ol/geom/polygon.js';
-import GeometryCollection from '../node_modules/ol/geom/geometrycollection.js';
-import Style from '../node_modules/ol/style/style.js';
-import RegularShape from '../node_modules/ol/style/regularshape.js';
-import Stroke from '../node_modules/ol/style/stroke.js';
-import Fill from '../node_modules/ol/style/fill.js';
-import Text from '../node_modules/ol/style/text.js';
-import extentHelper from '../node_modules/ol/extent.js';
+import _defineProperty from 'babel-runtime/helpers/defineProperty';
+import _typeof from 'babel-runtime/helpers/typeof';
+import _Object$getPrototypeOf from 'babel-runtime/core-js/object/get-prototype-of';
+import _classCallCheck from 'babel-runtime/helpers/classCallCheck';
+import _createClass from 'babel-runtime/helpers/createClass';
+import _possibleConstructorReturn from 'babel-runtime/helpers/possibleConstructorReturn';
+import _get from 'babel-runtime/helpers/get';
+import _inherits from 'babel-runtime/helpers/inherits';
+import PointerInteraction from 'ol/interaction/pointer';
+import Collection from 'ol/collection';
+import VectorLayer from 'ol/layer/vector';
+import VectorSource from 'ol/source/vector';
+import Feature from 'ol/feature';
+import Point from 'ol/geom/point';
+import Polygon from 'ol/geom/polygon';
+import GeometryCollection from 'ol/geom/geometrycollection';
+import Style from 'ol/style/style';
+import RegularShape from 'ol/style/regularshape';
+import Stroke from 'ol/style/stroke';
+import Fill from 'ol/style/fill';
+import Text from 'ol/style/text';
+import extentHelper from 'ol/extent';
 
 /**
  * @param {boolean} condition
@@ -46,22 +46,6 @@ function assert(condition) {
 }
 
 /**
- * Checks if the value is an instance of the user-defined type.
- *
- * @param {*} value
- * @param {*} type
- * @throws Error
- */
-function assertInstanceOf(value, type) {
-  assert(value instanceof type, 'Expected instanceof ' + getValueType(type) + ' but got ' + getValueType(value) + '.');
-}
-
-/**
- * Null function. Do nothing.
- */
-
-
-/**
  * @param {*} arg
  * @returns {*}
  */
@@ -70,34 +54,23 @@ function identity(arg) {
 }
 
 /**
- * Returns the type of a value. If a constructor is passed, and a suitable
- * string cannot be found, 'unknown type name' will be returned.
- *
- * @param {*} value
- * @returns string
- */
-function getValueType(value) {
-  if (value instanceof Function) {
-    return value.name || 'unknown type name';
-  } else if (value instanceof Object) {
-    return value.constructor.name || Object.prototype.toString.call(value);
-  } else {
-    return value === null ? 'null' : typeof value === 'undefined' ? 'undefined' : _typeof(value);
-  }
-}
-
-/**
  * @param {...*} args
  * @return {*}
  */
-function coalesce() {
-  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
 
-  return args.filter(function (value) {
-    return value != null;
-  }).shift();
+
+/**
+ * @param {string} [prefix]
+ * @return {number}
+ */
+
+
+function includes(arr, value) {
+  return arr.indexOf(value) !== -1;
+}
+
+function isArray(val) {
+  return Object.prototype.toString.call(val) === '[object Array]';
 }
 
 /**
@@ -246,19 +219,19 @@ var RotateFeatureEvent = function () {
   return RotateFeatureEvent;
 }();
 
-var ANCHOR_KEY = 'anchor';
-var ARROW_KEY = 'arrow';
-// const GHOST_KEY = 'ghost'
+/**
+ * Rotate interaction class.
+ * Adds controls to rotate vector features.
+ * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
+ */
+var ANCHOR_KEY = 'rotate-anchor';
+var ARROW_KEY = 'rotate-arrow';
 
 var ANGLE_PROP = 'angle';
 var ANCHOR_PROP = 'anchor';
 
 /**
- * todo добавить опцию condition - для возможности переопределения клавиш
- *
- * Rotate interaction class.
- * Adds controls to rotate vector features.
- * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
+ * @todo todo добавить опцию condition - для возможности переопределения клавиш
  */
 
 var RotateFeatureInteraction = function (_PointerInteraction) {
@@ -273,60 +246,18 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
     _classCallCheck(this, RotateFeatureInteraction);
 
     /**
-     * @type {ol.Collection<ol.Feature>}
+     * @type {string}
      * @private
      */
     var _this = _possibleConstructorReturn(this, (RotateFeatureInteraction.__proto__ || _Object$getPrototypeOf(RotateFeatureInteraction)).call(this, {
-      handleEvent: RotateFeatureInteraction.handleEvent,
+      handleEvent: handleEvent,
       handleDownEvent: handleDownEvent,
       handleUpEvent: handleUpEvent,
       handleDragEvent: handleDragEvent,
       handleMoveEvent: handleMoveEvent
     }));
 
-    _this.features_ = undefined;
-    if (options.features) {
-      if (Array.isArray(options.features)) {
-        _this.features_ = new Collection(options.features);
-      } else if (options.features instanceof Collection) {
-        _this.features_ = options.features;
-      } else {
-        throw new Error('Features option should be an array or collection of features, got ' + _typeof(options.features));
-      }
-    } else {
-      _this.features_ = new Collection();
-    }
-
-    if (options.angle != null) {
-      _this.setAngle(options.angle);
-    }
-
-    if (options.anchor != null) {
-      _this.setAnchor(options.anchor);
-    }
-
-    /**
-     * @type {ol.layer.Vector}
-     * @private
-     */
-    _this.overlay_ = new VectorLayer({
-      style: options.style || getDefaultStyle(),
-      source: new VectorSource({
-        features: new Collection()
-      })
-    });
-    /**
-     * @type {string}
-     * @private
-     */
     _this.previousCursor_ = undefined;
-    //        /**
-    //         * Rotated feature.
-    //         *
-    //         * @type {ol.Feature}
-    //         * @private
-    //         */
-    //        this.ghostFeature_ = undefined
     /**
      * @type {ol.Feature}
      * @private
@@ -347,15 +278,43 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
      * @private
      */
     _this.anchorMoving_ = false;
+    /**
+     * @type {ol.layer.Vector}
+     * @private
+     */
+    _this.overlay_ = new VectorLayer({
+      style: options.style || getDefaultStyle(),
+      source: new VectorSource({
+        features: new Collection()
+      })
+    });
+    /**
+     * @type {ol.Collection<ol.Feature>}
+     * @private
+     */
+    _this.features_ = undefined;
+    if (options.features) {
+      if (isArray(options.features)) {
+        _this.features_ = new Collection(options.features);
+      } else if (options.features instanceof Collection) {
+        _this.features_ = options.features;
+      } else {
+        throw new Error('Features option should be an array or collection of features, ' + 'got ' + _typeof(options.features));
+      }
+    } else {
+      _this.features_ = new Collection();
+    }
 
-    _this.features_.on('add', _this.onFeatureAdd_, _this);
-    _this.features_.on('remove', _this.onFeatureRemove_, _this);
+    _this.setAnchor(options.anchor || getFeaturesCentroid(_this.features_));
+    _this.setAngle(options.angle || 0);
 
-    _this.on('change:active', _this.onChangeActive_, _this);
-    _this.on('change:' + ANGLE_PROP, _this.onAngleChange_, _this);
-    _this.on('change:' + ANCHOR_PROP, _this.onAnchorChange_, _this);
+    _this.features_.on('add', _this.onFeatureAdd_.bind(_this));
+    _this.features_.on('remove', _this.onFeatureRemove_.bind(_this));
+    _this.on('change:' + ANGLE_PROP, _this.onAngleChange_.bind(_this));
+    _this.on('change:' + ANCHOR_PROP, _this.onAnchorChange_.bind(_this));
 
-    _this.updateInteractionFeatures_();
+    _this.createOrUpdateAnchorFeature_();
+    _this.createOrUpdateArrowFeature_();
     return _this;
   }
 
@@ -374,26 +333,20 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
     value: function setMap(map) {
       this.overlay_.setMap(map);
       _get(RotateFeatureInteraction.prototype.__proto__ || _Object$getPrototypeOf(RotateFeatureInteraction.prototype), 'setMap', this).call(this, map);
-
-      if (map) {
-        this.updateInteractionFeatures_();
-      } else {
-        this.reset_(true);
-      }
     }
 
     /**
-     * @private
+     * @param {boolean} active
      */
 
   }, {
-    key: 'onChangeActive_',
-    value: function onChangeActive_() {
-      if (this.getActive()) {
-        this.updateInteractionFeatures_();
-      } else {
-        this.reset_(true);
+    key: 'setActive',
+    value: function setActive(active) {
+      if (this.overlay_) {
+        this.overlay_.setMap(active ? this.map : undefined);
       }
+
+      _get(RotateFeatureInteraction.prototype.__proto__ || _Object$getPrototypeOf(RotateFeatureInteraction.prototype), 'setActive', this).call(this, active);
     }
 
     /**
@@ -419,7 +372,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
   }, {
     key: 'getAngle',
     value: function getAngle() {
-      return coalesce(this.get(ANGLE_PROP), 0);
+      return this.get(ANGLE_PROP);
     }
 
     /**
@@ -431,8 +384,9 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
   }, {
     key: 'setAnchor',
     value: function setAnchor(anchor) {
-      assert(anchor == null || Array.isArray(anchor) && anchor.length === 2, 'Array of two elements passed');
-      this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : undefined);
+      assert(anchor == null || isArray(anchor) && anchor.length === 2, 'Array of two elements passed');
+
+      this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : getFeaturesCentroid(this.features_));
     }
 
     /**
@@ -444,51 +398,57 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
   }, {
     key: 'getAnchor',
     value: function getAnchor() {
-      return coalesce(this.get(ANCHOR_PROP), getFeaturesCentroid(this.features_));
+      return this.get(ANCHOR_PROP);
     }
 
     /**
-     * Creates or updates all interaction helper features.
      * @private
      */
 
   }, {
-    key: 'updateInteractionFeatures_',
-    value: function updateInteractionFeatures_() {
-      if (!this.features_.getLength()) {
-        this.reset_();
+    key: 'createOrUpdateAnchorFeature_',
+    value: function createOrUpdateAnchorFeature_() {
+      var angle = this.getAngle();
+      var anchor = this.getAnchor();
 
-        return;
+      if (!anchor) return;
+
+      if (this.anchorFeature_) {
+        this.anchorFeature_.getGeometry().setCoordinates(anchor);
+        this.anchorFeature_.set(ANGLE_PROP, angle);
+      } else {
+        var _ref;
+
+        this.anchorFeature_ = new Feature((_ref = {
+          geometry: new Point(anchor)
+        }, _defineProperty(_ref, ANGLE_PROP, angle), _defineProperty(_ref, ANCHOR_KEY, true), _ref));
+        this.overlay_.getSource().addFeature(this.anchorFeature_);
       }
-
-      this.createOrUpdateAnchorFeature_();
-      this.createOrUpdateArrowFeature_();
     }
 
     /**
-     * @param {boolean} [resetAngleAndAnchor]
      * @private
      */
 
   }, {
-    key: 'reset_',
-    value: function reset_() {
-      var _this2 = this;
+    key: 'createOrUpdateArrowFeature_',
+    value: function createOrUpdateArrowFeature_() {
+      var angle = this.getAngle();
+      var anchor = this.getAnchor();
 
-      var resetAngleAndAnchor = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      if (!anchor) return;
 
-      if (resetAngleAndAnchor) {
-        this.resetAngleAndAnchor_();
+      if (this.arrowFeature_) {
+        this.arrowFeature_.getGeometry().setCoordinates(anchor);
+        this.arrowFeature_.set(ANGLE_PROP, angle);
+      } else {
+        var _ref2;
+
+        this.arrowFeature_ = new Feature((_ref2 = {
+          geometry: new Point(anchor)
+        }, _defineProperty(_ref2, ANGLE_PROP, angle), _defineProperty(_ref2, ARROW_KEY, true), _ref2));
+        this.overlay_.getSource().addFeature(this.arrowFeature_);
       }
-
-      [this.anchorFeature_, this.arrowFeature_].forEach(function (feature) {
-        if (feature) {
-          _this2.overlay_.getSource().removeFeature(feature);
-        }
-      });
-
-      this.anchorFeature_ = this.arrowFeature_ = this.lastCoordinate_ = undefined;
-      this.anchorMoving_ = false;
     }
 
     /**
@@ -534,98 +494,29 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
      */
 
   }, {
-    key: 'createOrUpdateAnchorFeature_',
-    value: function createOrUpdateAnchorFeature_() {
-      var angle = this.getAngle();
-      var anchor = this.getAnchor();
-
-      if (this.anchorFeature_) {
-        this.anchorFeature_.getGeometry().setCoordinates(anchor);
-      } else {
-        var _ref;
-
-        this.anchorFeature_ = new Feature((_ref = {
-          geometry: new Point(anchor)
-        }, _defineProperty(_ref, ANCHOR_KEY, true), _defineProperty(_ref, ANGLE_PROP, angle), _ref));
-        this.overlay_.getSource().addFeature(this.anchorFeature_);
-      }
-    }
-
-    //    /**
-    //     * @private
-    //     */
-    //    createOrUpdateGhostFeature_() {
-    //        if (this.ghostFeature_) {
-    //            this.ghostFeature_.getGeometry().setGeometries(geometries)
-    //        } else {
-    //            this.ghostFeature_ = new ol.Feature({
-    //                geometry: new ol.geom.GeometryCollection(geometries),
-    //                [GHOST_KEY]: true
-    //            })
-    //            this.overlay_.addFeature(this.ghostFeature_)
-    //        }
-    //    }
-
-    /**
-     * @private
-     */
-
-  }, {
-    key: 'createOrUpdateArrowFeature_',
-    value: function createOrUpdateArrowFeature_() {
-      var angle = this.getAngle();
-      var anchor = this.getAnchor();
-
-      if (this.arrowFeature_) {
-        this.arrowFeature_.getGeometry().setCoordinates(anchor);
-      } else {
-        var _ref2;
-
-        this.arrowFeature_ = new Feature((_ref2 = {
-          geometry: new Point(anchor)
-        }, _defineProperty(_ref2, ARROW_KEY, true), _defineProperty(_ref2, ANGLE_PROP, angle), _ref2));
-        this.overlay_.getSource().addFeature(this.arrowFeature_);
-      }
-    }
-
-    /**
-     * @param {ol.Feature} element
-     * @private
-     */
-
-  }, {
     key: 'onFeatureAdd_',
-    value: function onFeatureAdd_(_ref3) {
-      var element = _ref3.element;
-
-      if (!this.getActive()) {
-        return;
-      }
-
-      assertInstanceOf(element, Feature);
-
+    value: function onFeatureAdd_() {
       this.resetAngleAndAnchor_();
-      this.updateInteractionFeatures_();
+      this.createOrUpdateAnchorFeature_();
+      this.createOrUpdateArrowFeature_();
     }
 
     /**
-     * @param {ol.Feature} element
      * @private
      */
 
   }, {
     key: 'onFeatureRemove_',
-    value: function onFeatureRemove_(_ref4) {
-      var element = _ref4.element;
-
-      if (!this.getActive()) {
-        return;
-      }
-
-      assertInstanceOf(element, Feature);
-
+    value: function onFeatureRemove_() {
       this.resetAngleAndAnchor_();
-      this.updateInteractionFeatures_();
+
+      if (this.features_.getLength()) {
+        this.createOrUpdateAnchorFeature_();
+        this.createOrUpdateArrowFeature_();
+      } else {
+        this.overlay_.getSource().clear();
+        this.anchorFeature_ = this.arrowFeature_ = undefined;
+      }
     }
 
     /**
@@ -634,13 +525,13 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
 
   }, {
     key: 'onAngleChange_',
-    value: function onAngleChange_(_ref5) {
-      var _this3 = this;
+    value: function onAngleChange_(_ref3) {
+      var _this2 = this;
 
-      var oldValue = _ref5.oldValue;
+      var oldValue = _ref3.oldValue;
 
       this.features_.forEach(function (feature) {
-        feature.getGeometry().rotate(_this3.getAngle() - (oldValue || 0), _this3.anchorFeature_.getGeometry().getCoordinates());
+        return feature.getGeometry().rotate(_this2.getAngle() - oldValue, _this2.getAnchor());
       });
       this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle());
       this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle());
@@ -736,33 +627,66 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
     }
 
     /**
-     * @param {ol.MapBrowserEvent} evt Map browser event.
-     * @return {boolean} `false` to stop event propagation.
-     * @this {RotateFeatureInteraction}
-     * @public
+     * @param {ol.Map} map
      */
 
-  }], [{
-    key: 'handleEvent',
-    value: function handleEvent(evt) {
-      // disable selection of inner features
-      var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity);
-      if (['click', 'singleclick'].includes(evt.type) && [this.anchorFeature_, this.arrowFeature_].includes(foundFeature)) {
-        return false;
-      }
+  }, {
+    key: 'map',
+    set: function set(map) {
+      this.setMap(map);
+    }
 
-      return PointerInteraction.handleEvent.call(this, evt);
+    /**
+     * @type {ol.Map}
+     */
+    ,
+    get: function get() {
+      return this.getMap();
+    }
+
+    /**
+     * @param {boolean} active
+     */
+
+  }, {
+    key: 'active',
+    set: function set(active) {
+      this.setActive(active);
+    }
+
+    /**
+     * @type {boolean}
+     */
+    ,
+    get: function get() {
+      return this.getActive();
     }
   }]);
 
   return RotateFeatureInteraction;
 }(PointerInteraction);
 
+function handleEvent(evt) {
+  // disable selection of inner features
+  var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity);
+  if (includes(['click', 'singleclick', 'dblclick'], evt.type) && includes([this.anchorFeature_, this.arrowFeature_], foundFeature)) {
+    return false;
+  }
+
+  return PointerInteraction.handleEvent.call(this, evt);
+}
+
+/**
+ * @param {ol.MapBrowserEvent} evt Event.
+ * @return {boolean}
+ * @this {RotateFeatureInteraction}
+ * @private
+ */
 function handleDownEvent(evt) {
   var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity);
 
   // handle click & drag on features for rotation
-  if (foundFeature && !this.lastCoordinate_ && (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_)) {
+  if (foundFeature && !this.lastCoordinate_ && (includes(this.features_.getArray(), foundFeature) || foundFeature === this.arrowFeature_)) {
     this.lastCoordinate_ = evt.coordinate;
 
     handleMoveEvent.call(this, evt);
@@ -814,15 +738,16 @@ function handleUpEvent(evt) {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleDragEvent(evt) {
-  var newCoordinate = evt.coordinate;
+function handleDragEvent(_ref4) {
+  var coordinate = _ref4.coordinate;
+
   var anchorCoordinate = this.anchorFeature_.getGeometry().getCoordinates();
 
   // handle drag of features by angle
   if (this.lastCoordinate_) {
     // calculate vectors of last and current pointer positions
     var lastVector = [this.lastCoordinate_[0] - anchorCoordinate[0], this.lastCoordinate_[1] - anchorCoordinate[1]];
-    var newVector = [newCoordinate[0] - anchorCoordinate[0], newCoordinate[1] - anchorCoordinate[1]];
+    var newVector = [coordinate[0] - anchorCoordinate[0], coordinate[1] - anchorCoordinate[1]];
 
     // calculate angle between last and current vectors (positive angle counter-clockwise)
     var angle = Math.atan2(lastVector[0] * newVector[1] - newVector[0] * lastVector[1], lastVector[0] * newVector[0] + lastVector[1] * newVector[1]);
@@ -830,11 +755,11 @@ function handleDragEvent(evt) {
     this.setAngle(this.getAngle() + angle);
     this.dispatchRotatingEvent_(this.features_);
 
-    this.lastCoordinate_ = evt.coordinate;
+    this.lastCoordinate_ = coordinate;
   }
   // handle drag of the anchor
   else if (this.anchorMoving_) {
-      this.setAnchor(newCoordinate);
+      this.setAnchor(coordinate);
     }
 }
 
@@ -844,9 +769,12 @@ function handleDragEvent(evt) {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleMoveEvent(evt) {
-  var elem = evt.map.getTargetElement();
-  var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity);
+function handleMoveEvent(_ref5) {
+  var map = _ref5.map,
+      pixel = _ref5.pixel;
+
+  var elem = map.getTargetElement();
+  var foundFeature = map.forEachFeatureAtPixel(pixel, identity);
 
   var setCursor = function setCursor(cursor) {
     var vendor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -862,7 +790,7 @@ function handleMoveEvent(evt) {
   if (this.lastCoordinate_) {
     this.previousCursor_ = elem.style.cursor;
     setCursor('grabbing', true);
-  } else if (foundFeature && (this.features_.getArray().includes(foundFeature) || foundFeature === this.arrowFeature_)) {
+  } else if (foundFeature && (includes(this.features_.getArray(), foundFeature) || foundFeature === this.arrowFeature_)) {
     this.previousCursor_ = elem.style.cursor;
     setCursor('grab', true);
   } else if (foundFeature && foundFeature === this.anchorFeature_ || this.anchorMoving_) {

@@ -1,9 +1,7 @@
 {
   "presets": [
-    ["latest", {
-      "es2015": {
-        "modules": false
-      }
+    ["env", {
+      "modules": false
     }],
     "stage-0"
   ],
@@ -12,7 +10,9 @@
   ],
   "env": {
     "test": {
-      "plugins": [ "istanbul" ]
+      "plugins": [
+        "istanbul"
+      ]
     },
     "umd": {
       "plugins": [

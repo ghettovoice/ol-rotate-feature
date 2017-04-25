@@ -38,3 +38,11 @@ export function uniqId (prefix) {
 
   return String(prefix) + (++counters[ prefix ])
 }
+
+export function includes (arr, value) {
+  return arr.indexOf(value) !== -1
+}
+
+export function isArray (val) {
+  return val::Object.prototype.toString() === '[object Array]'
+}

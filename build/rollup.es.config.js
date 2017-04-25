@@ -43,7 +43,7 @@ module.exports = {
     cjs()
   ],
   external (id) {
-    return /node_modules\/.*$/i.test(id)
+    return /(babel-runtime|openlayers|ol\/.+)/i.test(id)
   },
   sourceMap: true
 }

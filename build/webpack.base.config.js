@@ -38,7 +38,6 @@ if (process.env.NODE_ENV === 'production') {
         warnings: false
       }
     })
-    // , new BundleAnalyzerPlugin()
   )
 }
 
@@ -66,7 +65,10 @@ module.exports = {
     rules: [ {
       test: /\.jsx?$/,
       loader: 'babel-loader',
-      include: [ srcPath, path.join(__dirname, '../test') ]
+      include: [
+        srcPath,
+        path.join(__dirname, '../test')
+      ]
     }, {
       test: /\.json$/i,
       loader: 'json-loader'

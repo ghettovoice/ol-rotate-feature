@@ -1,6 +1,4 @@
 /**
- * todo добавить опцию condition - для возможности переопределения клавиш
- *
  * Rotate interaction class.
  * Adds controls to rotate vector features.
  * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
@@ -19,7 +17,7 @@ import Stroke from 'ol/style/stroke'
 import Fill from 'ol/style/fill'
 import Text from 'ol/style/text'
 import extentHelper from 'ol/extent'
-import { assert, coalesce, identity } from './util'
+import { assert, identity, includes, isArray } from './util'
 import RotateFeatureEvent, { RotateFeatureEventType } from './rotate-feature-event'
 
 const ANCHOR_KEY = 'rotate-anchor'
@@ -28,13 +26,16 @@ const ARROW_KEY = 'rotate-arrow'
 const ANGLE_PROP = 'angle'
 const ANCHOR_PROP = 'anchor'
 
+/**
+ * @todo todo добавить опцию condition - для возможности переопределения клавиш
+ */
 export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * @param {InteractionOptions} options
    */
   constructor (options = {}) {
     super({
-      // handleEvent: handleEvent,
+      handleEvent: handleEvent,
       handleDownEvent: handleDownEvent,
       handleUpEvent: handleUpEvent,
       handleDragEvent: handleDragEvent,
@@ -81,7 +82,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
      */
     this.features_ = undefined
     if (options.features) {
-      if (Array.isArray(options.features)) {
+      if (isArray(options.features)) {
         this.features_ = new Collection(options.features)
       } else if (options.features instanceof Collection) {
         this.features_ = options.features
@@ -213,7 +214,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
    * @param {ol.Coordinate | undefined} anchor
    */
   setAnchor (anchor) {
-    assert(anchor == null || Array.isArray(anchor) && anchor.length === 2, 'Array of two elements passed')
+    assert(anchor == null || isArray(anchor) && anchor.length === 2, 'Array of two elements passed')
 
     this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : getFeaturesCentroid(this.features_))
   }
@@ -391,28 +392,24 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   }
 }
 
-// /**
-//  * @param {ol.MapBrowserEvent} evt Map browser event.
-//  * @return {boolean} `false` to stop event propagation.
-//  * @this {RotateFeatureInteraction}
-//  * @private
-//  */
-// function handleEvent (evt) {
-//   if (evt.type !== '') {
-//     return true
-//   }
-//
-//   // disable selection of inner features
-//   const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
-//   if (
-//     [ 'click', 'singleclick' ].includes(evt.type) &&
-//     [ this.anchorFeature_, this.arrowFeature_ ].includes(foundFeature)
-//   ) {
-//     return false
-//   }
-//
-//   return this::PointerInteraction.handleEvent(evt)
-// }
+/**
+ * @param {ol.MapBrowserEvent} evt Map browser event.
+ * @return {boolean} `false` to stop event propagation.
+ * @this {RotateFeatureInteraction}
+ * @private
+ */
+function handleEvent (evt) {
+  // disable selection of inner features
+  const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
+  if (
+    includes([ 'click', 'singleclick', 'dblclick' ], evt.type) &&
+    includes([ this.anchorFeature_, this.arrowFeature_ ], foundFeature)
+  ) {
+    return false
+  }
+
+  return this::PointerInteraction.handleEvent(evt)
+}
 
 /**
  * @param {ol.MapBrowserEvent} evt Event.
@@ -427,7 +424,7 @@ function handleDownEvent (evt) {
   if (
     foundFeature && !this.lastCoordinate_ &&
     (
-      this.features_.getArray().includes(foundFeature) ||
+      includes(this.features_.getArray(), foundFeature) ||
       foundFeature === this.arrowFeature_
     )
   ) {
@@ -539,7 +536,7 @@ function handleMoveEvent ({ map, pixel }) {
   } else if (
     foundFeature &&
     (
-      this.features_.getArray().includes(foundFeature) ||
+      includes(this.features_.getArray(), foundFeature) ||
       foundFeature === this.arrowFeature_
     )
   ) {
