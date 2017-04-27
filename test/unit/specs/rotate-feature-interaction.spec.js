@@ -391,6 +391,7 @@ describe('rotate feature interaction', function () {
     })
   })
 
+  // todo add test on anchor moving
   // todo add test on cursor changes
 })
 
