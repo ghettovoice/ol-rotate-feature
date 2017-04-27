@@ -32,11 +32,11 @@ const counters = {}
  * @param {string} [prefix]
  * @return {number}
  */
-export function uniqId (prefix) {
-  prefix || (prefix = 'default')
-  counters[ prefix ] = counters[ prefix ] == null ? 0 : counters[ prefix ]
+export function uniqId (prefix = '') {
+  const ns = prefix || 'default'
+  counters[ ns ] = counters[ ns ] == null ? 0 : counters[ ns ]
 
-  return String(prefix) + (++counters[ prefix ])
+  return String(prefix) + (++counters[ ns ])
 }
 
 export function includes (arr, value) {
