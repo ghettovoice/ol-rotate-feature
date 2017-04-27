@@ -7,14 +7,6 @@ Rotate vector features interaction for OpenLayers
 @licence MIT
 @copyright (c) 2016-2017, Vladimir Vershinin <ghettovoice@gmail.com>
 */
-import _defineProperty from 'babel-runtime/helpers/defineProperty';
-import _typeof from 'babel-runtime/helpers/typeof';
-import _Object$getPrototypeOf from 'babel-runtime/core-js/object/get-prototype-of';
-import _classCallCheck from 'babel-runtime/helpers/classCallCheck';
-import _createClass from 'babel-runtime/helpers/createClass';
-import _possibleConstructorReturn from 'babel-runtime/helpers/possibleConstructorReturn';
-import _get from 'babel-runtime/helpers/get';
-import _inherits from 'babel-runtime/helpers/inherits';
 import PointerInteraction from 'ol/interaction/pointer';
 import Collection from 'ol/collection';
 import VectorLayer from 'ol/layer/vector';
@@ -73,6 +65,10 @@ function isArray(val) {
   return Object.prototype.toString.call(val) === '[object Array]';
 }
 
+var _createClass$1 = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck$1(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /**
  * @enum {string}
  */
@@ -109,7 +105,7 @@ var RotateFeatureEvent = function () {
    * @param {ol.Coordinate} anchor Anchor position.
    */
   function RotateFeatureEvent(type, features, angle, anchor) {
-    _classCallCheck(this, RotateFeatureEvent);
+    _classCallCheck$1(this, RotateFeatureEvent);
 
     /**
      * @type {boolean}
@@ -149,7 +145,7 @@ var RotateFeatureEvent = function () {
    */
 
 
-  _createClass(RotateFeatureEvent, [{
+  _createClass$1(RotateFeatureEvent, [{
     key: 'preventDefault',
 
 
@@ -219,6 +215,20 @@ var RotateFeatureEvent = function () {
   return RotateFeatureEvent;
 }();
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 /**
  * Rotate interaction class.
  * Adds controls to rotate vector features.
@@ -249,7 +259,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
      * @type {string}
      * @private
      */
-    var _this = _possibleConstructorReturn(this, (RotateFeatureInteraction.__proto__ || _Object$getPrototypeOf(RotateFeatureInteraction)).call(this, {
+    var _this = _possibleConstructorReturn(this, (RotateFeatureInteraction.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction)).call(this, {
       handleEvent: handleEvent,
       handleDownEvent: handleDownEvent,
       handleUpEvent: handleUpEvent,
@@ -332,7 +342,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
      */
     value: function setMap(map) {
       this.overlay_.setMap(map);
-      _get(RotateFeatureInteraction.prototype.__proto__ || _Object$getPrototypeOf(RotateFeatureInteraction.prototype), 'setMap', this).call(this, map);
+      _get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setMap', this).call(this, map);
     }
 
     /**
@@ -346,7 +356,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
         this.overlay_.setMap(active ? this.map : undefined);
       }
 
-      _get(RotateFeatureInteraction.prototype.__proto__ || _Object$getPrototypeOf(RotateFeatureInteraction.prototype), 'setActive', this).call(this, active);
+      _get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setActive', this).call(this, active);
     }
 
     /**

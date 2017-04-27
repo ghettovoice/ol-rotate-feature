@@ -43,7 +43,7 @@ if (process.env.NODE_ENV === 'production') {
 
 module.exports = {
   entry: {
-    bundle: path.join(srcPath, '../src/index.js')
+    bundle: path.join(srcPath, 'index.js')
   },
   devtool: '#source-map',
   output: {
@@ -53,7 +53,7 @@ module.exports = {
   },
   resolve: {
     modules: [
-      path.join(__dirname, '../src'),
+      srcPath,
       path.join(__dirname, '../node_modules')
     ],
     extensions: [ '.jsx', '.js', '.json' ],

@@ -3,6 +3,7 @@
   "version": "1.2.4",
   "description": "Rotate vector features interaction for OpenLayers",
   "main": "dist/bundle.js",
+  "module": "dist/bundle.es.js",
   "scripts": {
     "build-umd": "cross-env BABEL_ENV=umd webpack --config=build/webpack.umd.config.js --progress",
     "build-umd-min": "cross-env BABEL_ENV=umd NODE_ENV=production webpack --config=build/webpack.umd.config.js --progress",
@@ -31,9 +32,7 @@
     "url": "https://github.com/ghettovoice/ol-rotate-feature/issues"
   },
   "homepage": "https://ghettovoice.github.io/ol-rotate-feature/",
-  "dependencies": {
-    "babel-runtime": "^6.23.0"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "openlayers": ">=3.14",
     "ol": ">=4.1"
@@ -42,7 +41,6 @@
     "babel-core": "^6.24.0",
     "babel-loader": "^6.4.1",
     "babel-plugin-istanbul": "^4.1.1",
-    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.4.0",
     "babel-preset-stage-0": "^6.22.0",
     "chai": "^3.5.0",
