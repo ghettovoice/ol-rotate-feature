@@ -3,7 +3,7 @@
  * 
  * @package ol-rotate-feature
  * @author Vladimir Vershinin <ghettovoice@gmail.com>
- * @version 1.2.4
+ * @version 1.3.0
  * @licence MIT
  * @copyright (c) 2016-2017, Vladimir Vershinin <ghettovoice@gmail.com>
  */
