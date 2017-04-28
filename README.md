@@ -8,6 +8,8 @@
 
 Plugin adds interaction that allows to rotate vector features around some anchor.
 
+### [Demo](https://ghettovoice.github.io/ol-rotate-feature/demo.html)
+
 ## Installation
 
 Install it thought NPM or Bower:

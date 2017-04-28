@@ -19,15 +19,15 @@
   <script src="../node_modules/openlayers/dist/ol.js"></script>
   <script src="../dist/bundle.js"></script>
   <script>
-    const point = new ol.Feature({
+    var point = new ol.Feature({
       name: 'point',
       geometry: new ol.geom.Point([ 2384267.0573564973, 7557371.884852641 ])
     })
-    const line = new ol.Feature({
+    var line = new ol.Feature({
       name: 'line',
       geometry: new ol.geom.LineString([ [ -603697.2100018249, -239432.60826165066 ], [ 4190433.20404443, 2930563.8287811787 ] ])
     })
-    const polygon = new ol.Feature({
+    var polygon = new ol.Feature({
       name: 'polygon',
       geometry: new ol.geom.Polygon([ [
         [ -14482348.171434438, 6661491.741627443 ],
@@ -37,7 +37,7 @@
       ] ])
     })
 
-    const map = new ol.Map({
+    var map = new ol.Map({
       view: new ol.View({
         center: [ 0, 0 ],
         zoom: 2
@@ -57,12 +57,13 @@
       projection: 'EPSG:3857'
     })
 
-    const select = new ol.interaction.Select()
+    var select = new ol.interaction.Select()
     select.getFeatures().extend([ point, line, polygon ])
 
-    const rotate = new ol.interaction.RotateFeature({
+    var rotate = new ol.interaction.RotateFeature({
       features: select.getFeatures(),
-      angle: -1.5708
+      angle: -1.5708,
+      style: createStyle()
     })
 
     rotate.on('rotatestart', evt => console.log('rotate start', evt))
@@ -71,6 +72,93 @@
 
     map.addInteraction(select)
     map.addInteraction(rotate)
+
+    // custom style factory
+    function createStyle () {
+      var white = [ 255, 255, 255, 0.8 ]
+      var blue = [ 0, 153, 255, 0.8 ]
+      var red = [ 209, 0, 26, 0.9 ]
+      var width = 2
+
+      var styles = {
+        anchor: [
+          new ol.style.Style({
+            image: new ol.style.RegularShape({
+              fill: new ol.style.Fill({
+                color: blue
+              }),
+              stroke: new ol.style.Stroke({
+                color: blue,
+                width: 1
+              }),
+              radius: 4,
+              points: 6
+            }),
+            zIndex: Infinity
+          })
+        ],
+        arrow: [
+          new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: white,
+              width: width + 3,
+              lineDash: [ 10, 10 ]
+            }),
+            text: new ol.style.Text({
+              font: '14px sans-serif',
+              offsetX: 25,
+              offsetY: -25,
+              fill: new ol.style.Fill({
+                color: 'blue'
+              }),
+              stroke: new ol.style.Stroke({
+                color: white,
+                width: width + 1
+              })
+            }),
+            zIndex: Infinity
+          }),
+          new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color: red,
+              width: width + 1,
+              lineDash: [ 10, 10 ]
+            }),
+            zIndex: Infinity
+          })
+        ]
+      }
+
+      return function (feature, resolution) {
+        var style
+        var angle = feature.get('angle') || 0
+
+        switch (true) {
+          case feature.get('rotate-anchor'):
+            style = styles[ 'anchor' ]
+            style[ 0 ].getImage().setRotation(-angle)
+
+            return style
+          case feature.get('rotate-arrow'):
+            style = styles[ 'arrow' ]
+
+            var coordinates = feature.getGeometry().getCoordinates()
+            // generate arrow polygon
+            var geom = new ol.geom.LineString([
+              coordinates,
+              [ coordinates[ 0 ], coordinates[ 1 ] + 100 * resolution ]
+            ])
+
+            // and rotate it according to current angle
+            geom.rotate(angle, coordinates)
+            style[ 0 ].setGeometry(geom)
+            style[ 1 ].setGeometry(geom)
+            style[ 0 ].getText().setText(Math.round(-angle * 180 / Math.PI) + '°')
+
+            return style
+        }
+      }
+    }
   </script>
 </body>
 </html>
