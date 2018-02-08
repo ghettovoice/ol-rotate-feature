@@ -1,134 +1,180 @@
 /*!
- * Rotate vector features interaction for OpenLayers
- * 
- * @package ol-rotate-feature
- * @author Vladimir Vershinin <ghettovoice@gmail.com>
- * @version 1.3.0
- * @licence MIT
- * @copyright (c) 2016-2017, Vladimir Vershinin <ghettovoice@gmail.com>
- */
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("openlayers"));
-	else if(typeof define === 'function' && define.amd)
-		define(["openlayers"], factory);
-	else if(typeof exports === 'object')
-		exports["RotateFeature"] = factory(require("openlayers"));
-	else
-		root["ol"] = root["ol"] || {}, root["ol"]["interaction"] = root["ol"]["interaction"] || {}, root["ol"]["interaction"]["RotateFeature"] = factory(root["ol"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_5__) {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, {
-/******/ 				configurable: false,
-/******/ 				enumerable: true,
-/******/ 				get: getter
-/******/ 			});
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "/";
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+Rotate vector features interaction for OpenLayers
 
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__rotate_feature_interaction__ = __webpack_require__(3);
-/**
- * Rotate interaction for OpenLayers.
- * Allows vector feature rotation.
- *
- * @author Vladimir Vershinin <ghettovoice@gmail.com>
- * @licence MIT https://opensource.org/licenses/MIT
- * @copyright (c) 2016-2017, Vladimir Vershinin
- */
+@package ol-rotate-feature
+@author Vladimir Vershinin <ghettovoice@gmail.com>
+@version 1.3.0
+@licence MIT
+@copyright (c) 2016-2018, Vladimir Vershinin <ghettovoice@gmail.com>
+*/
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('openlayers')) :
+	typeof define === 'function' && define.amd ? define('ol-rotate-feature', ['openlayers'], factory) :
+	(global.RotateFeatureInteraction = factory(global.ol));
+}(this, (function (__ol__) { 'use strict';
 
-
-/* harmony default export */ __webpack_exports__["default"] = (__WEBPACK_IMPORTED_MODULE_0__rotate_feature_interaction__["a" /* default */]);
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
+__ol__ = __ol__ && __ol__.hasOwnProperty('default') ? __ol__['default'] : __ol__;
 
 /**
- * Rotate interaction for OpenLayers.
- * Allows vector feature rotation.
- *
- * @author Vladimir Vershinin <ghettovoice@gmail.com>
- * @licence MIT https://opensource.org/licenses/MIT
- * @copyright (c) 2016-2017, Vladimir Vershinin
+ * @param {boolean} condition
+ * @param {string} message
+ * @throws Error
  */
-var RotateFeatureInteraction = __webpack_require__(0).default;
+function assert(condition) {
+  var message = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
 
-module.exports = RotateFeatureInteraction;
+  message = ['Assertion failed', message].join(': ');
 
-/***/ }),
-/* 2 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
 
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return RotateFeatureEventType; });
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+/**
+ * @param {*} arg
+ * @returns {*}
+ */
+function identity(arg) {
+  return arg;
+}
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+/**
+ * @param {...*} args
+ * @return {*}
+ */
+
+
+/**
+ * @param {string} [prefix]
+ * @return {number}
+ */
+
+
+function includes(arr, value) {
+  return arr.indexOf(value) !== -1;
+}
+
+function isArray(val) {
+  return Object.prototype.toString.call(val) === '[object Array]';
+}
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+
+
+
+
+
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+};
+
+var get = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+
+
+
+
+
+
+
+
+
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
 
 /**
  * @enum {string}
@@ -149,15 +195,14 @@ var RotateFeatureEventType = {
    * @event RotateFeatureEvent#rotateend
    */
   END: 'rotateend'
+
+  /**
+   * Events emitted by RotateFeatureInteraction instances are instances of this type.
+   *
+   * @class
+   * @author Vladimir Vershinin
+   */
 };
-
-/**
- * Events emitted by RotateFeatureInteraction instances are instances of this type.
- *
- * @class
- * @author Vladimir Vershinin
- */
-
 var RotateFeatureEvent = function () {
   /**
    * @param {string} type Type.
@@ -166,7 +211,7 @@ var RotateFeatureEvent = function () {
    * @param {ol.Coordinate} anchor Anchor position.
    */
   function RotateFeatureEvent(type, features, angle, anchor) {
-    _classCallCheck(this, RotateFeatureEvent);
+    classCallCheck(this, RotateFeatureEvent);
 
     /**
      * @type {boolean}
@@ -206,7 +251,7 @@ var RotateFeatureEvent = function () {
    */
 
 
-  _createClass(RotateFeatureEvent, [{
+  createClass(RotateFeatureEvent, [{
     key: 'preventDefault',
 
 
@@ -228,7 +273,7 @@ var RotateFeatureEvent = function () {
     }
   }, {
     key: 'propagationStopped',
-    get: function get() {
+    get: function get$$1() {
       return this.propagationStopped_;
     }
 
@@ -238,7 +283,7 @@ var RotateFeatureEvent = function () {
 
   }, {
     key: 'type',
-    get: function get() {
+    get: function get$$1() {
       return this.type_;
     }
 
@@ -248,7 +293,7 @@ var RotateFeatureEvent = function () {
 
   }, {
     key: 'features',
-    get: function get() {
+    get: function get$$1() {
       return this.features_;
     }
 
@@ -258,7 +303,7 @@ var RotateFeatureEvent = function () {
 
   }, {
     key: 'angle',
-    get: function get() {
+    get: function get$$1() {
       return this.angle_;
     }
 
@@ -268,49 +313,32 @@ var RotateFeatureEvent = function () {
 
   }, {
     key: 'anchor',
-    get: function get() {
+    get: function get$$1() {
       return this.anchor_;
     }
   }]);
-
   return RotateFeatureEvent;
 }();
-
-/* harmony default export */ __webpack_exports__["a"] = (RotateFeatureEvent);
-
-/***/ }),
-/* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_openlayers__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_openlayers___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_openlayers__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__util__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__rotate_feature_event__ = __webpack_require__(2);
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
  * Rotate interaction class.
  * Adds controls to rotate vector features.
  * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
  */
-
-
-
+var PointerInteraction = __ol__.interaction.Pointer;
+var Collection = __ol__.Collection;
+var VectorLayer = __ol__.layer.Vector;
+var VectorSource = __ol__.source.Vector;
+var Feature = __ol__.Feature;
+var Point = __ol__.geom.Point;
+var Polygon = __ol__.geom.Polygon;
+var GeometryCollection = __ol__.geom.GeometryCollection;
+var Style = __ol__.style.Style;
+var RegularShape = __ol__.style.RegularShape;
+var Stroke = __ol__.style.Stroke;
+var Fill = __ol__.style.Fill;
+var Text = __ol__.style.Text;
+var extentHelper = __ol__.extent;
 var ANCHOR_KEY = 'rotate-anchor';
 var ARROW_KEY = 'rotate-arrow';
 
@@ -321,22 +349,21 @@ var ANCHOR_PROP = 'anchor';
  * @todo todo добавить опцию condition - для возможности переопределения клавиш
  */
 
-var RotateFeatureInteraction = function (_ol$interaction$Poin) {
-  _inherits(RotateFeatureInteraction, _ol$interaction$Poin);
+var RotateFeatureInteraction = function (_PointerInteraction) {
+  inherits(RotateFeatureInteraction, _PointerInteraction);
 
   /**
    * @param {InteractionOptions} options
    */
   function RotateFeatureInteraction() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-    _classCallCheck(this, RotateFeatureInteraction);
+    classCallCheck(this, RotateFeatureInteraction);
 
     /**
      * @type {string}
      * @private
      */
-    var _this = _possibleConstructorReturn(this, (RotateFeatureInteraction.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction)).call(this, {
+    var _this = possibleConstructorReturn(this, (RotateFeatureInteraction.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction)).call(this, {
       handleEvent: handleEvent,
       handleDownEvent: handleDownEvent,
       handleUpEvent: handleUpEvent,
@@ -369,10 +396,10 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
      * @type {ol.layer.Vector}
      * @private
      */
-    _this.overlay_ = new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.layer.Vector({
+    _this.overlay_ = new VectorLayer({
       style: options.style || getDefaultStyle(),
-      source: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.source.Vector({
-        features: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.Collection()
+      source: new VectorSource({
+        features: new Collection()
       })
     });
     /**
@@ -381,15 +408,15 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
      */
     _this.features_ = undefined;
     if (options.features) {
-      if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["a" /* isArray */])(options.features)) {
-        _this.features_ = new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.Collection(options.features);
-      } else if (options.features instanceof __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.Collection) {
+      if (isArray(options.features)) {
+        _this.features_ = new Collection(options.features);
+      } else if (options.features instanceof Collection) {
         _this.features_ = options.features;
       } else {
         throw new Error('Features option should be an array or collection of features, ' + 'got ' + _typeof(options.features));
       }
     } else {
-      _this.features_ = new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.Collection();
+      _this.features_ = new Collection();
     }
 
     _this.setAnchor(options.anchor || getFeaturesCentroid(_this.features_));
@@ -410,7 +437,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
    */
 
 
-  _createClass(RotateFeatureInteraction, [{
+  createClass(RotateFeatureInteraction, [{
     key: 'setMap',
 
 
@@ -419,7 +446,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
      */
     value: function setMap(map) {
       this.overlay_.setMap(map);
-      _get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setMap', this).call(this, map);
+      get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setMap', this).call(this, map);
     }
 
     /**
@@ -433,7 +460,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
         this.overlay_.setMap(active ? this.map : undefined);
       }
 
-      _get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setActive', this).call(this, active);
+      get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setActive', this).call(this, active);
     }
 
     /**
@@ -445,7 +472,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
   }, {
     key: 'setAngle',
     value: function setAngle(angle) {
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["b" /* assert */])(!isNaN(parseFloat(angle)), 'Numeric value passed');
+      assert(!isNaN(parseFloat(angle)), 'Numeric value passed');
 
       this.set(ANGLE_PROP, parseFloat(angle));
     }
@@ -471,7 +498,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
   }, {
     key: 'setAnchor',
     value: function setAnchor(anchor) {
-      __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["b" /* assert */])(anchor == null || __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["a" /* isArray */])(anchor) && anchor.length === 2, 'Array of two elements passed');
+      assert(anchor == null || isArray(anchor) && anchor.length === 2, 'Array of two elements passed');
 
       this.set(ANCHOR_PROP, anchor != null ? anchor.map(parseFloat) : getFeaturesCentroid(this.features_));
     }
@@ -506,9 +533,9 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
       } else {
         var _ref;
 
-        this.anchorFeature_ = new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.Feature((_ref = {
-          geometry: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.geom.Point(anchor)
-        }, _defineProperty(_ref, ANGLE_PROP, angle), _defineProperty(_ref, ANCHOR_KEY, true), _ref));
+        this.anchorFeature_ = new Feature((_ref = {
+          geometry: new Point(anchor)
+        }, defineProperty(_ref, ANGLE_PROP, angle), defineProperty(_ref, ANCHOR_KEY, true), _ref));
         this.overlay_.getSource().addFeature(this.anchorFeature_);
       }
     }
@@ -531,9 +558,9 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
       } else {
         var _ref2;
 
-        this.arrowFeature_ = new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.Feature((_ref2 = {
-          geometry: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.geom.Point(anchor)
-        }, _defineProperty(_ref2, ANGLE_PROP, angle), _defineProperty(_ref2, ARROW_KEY, true), _ref2));
+        this.arrowFeature_ = new Feature((_ref2 = {
+          geometry: new Point(anchor)
+        }, defineProperty(_ref2, ANGLE_PROP, angle), defineProperty(_ref2, ARROW_KEY, true), _ref2));
         this.overlay_.getSource().addFeature(this.arrowFeature_);
       }
     }
@@ -647,7 +674,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
   }, {
     key: 'dispatchRotateStartEvent_',
     value: function dispatchRotateStartEvent_(features) {
-      this.dispatchEvent(new __WEBPACK_IMPORTED_MODULE_2__rotate_feature_event__["a" /* default */](__WEBPACK_IMPORTED_MODULE_2__rotate_feature_event__["b" /* RotateFeatureEventType */].START, features, this.getAngle(), this.getAnchor()));
+      this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.START, features, this.getAngle(), this.getAnchor()));
     }
 
     /**
@@ -658,7 +685,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
   }, {
     key: 'dispatchRotatingEvent_',
     value: function dispatchRotatingEvent_(features) {
-      this.dispatchEvent(new __WEBPACK_IMPORTED_MODULE_2__rotate_feature_event__["a" /* default */](__WEBPACK_IMPORTED_MODULE_2__rotate_feature_event__["b" /* RotateFeatureEventType */].ROTATING, features, this.getAngle(), this.getAnchor()));
+      this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.ROTATING, features, this.getAngle(), this.getAnchor()));
     }
 
     /**
@@ -669,11 +696,11 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
   }, {
     key: 'dispatchRotateEndEvent_',
     value: function dispatchRotateEndEvent_(features) {
-      this.dispatchEvent(new __WEBPACK_IMPORTED_MODULE_2__rotate_feature_event__["a" /* default */](__WEBPACK_IMPORTED_MODULE_2__rotate_feature_event__["b" /* RotateFeatureEventType */].END, features, this.getAngle(), this.getAnchor()));
+      this.dispatchEvent(new RotateFeatureEvent(RotateFeatureEventType.END, features, this.getAngle(), this.getAnchor()));
     }
   }, {
     key: 'features',
-    get: function get() {
+    get: function get$$1() {
       return this.features_;
     }
 
@@ -683,7 +710,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
 
   }, {
     key: 'angle',
-    get: function get() {
+    get: function get$$1() {
       return this.getAngle();
     }
 
@@ -691,7 +718,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
      * @param {number} angle
      */
     ,
-    set: function set(angle) {
+    set: function set$$1(angle) {
       this.setAngle(angle);
     }
 
@@ -701,7 +728,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
 
   }, {
     key: 'anchor',
-    get: function get() {
+    get: function get$$1() {
       return this.getAnchor();
     }
 
@@ -709,7 +736,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
      * @param {ol.Coordinate|undefined} anchor
      */
     ,
-    set: function set(anchor) {
+    set: function set$$1(anchor) {
       this.setAnchor(anchor);
     }
 
@@ -719,7 +746,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
 
   }, {
     key: 'map',
-    set: function set(map) {
+    set: function set$$1(map) {
       this.setMap(map);
     }
 
@@ -727,7 +754,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
      * @type {ol.Map}
      */
     ,
-    get: function get() {
+    get: function get$$1() {
       return this.getMap();
     }
 
@@ -737,7 +764,7 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
 
   }, {
     key: 'active',
-    set: function set(active) {
+    set: function set$$1(active) {
       this.setActive(active);
     }
 
@@ -745,31 +772,21 @@ var RotateFeatureInteraction = function (_ol$interaction$Poin) {
      * @type {boolean}
      */
     ,
-    get: function get() {
+    get: function get$$1() {
       return this.getActive();
     }
   }]);
-
   return RotateFeatureInteraction;
-}(__WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.interaction.Pointer);
+}(PointerInteraction);
 
-/**
- * @param {ol.MapBrowserEvent} evt Map browser event.
- * @return {boolean} `false` to stop event propagation.
- * @this {RotateFeatureInteraction}
- * @private
- */
-
-
-/* harmony default export */ __webpack_exports__["a"] = (RotateFeatureInteraction);
 function handleEvent(evt) {
   // disable selection of inner features
-  var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, __WEBPACK_IMPORTED_MODULE_1__util__["c" /* identity */]);
-  if (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["d" /* includes */])(['click', 'singleclick', 'dblclick'], evt.type) && __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["d" /* includes */])([this.anchorFeature_, this.arrowFeature_], foundFeature)) {
+  var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity);
+  if (includes(['click', 'singleclick', 'dblclick'], evt.type) && includes([this.anchorFeature_, this.arrowFeature_], foundFeature)) {
     return false;
   }
 
-  return __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.interaction.Pointer.handleEvent.call(this, evt);
+  return PointerInteraction.handleEvent.call(this, evt);
 }
 
 /**
@@ -779,10 +796,10 @@ function handleEvent(evt) {
  * @private
  */
 function handleDownEvent(evt) {
-  var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, __WEBPACK_IMPORTED_MODULE_1__util__["c" /* identity */]);
+  var foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity);
 
   // handle click & drag on features for rotation
-  if (foundFeature && !this.lastCoordinate_ && (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["d" /* includes */])(this.features_.getArray(), foundFeature) || foundFeature === this.arrowFeature_)) {
+  if (foundFeature && !this.lastCoordinate_ && (includes(this.features_.getArray(), foundFeature) || foundFeature === this.arrowFeature_)) {
     this.lastCoordinate_ = evt.coordinate;
 
     handleMoveEvent.call(this, evt);
@@ -870,7 +887,7 @@ function handleMoveEvent(_ref5) {
       pixel = _ref5.pixel;
 
   var elem = map.getTargetElement();
-  var foundFeature = map.forEachFeatureAtPixel(pixel, __WEBPACK_IMPORTED_MODULE_1__util__["c" /* identity */]);
+  var foundFeature = map.forEachFeatureAtPixel(pixel, identity);
 
   var setCursor = function setCursor(cursor) {
     var vendor = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -886,7 +903,7 @@ function handleMoveEvent(_ref5) {
   if (this.lastCoordinate_) {
     this.previousCursor_ = elem.style.cursor;
     setCursor('grabbing', true);
-  } else if (foundFeature && (__webpack_require__.i(__WEBPACK_IMPORTED_MODULE_1__util__["d" /* includes */])(this.features_.getArray(), foundFeature) || foundFeature === this.arrowFeature_)) {
+  } else if (foundFeature && (includes(this.features_.getArray(), foundFeature) || foundFeature === this.arrowFeature_)) {
     this.previousCursor_ = elem.style.cursor;
     setCursor('grab', true);
   } else if (foundFeature && foundFeature === this.anchorFeature_ || this.anchorMoving_) {
@@ -910,12 +927,12 @@ function getDefaultStyle() {
   var transparent = [255, 255, 255, 0.01];
   var width = 2;
 
-  var styles = (_styles = {}, _defineProperty(_styles, ANCHOR_KEY, [new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Style({
-    image: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.RegularShape({
-      fill: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Fill({
+  var styles = (_styles = {}, defineProperty(_styles, ANCHOR_KEY, [new Style({
+    image: new RegularShape({
+      fill: new Fill({
         color: [0, 153, 255, 0.8]
       }),
-      stroke: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Stroke({
+      stroke: new Stroke({
         color: blue,
         width: 1
       }),
@@ -923,32 +940,32 @@ function getDefaultStyle() {
       points: 6
     }),
     zIndex: Infinity
-  })]), _defineProperty(_styles, ARROW_KEY, [new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Style({
-    fill: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Fill({
+  })]), defineProperty(_styles, ARROW_KEY, [new Style({
+    fill: new Fill({
       color: transparent
     }),
-    stroke: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Stroke({
+    stroke: new Stroke({
       color: white,
       width: width + 2
     }),
-    text: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Text({
+    text: new Text({
       font: '12px sans-serif',
       offsetX: 20,
       offsetY: -20,
-      fill: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Fill({
+      fill: new Fill({
         color: 'blue'
       }),
-      stroke: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Stroke({
+      stroke: new Stroke({
         color: white,
         width: width + 1
       })
     }),
     zIndex: Infinity
-  }), new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Style({
-    fill: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Fill({
+  }), new Style({
+    fill: new Fill({
       color: transparent
     }),
-    stroke: new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.style.Stroke({
+    stroke: new Stroke({
       color: blue,
       width: width
     }),
@@ -970,7 +987,7 @@ function getDefaultStyle() {
 
         var coordinates = feature.getGeometry().getCoordinates();
         // generate arrow polygon
-        var geom = new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.geom.Polygon([[[coordinates[0], coordinates[1] - 6 * resolution], [coordinates[0] + 8 * resolution, coordinates[1] - 12 * resolution], [coordinates[0], coordinates[1] + 30 * resolution], [coordinates[0] - 8 * resolution, coordinates[1] - 12 * resolution], [coordinates[0], coordinates[1] - 6 * resolution]]]);
+        var geom = new Polygon([[[coordinates[0], coordinates[1] - 6 * resolution], [coordinates[0] + 8 * resolution, coordinates[1] - 12 * resolution], [coordinates[0], coordinates[1] + 30 * resolution], [coordinates[0] - 8 * resolution, coordinates[1] - 12 * resolution], [coordinates[0], coordinates[1] - 6 * resolution]]]);
 
         // and rotate it according to current angle
         geom.rotate(angle, coordinates);
@@ -989,10 +1006,10 @@ function getDefaultStyle() {
  * @private
  */
 function getFeaturesExtent(features) {
-  features = features instanceof __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.Collection ? features.getArray() : features;
+  features = features instanceof Collection ? features.getArray() : features;
   if (!features.length) return;
 
-  return new __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.geom.GeometryCollection(features.map(function (feature) {
+  return new GeometryCollection(features.map(function (feature) {
     return feature.getGeometry();
   })).getExtent();
 }
@@ -1002,89 +1019,26 @@ function getFeaturesExtent(features) {
  * @return {ol.Coordinate | undefined}
  */
 function getFeaturesCentroid(features) {
-  features = features instanceof __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.Collection ? features.getArray() : features;
+  features = features instanceof Collection ? features.getArray() : features;
   if (!features.length) return;
 
-  return __WEBPACK_IMPORTED_MODULE_0_openlayers___default.a.extent.getCenter(getFeaturesExtent(features));
-}
-
-/***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["b"] = assert;
-/* harmony export (immutable) */ __webpack_exports__["c"] = identity;
-/* unused harmony export coalesce */
-/* unused harmony export uniqId */
-/* harmony export (immutable) */ __webpack_exports__["d"] = includes;
-/* harmony export (immutable) */ __webpack_exports__["a"] = isArray;
-/**
- * @param {boolean} condition
- * @param {string} message
- * @throws Error
- */
-function assert(condition) {
-  var message = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-
-  message = ['Assertion failed', message].join(': ');
-
-  if (!condition) {
-    throw new Error(message);
-  }
+  return extentHelper.getCenter(getFeaturesExtent(features));
 }
 
 /**
- * @param {*} arg
- * @returns {*}
+ * Rotate interaction for OpenLayers.
+ * Allows vector feature rotation.
+ *
+ * @author Vladimir Vershinin <ghettovoice@gmail.com>
+ * @licence MIT https://opensource.org/licenses/MIT
+ * @copyright (c) 2016-2017, Vladimir Vershinin
  */
-function identity(arg) {
-  return arg;
+// for backward compatibility
+if (typeof window !== 'undefined' && window.ol) {
+  window.ol.interaction.RotateFeature = RotateFeatureInteraction;
 }
 
-/**
- * @param {...*} args
- * @return {*}
- */
-function coalesce() {
-  for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-    args[_key] = arguments[_key];
-  }
+return RotateFeatureInteraction;
 
-  return args.filter(function (value) {
-    return value != null;
-  }).shift();
-}
-
-var counters = {};
-/**
- * @param {string} [prefix]
- * @return {number}
- */
-function uniqId() {
-  var prefix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-
-  var ns = prefix || 'default';
-  counters[ns] = counters[ns] == null ? 0 : counters[ns];
-
-  return String(prefix) + ++counters[ns];
-}
-
-function includes(arr, value) {
-  return arr.indexOf(value) !== -1;
-}
-
-function isArray(val) {
-  return Object.prototype.toString.call(val) === '[object Array]';
-}
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
-
-/***/ })
-/******/ ]);
-});
+})));
 //# sourceMappingURL=bundle.js.map

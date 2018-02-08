@@ -18,7 +18,7 @@ import Fill from 'ol/style/fill'
 import Text from 'ol/style/text'
 import extentHelper from 'ol/extent'
 import { assert, identity, includes, isArray } from './util'
-import RotateFeatureEvent, { RotateFeatureEventType } from './rotate-feature-event'
+import RotateFeatureEvent, { RotateFeatureEventType } from './event'
 
 const ANCHOR_KEY = 'rotate-anchor'
 const ARROW_KEY = 'rotate-arrow'

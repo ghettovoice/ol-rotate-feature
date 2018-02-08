@@ -1,8 +1,11 @@
 {
   "presets": [
-    ["env", {
-      "modules": false
-    }],
+    [
+      "env",
+      {
+        "modules": false
+      }
+    ],
     "stage-0"
   ],
   "env": {
@@ -11,13 +14,22 @@
         "istanbul"
       ]
     },
+    "es": {
+      "plugins": [
+        "external-helpers"
+      ]
+    },
     "umd": {
       "plugins": [
-        ["./modules/babel-plugin-merge-imports", {
-          "pkg": "openlayers",
-            "pkgVar": "__ol",
+        "external-helpers",
+        [
+          "./modules/babel-plugin-merge-imports",
+          {
+            "pkg": "openlayers",
+            "pkgVar": "__ol__",
             "regex": "^ol(?:/(.*))?$"
-        }]
+          }
+        ]
       ]
     }
   }

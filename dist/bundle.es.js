@@ -5,7 +5,7 @@ Rotate vector features interaction for OpenLayers
 @author Vladimir Vershinin <ghettovoice@gmail.com>
 @version 1.3.0
 @licence MIT
-@copyright (c) 2016-2017, Vladimir Vershinin <ghettovoice@gmail.com>
+@copyright (c) 2016-2018, Vladimir Vershinin <ghettovoice@gmail.com>
 */
 import PointerInteraction from 'ol/interaction/pointer';
 import Collection from 'ol/collection';
@@ -65,9 +65,123 @@ function isArray(val) {
   return Object.prototype.toString.call(val) === '[object Array]';
 }
 
-var _createClass$1 = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
 
-function _classCallCheck$1(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+
+
+
+
+
+
+
+
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+};
+
+var get = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+
+
+
+
+
+
+
+
+
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
 
 /**
  * @enum {string}
@@ -88,15 +202,14 @@ var RotateFeatureEventType = {
    * @event RotateFeatureEvent#rotateend
    */
   END: 'rotateend'
+
+  /**
+   * Events emitted by RotateFeatureInteraction instances are instances of this type.
+   *
+   * @class
+   * @author Vladimir Vershinin
+   */
 };
-
-/**
- * Events emitted by RotateFeatureInteraction instances are instances of this type.
- *
- * @class
- * @author Vladimir Vershinin
- */
-
 var RotateFeatureEvent = function () {
   /**
    * @param {string} type Type.
@@ -105,7 +218,7 @@ var RotateFeatureEvent = function () {
    * @param {ol.Coordinate} anchor Anchor position.
    */
   function RotateFeatureEvent(type, features, angle, anchor) {
-    _classCallCheck$1(this, RotateFeatureEvent);
+    classCallCheck(this, RotateFeatureEvent);
 
     /**
      * @type {boolean}
@@ -145,7 +258,7 @@ var RotateFeatureEvent = function () {
    */
 
 
-  _createClass$1(RotateFeatureEvent, [{
+  createClass(RotateFeatureEvent, [{
     key: 'preventDefault',
 
 
@@ -167,7 +280,7 @@ var RotateFeatureEvent = function () {
     }
   }, {
     key: 'propagationStopped',
-    get: function get() {
+    get: function get$$1() {
       return this.propagationStopped_;
     }
 
@@ -177,7 +290,7 @@ var RotateFeatureEvent = function () {
 
   }, {
     key: 'type',
-    get: function get() {
+    get: function get$$1() {
       return this.type_;
     }
 
@@ -187,7 +300,7 @@ var RotateFeatureEvent = function () {
 
   }, {
     key: 'features',
-    get: function get() {
+    get: function get$$1() {
       return this.features_;
     }
 
@@ -197,7 +310,7 @@ var RotateFeatureEvent = function () {
 
   }, {
     key: 'angle',
-    get: function get() {
+    get: function get$$1() {
       return this.angle_;
     }
 
@@ -207,27 +320,12 @@ var RotateFeatureEvent = function () {
 
   }, {
     key: 'anchor',
-    get: function get() {
+    get: function get$$1() {
       return this.anchor_;
     }
   }]);
-
   return RotateFeatureEvent;
 }();
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
  * Rotate interaction class.
@@ -245,21 +343,20 @@ var ANCHOR_PROP = 'anchor';
  */
 
 var RotateFeatureInteraction = function (_PointerInteraction) {
-  _inherits(RotateFeatureInteraction, _PointerInteraction);
+  inherits(RotateFeatureInteraction, _PointerInteraction);
 
   /**
    * @param {InteractionOptions} options
    */
   function RotateFeatureInteraction() {
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-    _classCallCheck(this, RotateFeatureInteraction);
+    classCallCheck(this, RotateFeatureInteraction);
 
     /**
      * @type {string}
      * @private
      */
-    var _this = _possibleConstructorReturn(this, (RotateFeatureInteraction.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction)).call(this, {
+    var _this = possibleConstructorReturn(this, (RotateFeatureInteraction.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction)).call(this, {
       handleEvent: handleEvent,
       handleDownEvent: handleDownEvent,
       handleUpEvent: handleUpEvent,
@@ -333,7 +430,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
    */
 
 
-  _createClass(RotateFeatureInteraction, [{
+  createClass(RotateFeatureInteraction, [{
     key: 'setMap',
 
 
@@ -342,7 +439,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
      */
     value: function setMap(map) {
       this.overlay_.setMap(map);
-      _get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setMap', this).call(this, map);
+      get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setMap', this).call(this, map);
     }
 
     /**
@@ -356,7 +453,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
         this.overlay_.setMap(active ? this.map : undefined);
       }
 
-      _get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setActive', this).call(this, active);
+      get(RotateFeatureInteraction.prototype.__proto__ || Object.getPrototypeOf(RotateFeatureInteraction.prototype), 'setActive', this).call(this, active);
     }
 
     /**
@@ -431,7 +528,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
 
         this.anchorFeature_ = new Feature((_ref = {
           geometry: new Point(anchor)
-        }, _defineProperty(_ref, ANGLE_PROP, angle), _defineProperty(_ref, ANCHOR_KEY, true), _ref));
+        }, defineProperty(_ref, ANGLE_PROP, angle), defineProperty(_ref, ANCHOR_KEY, true), _ref));
         this.overlay_.getSource().addFeature(this.anchorFeature_);
       }
     }
@@ -456,7 +553,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
 
         this.arrowFeature_ = new Feature((_ref2 = {
           geometry: new Point(anchor)
-        }, _defineProperty(_ref2, ANGLE_PROP, angle), _defineProperty(_ref2, ARROW_KEY, true), _ref2));
+        }, defineProperty(_ref2, ANGLE_PROP, angle), defineProperty(_ref2, ARROW_KEY, true), _ref2));
         this.overlay_.getSource().addFeature(this.arrowFeature_);
       }
     }
@@ -596,7 +693,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
     }
   }, {
     key: 'features',
-    get: function get() {
+    get: function get$$1() {
       return this.features_;
     }
 
@@ -606,7 +703,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
 
   }, {
     key: 'angle',
-    get: function get() {
+    get: function get$$1() {
       return this.getAngle();
     }
 
@@ -614,7 +711,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
      * @param {number} angle
      */
     ,
-    set: function set(angle) {
+    set: function set$$1(angle) {
       this.setAngle(angle);
     }
 
@@ -624,7 +721,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
 
   }, {
     key: 'anchor',
-    get: function get() {
+    get: function get$$1() {
       return this.getAnchor();
     }
 
@@ -632,7 +729,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
      * @param {ol.Coordinate|undefined} anchor
      */
     ,
-    set: function set(anchor) {
+    set: function set$$1(anchor) {
       this.setAnchor(anchor);
     }
 
@@ -642,7 +739,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
 
   }, {
     key: 'map',
-    set: function set(map) {
+    set: function set$$1(map) {
       this.setMap(map);
     }
 
@@ -650,7 +747,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
      * @type {ol.Map}
      */
     ,
-    get: function get() {
+    get: function get$$1() {
       return this.getMap();
     }
 
@@ -660,7 +757,7 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
 
   }, {
     key: 'active',
-    set: function set(active) {
+    set: function set$$1(active) {
       this.setActive(active);
     }
 
@@ -668,11 +765,10 @@ var RotateFeatureInteraction = function (_PointerInteraction) {
      * @type {boolean}
      */
     ,
-    get: function get() {
+    get: function get$$1() {
       return this.getActive();
     }
   }]);
-
   return RotateFeatureInteraction;
 }(PointerInteraction);
 
@@ -824,7 +920,7 @@ function getDefaultStyle() {
   var transparent = [255, 255, 255, 0.01];
   var width = 2;
 
-  var styles = (_styles = {}, _defineProperty(_styles, ANCHOR_KEY, [new Style({
+  var styles = (_styles = {}, defineProperty(_styles, ANCHOR_KEY, [new Style({
     image: new RegularShape({
       fill: new Fill({
         color: [0, 153, 255, 0.8]
@@ -837,7 +933,7 @@ function getDefaultStyle() {
       points: 6
     }),
     zIndex: Infinity
-  })]), _defineProperty(_styles, ARROW_KEY, [new Style({
+  })]), defineProperty(_styles, ARROW_KEY, [new Style({
     fill: new Fill({
       color: transparent
     }),
@@ -930,6 +1026,10 @@ function getFeaturesCentroid(features) {
  * @licence MIT https://opensource.org/licenses/MIT
  * @copyright (c) 2016-2017, Vladimir Vershinin
  */
+// for backward compatibility
+if (typeof window !== 'undefined' && window.ol) {
+  window.ol.interaction.RotateFeature = RotateFeatureInteraction;
+}
 
 export default RotateFeatureInteraction;
 //# sourceMappingURL=bundle.es.js.map

@@ -6,6 +6,11 @@
  * @licence MIT https://opensource.org/licenses/MIT
  * @copyright (c) 2016-2017, Vladimir Vershinin
  */
-import RotateFeature from "./rotate-feature-interaction"
+import RotateFeatureInteraction from "./interaction"
 
-export default RotateFeature
+// for backward compatibility
+if (typeof window !== 'undefined' && window.ol) {
+  window.ol.interaction.RotateFeature = RotateFeatureInteraction
+}
+
+export default RotateFeatureInteraction

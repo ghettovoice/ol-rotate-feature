@@ -19,6 +19,8 @@
   <script src="../node_modules/openlayers/dist/ol.js"></script>
   <script src="../dist/bundle.js"></script>
   <script>
+    console.log(ol)
+
     var point = new ol.Feature({
       name: 'point',
       geometry: new ol.geom.Point([ 2384267.0573564973, 7557371.884852641 ])
@@ -60,7 +62,7 @@
     var select = new ol.interaction.Select()
     select.getFeatures().extend([ point, line, polygon ])
 
-    var rotate = new ol.interaction.RotateFeature({
+    var rotate = new RotateFeatureInteraction({
       features: select.getFeatures(),
       angle: -1.5708,
       style: createStyle()
