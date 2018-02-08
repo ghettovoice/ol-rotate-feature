@@ -15,15 +15,15 @@ Plugin adds interaction that allows to rotate vector features around some anchor
 Install it thought NPM or Bower:
 
 ```shell
-npm install openlayers ol ol-rotate-feature
-bower install openlayers ol-rotate-feature
+npm install ol ol-rotate-feature # ES6 version for bundling with Webpack, Rollup or etc.
+bower install openlayers ol-rotate-feature # UMD version for browser
 ```
 
 Or download the latest version archive and add it with script tag:
 
 ```html
-<script src="/js/openlayers/dist/ol.js"></script>
-<script src="/js/ol-rotate-feature/dist/bundle.min.js"></script>
+<script src="/path/to/openlayers/dist/ol.js"></script>
+<script src="/path/to/ol-rotate-feature/dist/bundle.min.js"></script>
 ```
 
 ### Note
@@ -31,7 +31,7 @@ Or download the latest version archive and add it with script tag:
 - **UMD version (`dist/bundle[.min].js`) should be used with [openlayers](https://www.npmjs.com/package/openlayers) package.
   You can install `ol` package as dev dependency to suppress NPM warning about required peer dependencies.**
 - **ES2015 version (`dist/bundle.es.js`) should be used with [ol](https://www.npmjs.com/package/ol) package (you should
-  install it manually). You can install `openlayers` package as dev dependency to suppress NPM warning about required peer dependencies.**
+  install it manually).**
 
 ## Usage
 
@@ -54,7 +54,8 @@ In Browser environment you should add **script** tag pointing to UMD module afte
 <script src="/js/openlayers/dist/ol.js"></script>
 <script src="/js/ol-rotate-feature/dist/bundle.min.js"></script>
 <script>
-  // now plugin is available at `ol.interaction.RotateFeature` field
+  // plugin exports global variable RotateFeatureInteraction
+  // in addition it also exported to `ol.interaction.RotateFeature` field (for backward compatibility).
 </script>
 ```
 
@@ -119,7 +120,7 @@ import Point from 'ol/geom/point'
 import LineString from 'ol/geom/linestring'
 import Polygon from 'ol/geom/polygon'
 import Select from 'ol/interaction/select'
-import RotateFeature from 'ol-rotate-feature'
+import RotateFeatureInteraction from 'ol-rotate-feature'
 
 const point = new Feature({
   name: 'point',
@@ -162,7 +163,7 @@ const map = new Map({
 const select = new Select()
 select.getFeatures().extend([ point, line, polygon ])
 
-const rotate = new RotateFeature({
+const rotate = new RotateFeatureInteraction({
   features: select.getFeatures(),
   anchor: [ 0, 0 ],
   angle: -90 * Math.PI / 180

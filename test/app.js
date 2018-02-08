@@ -14,7 +14,7 @@ import RegularShape from 'ol/style/regularshape'
 import Fill from 'ol/style/fill'
 import Stroke from 'ol/style/stroke'
 import Text from 'ol/style/text'
-import RotateFeature from '../src'
+import RotateFeatureInteraction from '../src'
 
 const point = new Feature({
   name: 'point',
@@ -57,7 +57,7 @@ const map = new Map({
 const select = new Select()
 select.getFeatures().extend([ point, line, polygon ])
 
-const rotate = new RotateFeature({
+const rotate = new RotateFeatureInteraction({
   features: select.getFeatures(),
   anchor: [ 0, 0 ],
   angle: -90 * Math.PI / 180,

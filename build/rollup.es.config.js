@@ -3,47 +3,33 @@ const replace = require('rollup-plugin-replace')
 const babel = require('rollup-plugin-babel')
 const resolve = require('rollup-plugin-node-resolve')
 const cjs = require('rollup-plugin-commonjs')
-const packageJson = require('../package.json')
-
-const nodeEnv = process.env.NODE_ENV || 'development'
-const banner =
-  `/*!
-${packageJson.description}
-
-@package ${packageJson.name}
-@author ${packageJson.author}
-@version ${packageJson.version}
-@licence MIT
-@copyright (c) 2016-${new Date().getFullYear()}, ${packageJson.author}
-*/`
+const config = require('./config')
 
 module.exports = {
-  format: 'es',
-  entry: path.join(__dirname, '../src/index.js'),
-  dest: path.join(__dirname, '../dist/bundle.es.js'),
-  banner,
+  input: config.input,
+  external: id => /(babel-runtime|openlayers|ol\/.+)/i.test(id),
   plugins: [
-    replace({
-      'process.env.NODE_ENV': `'${nodeEnv}'`,
-      PKG_VERSION: `'${packageJson.version}'`
-    }),
+    replace(config.replace),
     babel({
       runtimeHelpers: true,
       sourceMap: true,
       include: [
-        'src/**/*'
-      ]
+        'src/**/*',
+      ],
     }),
     resolve({
       main: true,
       module: true,
       jsnext: true,
-      browser: true
+      browser: true,
     }),
-    cjs()
+    cjs(),
   ],
-  external (id) {
-    return /(babel-runtime|openlayers|ol\/.+)/i.test(id)
+  output: {
+    format: 'es',
+    file: path.join(__dirname, `../dist/bundle.es.js`),
+    sourcemap: true,
+    banner: config.banner,
+    name: config.name,
   },
-  sourceMap: true
 }

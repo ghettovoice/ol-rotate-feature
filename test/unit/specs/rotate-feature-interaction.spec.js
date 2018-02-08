@@ -10,7 +10,7 @@ import PointerEvent from 'ol/pointer/pointerevent'
 import MapBrowserPointerEvent from 'ol/mapbrowserpointerevent'
 import olEvent from 'ol/events/event'
 import RotateFeatureInteraction from '../../../src'
-import RotateFeatureEvent from '../../../src/rotate-feature-event'
+import RotateFeatureEvent from '../../../src/event'
 
 Object.defineProperties(RotateFeatureInteraction.prototype, /** @lends RotateFeatureInteraction.prototype */{
   overlay: {
