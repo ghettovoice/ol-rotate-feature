@@ -1,4 +1,10 @@
 /**
+ * This file is part of ol-rotate-feature package.
+ * @module ol-rotate-feature
+ * @license MIT
+ * @author Vladimir Vershinin
+ */
+/**
  * @enum {string}
  */
 export const RotateFeatureEventType = {

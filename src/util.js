@@ -1,4 +1,11 @@
 /**
+ * This file is part of ol-rotate-feature package.
+ * @module ol-rotate-feature
+ * @license MIT
+ * @author Vladimir Vershinin
+ */
+
+/**
  * @param {boolean} condition
  * @param {string} message
  * @throws Error

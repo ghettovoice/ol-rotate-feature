@@ -1,4 +1,11 @@
 /**
+ * This file is part of ol-rotate-feature package.
+ * @module ol-rotate-feature
+ * @license MIT
+ * @author Vladimir Vershinin
+ */
+
+/**
  * @typedef {Object} InteractionOptions
  * @property {ol.Collection<ol.Feature>} features The features the interaction works on. Required.
  * @property {ol.style.Style | Array<ol.style.Style> | ol.style.StyleFunction | undefined} style  Style of the overlay.
