@@ -1,0 +1,12 @@
+title: ol-rotate-feature homepage
+description: ol-rotate-feature homepage
+
+theme: jekyll-theme-cayman
+
+plugins:
+  - jekyll-analytics
+
+jekyll_analytics:
+  GoogleAnalytics:
+    id: UA-98870917-1
+    anonymizeIp: false
