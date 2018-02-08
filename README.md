@@ -12,11 +12,12 @@ Plugin adds interaction that allows to rotate vector features around some anchor
 
 ## Installation
 
-Install it thought NPM or Bower:
+Install it thought NPM:
 
 ```shell
 npm install ol ol-rotate-feature # ES6 version for bundling with Webpack, Rollup or etc.
-bower install openlayers ol-rotate-feature # UMD version for browser
+# to use UMD version 'openlayers' package should be installed
+npm install openlayers
 ```
 
 Or download the latest version archive and add it with script tag:
