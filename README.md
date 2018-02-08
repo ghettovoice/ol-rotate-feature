@@ -23,7 +23,7 @@ npm install openlayers
 Or download the latest version archive and add it with script tag:
 
 ```html
-<script src="https://unpkg.com/openlayers@4.6.4/dist/ol.js"></script>
+<script src="https://unpkg.com/openlayers@latest/dist/ol.js"></script>
 <script src="https://unpkg.com/ol-rotate-feature@latest/dist/bundle.min.js"></script>
 ```
 
