@@ -15,7 +15,8 @@ Plugin adds interaction that allows to rotate vector features around some anchor
 Install it thought NPM:
 
 ```shell
-npm install ol ol-rotate-feature # ES6 version for bundling with Webpack, Rollup or etc.
+# ES6 version for bundling with Webpack, Rollup or etc.
+npm install ol ol-rotate-feature
 # to use UMD version 'openlayers' package should be installed
 npm install openlayers
 ```
@@ -23,16 +24,16 @@ npm install openlayers
 Or download the latest version archive and add it with script tag:
 
 ```html
-<script src="https://unpkg.com/openlayers@4.6.4/dist/ol.js"></script>
+<script src="https://unpkg.com/openlayers@latest/dist/ol.js"></script>
 <script src="https://unpkg.com/ol-rotate-feature@latest/dist/bundle.min.js"></script>
 ```
 
 ### Note
 **Plugin is available in 2 versions: as UMD module and as ES2015 module:**
+- **RECOMMENDED: ES2015 version (`dist/bundle.es.js`) should be used with [ol](https://www.npmjs.com/package/ol) package (you should
+  install it manually).**
 - **UMD version (`dist/bundle[.min].js`) should be used with [openlayers](https://www.npmjs.com/package/openlayers) package.
   You can install `ol` package as dev dependency to suppress NPM warning about required peer dependencies.**
-- **ES2015 version (`dist/bundle.es.js`) should be used with [ol](https://www.npmjs.com/package/ol) package (you should
-  install it manually).**
 
 ## Usage
 
@@ -52,8 +53,8 @@ const RotateFeatureInteraction = require('ol-rotate-feature')
 
 In Browser environment you should add **script** tag pointing to UMD module after OpenLayers js files.
 ```html
-<script src="/js/openlayers/dist/ol.js"></script>
-<script src="/js/ol-rotate-feature/dist/bundle.min.js"></script>
+<script src="https://unpkg.com/openlayers@latest/dist/ol.js"></script>
+<script src="https://unpkg.com/ol-rotate-feature@latest/dist/bundle.min.js"></script>
 <script>
   // plugin exports global variable RotateFeatureInteraction
   // in addition it also exported to `ol.interaction.RotateFeature` field (for backward compatibility).
@@ -193,4 +194,4 @@ rotate.on('rotateend', evt => {
 
 ## License
 
-MIT (c) 2016-2017, Vladimir Vershinin
+MIT (c) 2016-2018, Vladimir Vershinin
