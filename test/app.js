@@ -14,6 +14,7 @@ import RegularShape from 'ol/style/regularshape'
 import Fill from 'ol/style/fill'
 import Stroke from 'ol/style/stroke'
 import Text from 'ol/style/text'
+import 'ol/ol.css'
 import RotateFeatureInteraction from '../src'
 
 const point = new Feature({

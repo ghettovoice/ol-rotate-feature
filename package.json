@@ -9,7 +9,7 @@
     "build-es": "cross-env BABEL_ENV=es NODE_ENV=production rollup -c build/rollup.es.config.js",
     "build": "npm run clean && npm run build-es && npm run build-umd",
     "clean": "rm -rf ./dist",
-    "start": "webpack-dev-server --config=build/webpack.dev.config.js",
+    "start": "webpack-dev-server --config=build/webpack.dev.config.js --progress --colors",
     "test": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
     "coveralls": "cat test/unit/coverage/lcov.info | coveralls"
   },
@@ -46,6 +46,7 @@
     "chai": "^4.1.2",
     "coveralls": "^3.0.0",
     "cross-env": "^5.1.3",
+    "css-loader": "^0.28.9",
     "html-webpack-plugin": "^2.30.1",
     "karma": "^2.0.0",
     "karma-chai": "^0.1.0",
@@ -70,6 +71,7 @@
     "rollup-plugin-uglify": "^3.0.0",
     "sinon": "^4.2.2",
     "sinon-chai": "^2.14.0",
+    "style-loader": "^0.20.1",
     "webpack": "^3.10.0",
     "webpack-dev-server": "^2.11.1",
     "webpack-merge": "^4.1.1"

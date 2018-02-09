@@ -23,4 +23,5 @@ module.exports = {
     'process.env.NODE_ENV': `'${env}'`,
     PKG_VERSION: `'${packageJson.version}'`,
   },
+  external: id => /(babel-runtime|openlayers|ol\/.+)/i.test(id),
 }

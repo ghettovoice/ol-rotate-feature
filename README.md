@@ -21,7 +21,7 @@ npm install ol ol-rotate-feature
 npm install openlayers
 ```
 
-Or download the latest version archive and add it with script tag:
+Or add from CDN:
 
 ```html
 <script src="https://unpkg.com/openlayers@latest/dist/ol.js"></script>
