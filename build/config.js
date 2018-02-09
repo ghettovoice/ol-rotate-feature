@@ -8,7 +8,7 @@ ${packageJson.description}
 @package ${packageJson.name}
 @author ${packageJson.author}
 @version ${packageJson.version}
-@licence MIT
+@licence ${packageJson.license}
 @copyright (c) 2016-${new Date().getFullYear()}, ${packageJson.author}
 */`
 
