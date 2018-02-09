@@ -4,14 +4,18 @@ const merge = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const baseConfig = require('./webpack.base.config')
 
+const host = process.env.HOST || 'localhost'
+const port = process.env.PORT || 8080
+
 const webpackCofnig = merge(baseConfig, {
   devtool: '#cheap-module-eval-source-map',
   devServer: {
-    publicPath: baseConfig.output.publicPath,
-    host: 'localhost',
-    port: 8080,
+    host,
+    port,
     hot: true,
-    inline: true
+    inline: true,
+    compress: true,
+    open: true,
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
@@ -19,14 +23,14 @@ const webpackCofnig = merge(baseConfig, {
     // https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: 'test/index.html',
-      inject: true
+      template: path.resolve(__dirname, '../test/index.html'),
+      inject: true,
     })
   ]
 })
 
 webpackCofnig.entry = {
-  app: path.join(__dirname, '../test/app.js')
+  app: path.join(__dirname, '../test/app.js'),
 }
 
 module.exports = webpackCofnig
