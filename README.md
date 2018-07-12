@@ -10,14 +10,18 @@ Plugin adds interaction that allows to rotate vector features around some anchor
 
 ### [Demo](https://ghettovoice.github.io/ol-rotate-feature/demo.html)
 
+**NOTE**: `ol-rotate-feature` starting from version **v2.x** supports `ol` **v5.x**. To use it with previous version of the OpenLayers `ol` package
+you should install **v1.x** version.
+
 ## Installation
 
-Install it thought NPM:
+Install it thought NPM (**recommended**):
 
 ```shell
 # ES6 version for bundling with Webpack, Rollup or etc.
 npm install ol ol-rotate-feature
-# to use UMD version 'openlayers' package should be installed
+
+# to use UMD version 'openlayers' package should be installed (not recommended)
 npm install openlayers
 ```
 
@@ -37,21 +41,23 @@ Or add from CDN:
 
 ## Usage
 
-Plugin may be used as UMD module or ES2015 module:
+Plugin may be used as **ES2015** module and **`ol` v5.x** (**recommended**):
 
 ```js
-// Use as ES2015 module (based on NPM package `ol`)
-import Map from 'ol/map'
+import Map from 'ol/Map'
 ...
 import RotateFeatureInteraction from 'ol-rotate-feature'
+```
 
-// Use as UMD module (based on NPM package `openlayers`)
+Use **UMD** bundle with deprecated **`openlayers` v4.x** package (**not recommended but supported**)
+
+```js
 const ol = require('openlayers')
 ...
 const RotateFeatureInteraction = require('ol-rotate-feature')
 ```
 
-In Browser environment you should add **script** tag pointing to UMD module after OpenLayers js files.
+In Browser environment you should add **script** tag pointing to **UMD** module after OpenLayers js files.
 ```html
 <script src="https://unpkg.com/openlayers@latest/dist/ol.js"></script>
 <script src="https://unpkg.com/ol-rotate-feature@latest/dist/bundle.min.js"></script>
@@ -111,17 +117,17 @@ All events triggered by the interaction are instances of `RotateFeatureEvent`.
 ### Example usage:
 
 ```js
-import Map from 'ol/map'
-import View from 'ol/view'
-import TileLayer from 'ol/layer/tile'
-import VectorLayer from 'ol/layer/vector'
-import OSMSource from 'ol/source/osm'
-import VectorSource from 'ol/source/vector'
-import Feature from 'ol/feature'
-import Point from 'ol/geom/point'
-import LineString from 'ol/geom/linestring'
-import Polygon from 'ol/geom/polygon'
-import Select from 'ol/interaction/select'
+import Map from 'ol/Map'
+import View from 'ol/View'
+import TileLayer from 'ol/layer/Tile'
+import VectorLayer from 'ol/layer/Vector'
+import OSMSource from 'ol/source/OSM'
+import VectorSource from 'ol/source/Vector'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point'
+import LineString from 'ol/geom/LineString'
+import Polygon from 'ol/geom/Polygon'
+import Select from 'ol/interaction/Select'
 import RotateFeatureInteraction from 'ol-rotate-feature'
 
 const point = new Feature({
