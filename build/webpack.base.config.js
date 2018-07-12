@@ -13,6 +13,7 @@ module.exports = {
   entry: {
     bundle: config.input,
   },
+  mode: process.env.NODE_ENV || 'development',
   devtool: '#source-map',
   output: {
     filename: '[name].js',
@@ -37,6 +38,7 @@ module.exports = {
         include: [
           srcPath,
           path.join(__dirname, '../test'),
+          path.join(__dirname, '../node_modules/ol'),
         ],
       }, {
         test: /\.json$/i,
