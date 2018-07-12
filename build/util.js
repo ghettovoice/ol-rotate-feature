@@ -2,7 +2,7 @@ const replace = require('rollup-plugin-replace')
 const babel = require('rollup-plugin-babel')
 const resolve = require('rollup-plugin-node-resolve')
 const cjs = require('rollup-plugin-commonjs')
-const uglify = require('rollup-plugin-uglify')
+const {uglify} = require('rollup-plugin-uglify')
 
 function plugins (options = {}) {
   const plugins = [

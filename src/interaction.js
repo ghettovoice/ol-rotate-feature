@@ -9,20 +9,20 @@
  * Adds controls to rotate vector features.
  * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
  */
-import PointerInteraction from 'ol/interaction/pointer'
-import Collection from 'ol/collection'
-import VectorLayer from 'ol/layer/vector'
-import VectorSource from 'ol/source/vector'
-import Feature from 'ol/feature'
-import Point from 'ol/geom/point'
-import Polygon from 'ol/geom/polygon'
-import GeometryCollection from 'ol/geom/geometrycollection'
-import Style from 'ol/style/style'
-import RegularShape from 'ol/style/regularshape'
-import Stroke from 'ol/style/stroke'
-import Fill from 'ol/style/fill'
-import Text from 'ol/style/text'
-import extentHelper from 'ol/extent'
+import PointerInteraction, {handleEvent as baseHandleEvent} from 'ol/interaction/Pointer'
+import Collection from 'ol/Collection'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point'
+import Polygon from 'ol/geom/Polygon'
+import GeometryCollection from 'ol/geom/GeometryCollection'
+import Style from 'ol/style/Style'
+import RegularShape from 'ol/style/RegularShape'
+import Stroke from 'ol/style/Stroke'
+import Fill from 'ol/style/Fill'
+import Text from 'ol/style/Text'
+import {getCenter as getExtentCenter} from 'ol/extent'
 import { assert, identity, includes, isArray } from './util'
 import RotateFeatureEvent, { RotateFeatureEventType } from './event'
 
@@ -53,17 +53,17 @@ export default class RotateFeatureInteraction extends PointerInteraction {
      */
     this.previousCursor_ = undefined
     /**
-     * @type {ol.Feature}
+     * @type {Feature}
      * @private
      */
     this.anchorFeature_ = undefined
     /**
-     * @type {ol.Feature}
+     * @type {Feature}
      * @private
      */
     this.arrowFeature_ = undefined
     /**
-     * @type {ol.Coordinate}
+     * @type {Coordinate}
      * @private
      */
     this.lastCoordinate_ = undefined
@@ -73,7 +73,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
      */
     this.anchorMoving_ = false
     /**
-     * @type {ol.layer.Vector}
+     * @type {Vector}
      * @private
      */
     this.overlay_ = new VectorLayer({
@@ -83,7 +83,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
       })
     })
     /**
-     * @type {ol.Collection<ol.Feature>}
+     * @type {Collection<Feature>}
      * @private
      */
     this.features_ = undefined
@@ -113,7 +113,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   }
 
   /**
-   * @type {ol.Collection<ol.Feature>}
+   * @type {Collection<Feature>}
    */
   get features () {
     return this.features_
@@ -134,28 +134,28 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   }
 
   /**
-   * @type {ol.Coordinate|undefined}
+   * @type {Coordinate|number[]|undefined}
    */
   get anchor () {
     return this.getAnchor()
   }
 
   /**
-   * @param {ol.Coordinate|undefined} anchor
+   * @param {Coordinate|undefined} anchor
    */
   set anchor (anchor) {
     this.setAnchor(anchor)
   }
 
   /**
-   * @param {ol.Map} map
+   * @param {PluggableMap} map
    */
   set map (map) {
     this.setMap(map)
   }
 
   /**
-   * @type {ol.Map}
+   * @type {PluggableMap}
    */
   get map() {
     return this.getMap()
@@ -217,7 +217,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * Set current anchor position.
    *
-   * @param {ol.Coordinate | undefined} anchor
+   * @param {Coordinate | undefined} anchor
    */
   setAnchor (anchor) {
     assert(anchor == null || isArray(anchor) && anchor.length === 2, 'Array of two elements passed')
@@ -228,7 +228,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * Returns current anchor position.
    *
-   * @return {ol.Coordinate | undefined}
+   * @return {Coordinate | undefined}
    */
   getAnchor () {
     return this.get(ANCHOR_PROP)
@@ -353,7 +353,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   }
 
   /**
-   * @param {ol.Collection<ol.Feature>} features
+   * @param {Collection<Feature>} features
    * @private
    */
   dispatchRotateStartEvent_ (features) {
@@ -368,7 +368,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   }
 
   /**
-   * @param {ol.Collection<ol.Feature>} features
+   * @param {Collection<Feature>} features
    * @private
    */
   dispatchRotatingEvent_ (features) {
@@ -383,7 +383,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   }
 
   /**
-   * @param {ol.Collection<ol.Feature>} features
+   * @param {Collection<Feature>} features
    * @private
    */
   dispatchRotateEndEvent_ (features) {
@@ -399,7 +399,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
 }
 
 /**
- * @param {ol.MapBrowserEvent} evt Map browser event.
+ * @param {MapBrowserEvent} evt Map browser event.
  * @return {boolean} `false` to stop event propagation.
  * @this {RotateFeatureInteraction}
  * @private
@@ -414,11 +414,11 @@ function handleEvent (evt) {
     return false
   }
 
-  return this::PointerInteraction.handleEvent(evt)
+  return this::baseHandleEvent(evt)
 }
 
 /**
- * @param {ol.MapBrowserEvent} evt Event.
+ * @param {MapBrowserEvent} evt Event.
  * @return {boolean}
  * @this {RotateFeatureInteraction}
  * @private
@@ -453,7 +453,7 @@ function handleDownEvent (evt) {
 }
 
 /**
- * @param {ol.MapBrowserEvent} evt Event.
+ * @param {MapBrowserEvent} evt Event.
  * @return {boolean}
  * @this {RotateFeatureInteraction}
  * @private
@@ -480,7 +480,7 @@ function handleUpEvent (evt) {
 }
 
 /**
- * @param {ol.MapBrowserEvent} evt Event.
+ * @param {MapBrowserEvent} evt Event.
  * @return {boolean}
  * @this {RotateFeatureInteraction}
  * @private
@@ -518,7 +518,7 @@ function handleDragEvent ({ coordinate }) {
 }
 
 /**
- * @param {ol.MapBrowserEvent} evt Event.
+ * @param {MapBrowserEvent} evt Event.
  * @return {boolean}
  * @this {RotateFeatureInteraction}
  * @private
@@ -657,8 +657,8 @@ function getDefaultStyle () {
 }
 
 /**
- * @param {ol.Collection<ol.Feature>|Array<ol.Feature>} features
- * @returns {ol.Extent | undefined}
+ * @param {Collection<Feature>|Array<Feature>} features
+ * @returns {Extent | number[] | undefined}
  * @private
  */
 function getFeaturesExtent (features) {
@@ -669,12 +669,12 @@ function getFeaturesExtent (features) {
 }
 
 /**
- * @param {ol.Collection<ol.Feature> | Array<ol.Feature>} features
- * @return {ol.Coordinate | undefined}
+ * @param {Collection<ol.Feature> | Array<Feature>} features
+ * @return {Coordinate | number[] | undefined}
  */
 function getFeaturesCentroid (features) {
   features = features instanceof Collection ? features.getArray() : features
   if (!features.length) return
 
-  return extentHelper.getCenter(getFeaturesExtent(features))
+  return getExtentCenter(getFeaturesExtent(features))
 }
