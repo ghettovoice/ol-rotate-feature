@@ -419,7 +419,8 @@ function simulateEvent(type, [ x, y ]) {
   const position = viewport.getBoundingClientRect()
   const evt = new MapBrowserPointerEvent(type, map, new PointerEvent(type, {
     clientX: position.left + x,
-    clientY: position.top + y
+    clientY: position.top + y,
+    preventDefault () {}
   }))
   map.handleMapBrowserEvent(evt)
 }

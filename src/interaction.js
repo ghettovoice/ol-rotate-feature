@@ -9,7 +9,7 @@
  * Adds controls to rotate vector features.
  * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
  */
-import PointerInteraction, {handleEvent as baseHandleEvent} from 'ol/interaction/Pointer'
+import PointerInteraction from 'ol/interaction/Pointer'
 import Collection from 'ol/Collection'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
@@ -41,7 +41,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
    */
   constructor (options = {}) {
     super({
-      handleEvent: handleEvent,
+      // handleEvent: handleEvent,
       handleDownEvent: handleDownEvent,
       handleUpEvent: handleUpEvent,
       handleDragEvent: handleDragEvent,
@@ -404,18 +404,18 @@ export default class RotateFeatureInteraction extends PointerInteraction {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleEvent (evt) {
-  // disable selection of inner features
-  const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
-  if (
-    includes([ 'click', 'singleclick', 'dblclick' ], evt.type) &&
-    includes([ this.anchorFeature_, this.arrowFeature_ ], foundFeature)
-  ) {
-    return false
-  }
-
-  return this::baseHandleEvent(evt)
-}
+// function handleEvent (evt) {
+//   // disable selection of inner features
+//   const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
+//   if (
+//     includes([ 'click', 'singleclick', 'dblclick' ], evt.type) &&
+//     includes([ this.anchorFeature_, this.arrowFeature_ ], foundFeature)
+//   ) {
+//     return false
+//   }
+//
+//   return this::baseHandleEvent(evt)
+// }
 
 /**
  * @param {MapBrowserEvent} evt Event.
@@ -424,8 +424,14 @@ function handleEvent (evt) {
  * @private
  */
 function handleDownEvent (evt) {
+  // disable selection of inner features
   const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
-
+  if (
+    includes([ 'click', 'singleclick', 'dblclick' ], evt.type) &&
+    includes([ this.anchorFeature_, this.arrowFeature_ ], foundFeature)
+  ) {
+    return false
+  }
   // handle click & drag on features for rotation
   if (
     foundFeature && !this.lastCoordinate_ &&
