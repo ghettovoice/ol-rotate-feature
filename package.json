@@ -1,6 +1,6 @@
 {
   "name": "ol-rotate-feature",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Rotate vector features interaction for OpenLayers",
   "main": "dist/bundle.js",
   "module": "dist/bundle.es.js",

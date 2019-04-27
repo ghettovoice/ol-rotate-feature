@@ -353,9 +353,9 @@ describe('rotate feature interaction', function () {
       // simulate rotation to 45deg around [ 10, 10 ] anchor
       let startPixel = map.getPixelFromCoordinate(features.item(0).getGeometry().getCoordinates())
       let endPixel = map.getPixelFromCoordinate([ 0, 20 ])
-      simulateEvent('pointerdown', startPixel)
-      simulateEvent('pointerdrag', endPixel)
-      simulateEvent('pointerup', endPixel)
+      simulatePointerEvent('pointerdown', startPixel)
+      simulatePointerEvent('pointerdrag', endPixel)
+      simulatePointerEvent('pointerup', endPixel)
 
       expect(features.getArray().every(feature => (feature.getGeometry() instanceof Point))).to.be.true
       const expectedCoords = [
@@ -414,14 +414,18 @@ function createTargetElement (w, h) {
  * @param {string} type Event type.
  * @param {number[]} pixelCoordinate Horizontal/vertical offset from bottom left corner.
  */
-function simulateEvent(type, [ x, y ]) {
+function simulatePointerEvent(type, [ x, y ]) {
   const viewport = map.getViewport()
   const position = viewport.getBoundingClientRect()
-  const evt = new MapBrowserPointerEvent(type, map, new PointerEvent(type, {
+  const pointerEvt = new PointerEvent(type, {
     clientX: position.left + x,
     clientY: position.top + y,
     preventDefault () {}
-  }))
+  })
+  pointerEvt.pointerType = 'mouse'
+  const evt = new MapBrowserPointerEvent(type, map, pointerEvt)
+  evt.originalEvent.button = 0
+
   map.handleMapBrowserEvent(evt)
 }
 
