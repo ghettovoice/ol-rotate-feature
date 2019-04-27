@@ -23,9 +23,10 @@ import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
 import Text from 'ol/style/Text'
 import {getCenter as getExtentCenter} from 'ol/extent'
-import { always, mouseActionButton, mouseOnly } from 'ol/events/condition';
+import { always, mouseOnly } from 'ol/events/condition';
 import { assert, identity, includes, isArray } from './util'
 import RotateFeatureEvent, { RotateFeatureEventType } from './event'
+import { mouseActionButton } from './shim'
 
 const ANCHOR_KEY = 'rotate-anchor'
 const ARROW_KEY = 'rotate-arrow'
