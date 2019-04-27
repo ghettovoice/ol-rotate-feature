@@ -65,7 +65,7 @@ module.exports = {
         ],
       },
     ],
-    noParse: [/openlayers/],
+    noParse: [/node_modules\/openlayers/],
   },
   plugins,
 }
