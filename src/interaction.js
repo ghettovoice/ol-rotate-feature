@@ -23,7 +23,7 @@ import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
 import Text from 'ol/style/Text'
 import {getCenter as getExtentCenter} from 'ol/extent'
-import { platformModifierKeyOnly, mouseActionButton, mouseOnly } from 'ol/events/condition';
+import { always, mouseActionButton, mouseOnly } from 'ol/events/condition';
 import { assert, identity, includes, isArray } from './util'
 import RotateFeatureEvent, { RotateFeatureEventType } from './event'
 
@@ -43,10 +43,10 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   constructor (options = {}) {
     super({
       // handleEvent: handleEvent,
-      handleDownEvent: handleDownEvent,
-      handleUpEvent: handleUpEvent,
-      handleDragEvent: handleDragEvent,
-      handleMoveEvent: handleMoveEvent
+      handleDownEvent,
+      handleUpEvent,
+      handleDragEvent,
+      handleMoveEvent
     })
     /**
      * @type {string}
@@ -87,7 +87,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
      * @private
      * @type {module:ol/events/condition~Condition}
      */
-    this.condition_ = options.condition ? options.condition : platformModifierKeyOnly;
+    this.condition_ = options.condition ? options.condition : always;
     /**
      * @type {Collection<Feature>}
      * @private

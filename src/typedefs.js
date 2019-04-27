@@ -12,4 +12,5 @@
  * @property {number | undefined} angle Initial angle in radians (positive is counter-clockwise),
  *                                      applied for features already added to collection. Default is `0`.
  * @property {number[] | ol.Coordinate | undefined} anchor Initial anchor coordinate. Default is center of features extent.
+ * @property {function} condition
  */
