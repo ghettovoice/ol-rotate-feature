@@ -69,13 +69,13 @@ In Browser environment you should add **script** tag pointing to **UMD** module 
 
 ### Options
 
-| Option         | Type                                                                                               | Description                                                                                                                 |
-|:---------------|:---------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------|
-| features       | _ol.Collection<ol.Feature>_                                                                        | The features the interaction works on. **Required**.                                                                        |
-| style          | _ol.style.Style &#124; Array&lt;ol.style.Style&gt; &#124; ol.style.StyleFunction &#124; undefined_ | Style of the overlay with interaction helper features.                                                                      |
-| angle          | _number &#124; undefined_                                                                          | Initial angle in radians (positive is counter-clockwise), applied for features already added to collection. Default is `0`. |
-| anchor         | _number[] &#124; ol.Coordinate &#124; undefined_                                                   | Initial anchor coordinate. Default is center of features extent.                                                            |
-| condition         | module:ol/events/condition~Condition	                                                          | A function that takes an module:ol/MapBrowserEvent~MapBrowserEvent and returns a boolean to indicate whether that event should be handled. Default is module:ol/events/condition~platformModifierKeyOnly |
+| Option    | Type                                                                                               | Description                                                                                                                                                                                 |
+| :-------- | :------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| features  | _ol.Collection<ol.Feature>_                                                                        | The features the interaction works on. **Required**.                                                                                                                                        |
+| style     | _ol.style.Style &#124; Array&lt;ol.style.Style&gt; &#124; ol.style.StyleFunction &#124; undefined_ | Style of the overlay with interaction helper features.                                                                                                                                      |
+| angle     | _number &#124; undefined_                                                                          | Initial angle in radians (positive is counter-clockwise), applied for features already added to collection. Default is `0`.                                                                 |
+| anchor    | _number[] &#124; ol.Coordinate &#124; undefined_                                                   | Initial anchor coordinate. Default is center of features extent.                                                                                                                            |
+| condition | _module:ol/events/condition~Condition_                                                             | A function that takes an `module:ol/MapBrowserEvent~MapBrowserEvent` and returns a boolean to indicate whether that event should be handled. Default is `module:ol/events/condition~always` |
 
 ### Methods
 
@@ -110,7 +110,7 @@ All events triggered by the interaction are instances of `RotateFeatureEvent`.
 - **anchor**      _ol.Coordinate_     Current anchor position.
 
 | Event       | Arguments            | Description                          |
-|:------------|:---------------------|:-------------------------------------|
+| :---------- | :------------------- | :----------------------------------- |
 | rotatestart | _RotateFeatureEvent_ | Triggered upon feature rotate start. |
 | rotating    | _RotateFeatureEvent_ | Triggered upon feature rotating.     |
 | rotateend   | _RotateFeatureEvent_ | Triggered upon feature rotation end. |
