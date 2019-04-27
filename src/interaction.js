@@ -23,6 +23,7 @@ import Stroke from 'ol/style/Stroke'
 import Fill from 'ol/style/Fill'
 import Text from 'ol/style/Text'
 import {getCenter as getExtentCenter} from 'ol/extent'
+import { platformModifierKeyOnly, mouseActionButton, mouseOnly } from 'ol/events/condition';
 import { assert, identity, includes, isArray } from './util'
 import RotateFeatureEvent, { RotateFeatureEventType } from './event'
 
@@ -82,6 +83,11 @@ export default class RotateFeatureInteraction extends PointerInteraction {
         features: new Collection()
       })
     })
+    /**
+     * @private
+     * @type {module:ol/events/condition~Condition}
+     */
+    this.condition_ = options.condition ? options.condition : platformModifierKeyOnly;
     /**
      * @type {Collection<Feature>}
      * @private
@@ -424,37 +430,42 @@ export default class RotateFeatureInteraction extends PointerInteraction {
  * @private
  */
 function handleDownEvent (evt) {
-  // disable selection of inner features
-  const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
-  if (
-    includes([ 'click', 'singleclick', 'dblclick' ], evt.type) &&
-    includes([ this.anchorFeature_, this.arrowFeature_ ], foundFeature)
-  ) {
-    return false
-  }
-  // handle click & drag on features for rotation
-  if (
-    foundFeature && !this.lastCoordinate_ &&
-    (
-      includes(this.features_.getArray(), foundFeature) ||
-      foundFeature === this.arrowFeature_
-    )
-  ) {
-    this.lastCoordinate_ = evt.coordinate
-
-    this::handleMoveEvent(evt)
-    this.dispatchRotateStartEvent_(this.features_)
-
-    return true
-  }
-  // handle click & drag on rotation anchor feature
-  else if (foundFeature && foundFeature === this.anchorFeature_) {
-    this.anchorMoving_ = true
-    this::handleMoveEvent(evt)
-
-    return true
+  if (!mouseOnly(evt)) {
+    return false;
   }
 
+  if (mouseActionButton(evt) && this.condition_(evt)) {
+    // disable selection of inner features
+    const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
+    if (
+      includes([ 'click', 'singleclick', 'dblclick' ], evt.type) &&
+      includes([ this.anchorFeature_, this.arrowFeature_ ], foundFeature)
+    ) {
+      return false
+    }
+    // handle click & drag on features for rotation
+    if (
+      foundFeature && !this.lastCoordinate_ &&
+      (
+        includes(this.features_.getArray(), foundFeature) ||
+        foundFeature === this.arrowFeature_
+      )
+    ) {
+      this.lastCoordinate_ = evt.coordinate
+
+      this::handleMoveEvent(evt)
+      this.dispatchRotateStartEvent_(this.features_)
+
+      return true
+    }
+    // handle click & drag on rotation anchor feature
+    else if (foundFeature && foundFeature === this.anchorFeature_) {
+      this.anchorMoving_ = true
+      this::handleMoveEvent(evt)
+
+      return true
+    }
+  }
   return false
 }
 
