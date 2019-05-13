@@ -13,4 +13,5 @@
  *                                      applied for features already added to collection. Default is `0`.
  * @property {number[] | ol.Coordinate | undefined} anchor Initial anchor coordinate. Default is center of features extent.
  * @property {function} condition
+ * @property {boolean | undefined} allowAnchorMovement Allow UI manipulaiton of the Rotation Anchor
  */

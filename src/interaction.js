@@ -107,6 +107,12 @@ export default class RotateFeatureInteraction extends PointerInteraction {
       this.features_ = new Collection()
     }
 
+    /**
+     * @type {boolean}
+     * @public
+     */
+    this.allowAnchorMovement = true || options.allowAnchorMovement;
+
     this.setAnchor(options.anchor || getFeaturesCentroid(this.features_))
     this.setAngle(options.angle || 0)
 
@@ -460,7 +466,7 @@ function handleDownEvent (evt) {
       return true
     }
     // handle click & drag on rotation anchor feature
-    else if (foundFeature && foundFeature === this.anchorFeature_) {
+    else if (foundFeature && foundFeature === this.anchorFeature_ && this.allowAnchorMovement) {
       this.anchorMoving_ = true
       this::handleMoveEvent(evt)
 
@@ -566,7 +572,7 @@ function handleMoveEvent ({ map, pixel }) {
   ) {
     this.previousCursor_ = elem.style.cursor
     setCursor('grab', true)
-  } else if (( foundFeature && foundFeature === this.anchorFeature_ ) || this.anchorMoving_) {
+  } else if (( foundFeature && foundFeature === this.anchorFeature_ && this.allowAnchorMovement) || this.anchorMoving_) {
     this.previousCursor_ = elem.style.cursor
     setCursor('crosshair')
   } else {
