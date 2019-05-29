@@ -111,7 +111,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
      * @type {boolean}
      * @public
      */
-    this.allowAnchorMovement = true || options.allowAnchorMovement;
+    this.allowAnchorMovement = options.allowAnchorMovement === undefined ? true : options.allowAnchorMovement;
 
     this.setAnchor(options.anchor || getFeaturesCentroid(this.features_))
     this.setAngle(options.angle || 0)
