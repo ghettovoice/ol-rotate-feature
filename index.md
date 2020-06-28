@@ -6,61 +6,24 @@
 
 # Rotate feature interaction for OpenLayers
 
-Plugin adds interaction that allows to rotate vector features around some anchor.
+Plugin adds interaction that allows rotating vector features around some anchor.
 
 ### [Demo](https://ghettovoice.github.io/ol-rotate-feature/demo.html)
 
-**NOTE**: `ol-rotate-feature` starting from version **v2.x** supports `ol` **v5.x**. To use it with previous version of the OpenLayers `ol` package
-you should install **v1.x** version.
-
 ## Installation
 
-Install it thought NPM (**recommended**):
+Install it with NPM (**recommended**):
 
 ```shell
 # ES6 version for bundling with Webpack, Rollup or etc.
 npm install ol ol-rotate-feature
-
-# to use UMD version 'openlayers' package should be installed (not recommended)
-npm install openlayers
 ```
 
 Or add from CDN:
 
 ```html
-<script src="https://unpkg.com/openlayers@latest/dist/ol.js"></script>
-<script src="https://unpkg.com/ol-rotate-feature@latest/dist/bundle.min.js"></script>
-```
-
-### Note
-**Plugin is available in 2 versions: as UMD module and as ES2015 module:**
-- **RECOMMENDED: ES2015 version (`dist/bundle.es.js`) should be used with [ol](https://www.npmjs.com/package/ol) package (you should
-  install it manually).**
-- **UMD version (`dist/bundle[.min].js`) should be used with [openlayers](https://www.npmjs.com/package/openlayers) package.
-  You can install `ol` package as dev dependency to suppress NPM warning about required peer dependencies.**
-
-## Usage
-
-Plugin may be used as **ES2015** module and **`ol` v5.x** (**recommended**):
-
-```js
-import Map from 'ol/Map'
-...
-import RotateFeatureInteraction from 'ol-rotate-feature'
-```
-
-Use **UMD** bundle with deprecated **`openlayers` v4.x** package (**not recommended but supported**)
-
-```js
-const ol = require('openlayers')
-...
-const RotateFeatureInteraction = require('ol-rotate-feature')
-```
-
-In Browser environment you should add **script** tag pointing to **UMD** module after OpenLayers js files.
-```html
-<script src="https://unpkg.com/openlayers@latest/dist/ol.js"></script>
-<script src="https://unpkg.com/ol-rotate-feature@latest/dist/bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.0.0/build/ol.js"></script>
+<script src="https://unpkg.com/ol-rotate-feature@latest/dist/ol-rotate-feature.umd.js"></script>
 <script>
   // plugin exports global variable RotateFeatureInteraction
   // in addition it also exported to `ol.interaction.RotateFeature` field (for backward compatibility).
@@ -110,7 +73,7 @@ All events triggered by the interaction are instances of `RotateFeatureEvent`.
 - **anchor**      _ol.Coordinate_     Current anchor position.
 
 | Event       | Arguments            | Description                          |
-|:------------|:---------------------|:-------------------------------------|
+| :---------- | :------------------- | :----------------------------------- |
 | rotatestart | _RotateFeatureEvent_ | Triggered upon feature rotate start. |
 | rotating    | _RotateFeatureEvent_ | Triggered upon feature rotating.     |
 | rotateend   | _RotateFeatureEvent_ | Triggered upon feature rotation end. |
@@ -118,17 +81,11 @@ All events triggered by the interaction are instances of `RotateFeatureEvent`.
 ### Example usage:
 
 ```js
-import Map from 'ol/Map'
-import View from 'ol/View'
-import TileLayer from 'ol/layer/Tile'
-import VectorLayer from 'ol/layer/Vector'
-import OSMSource from 'ol/source/OSM'
-import VectorSource from 'ol/source/Vector'
-import Feature from 'ol/Feature'
-import Point from 'ol/geom/Point'
-import LineString from 'ol/geom/LineString'
-import Polygon from 'ol/geom/Polygon'
-import Select from 'ol/interaction/Select'
+import { Map, View, Feature } from 'ol'
+import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
+import { OSM as OSMSource, Vector as VectorSource } from 'ol/source'
+import { Point, LineString, Polygon } from 'ol/geom'
+import { Select as SelectInteraction } from 'ol/interaction'
 import RotateFeatureInteraction from 'ol-rotate-feature'
 
 const point = new Feature({
@@ -169,7 +126,7 @@ const map = new Map({
   projection: 'EPSG:3857'
 })
 
-const select = new Select()
+const select = new SelectInteraction()
 select.getFeatures().extend([ point, line, polygon ])
 
 const rotate = new RotateFeatureInteraction({
@@ -201,4 +158,4 @@ rotate.on('rotateend', evt => {
 
 ## License
 
-MIT (c) 2016-2018, Vladimir Vershinin
+MIT (c) 2016-2020, Vladimir Vershinin
