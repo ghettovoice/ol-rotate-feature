@@ -1,14 +1,14 @@
-const replace = require('rollup-plugin-replace')
-const babel = require('rollup-plugin-babel')
-const resolve = require('rollup-plugin-node-resolve')
-const cjs = require('rollup-plugin-commonjs')
+const replace = require('@rollup/plugin-replace')
+const babel = require('@rollup/plugin-babel').babel
+const resolve = require('@rollup/plugin-node-resolve').nodeResolve
+const cjs = require('@rollup/plugin-commonjs')
 const terser = require('rollup-plugin-terser').terser
 
 function plugins (options = {}) {
   const plugins = [
     replace(options.replace),
     babel({
-      runtimeHelpers: true,
+      babelHelpers: 'runtime',
       sourceMap: true,
       include: [
         'src/**/*',
