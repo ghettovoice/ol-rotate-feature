@@ -13,8 +13,8 @@ ${packageJson.description}
 */`
 
 module.exports = {
-  name: 'RotateFeatureInteraction',
-  amdName: packageJson.name,
+  name: packageJson.name,
+  fullname: 'RotateFeatureInteraction',
   env,
   version: packageJson.version,
   input: path.join(__dirname, '../src/index.js'),
@@ -23,5 +23,7 @@ module.exports = {
     'process.env.NODE_ENV': `'${env}'`,
     PKG_VERSION: `'${packageJson.version}'`,
   },
-  external: id => /^(babel-runtime|openlayers|ol\/.+)$/i.test(id),
+  dependencies: Object.keys(packageJson.dependencies).concat(
+    ...Object.keys(packageJson.peerDependencies),
+  ),
 }

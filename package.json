@@ -1,17 +1,18 @@
 {
   "name": "ol-rotate-feature",
-  "version": "2.2.1",
+  "version": "3.0.0",
   "description": "Rotate vector features interaction for OpenLayers",
-  "main": "dist/bundle.js",
-  "module": "dist/bundle.es.js",
+  "main": "dist/ol-rotate-feature.umd.js",
+  "module": "dist/ol-rotate-feature.esm.js",
   "scripts": {
-    "build-umd": "cross-env BABEL_ENV=umd NODE_ENV=production rollup -c build/rollup.umd.config.js",
-    "build-es": "cross-env BABEL_ENV=es NODE_ENV=production rollup -c build/rollup.es.config.js",
-    "build": "npm run clean && npm run build-es && npm run build-umd",
+    "rollup": "rollup -c build/rollup.config.js",
+    "build": "cross-env NODE_ENV=production npm run clean && npm run rollup",
     "clean": "rm -rf ./dist",
     "start": "webpack-dev-server --config=build/webpack.dev.config.js --progress --colors",
     "test": "cross-env BABEL_ENV=test karma start test/unit/karma.conf.js --single-run",
-    "coveralls": "cat test/unit/coverage/lcov.info | coveralls"
+    "coveralls": "cat test/unit/coverage/lcov.info | coveralls",
+    "preversion": "npm test",
+    "version": "npm run build"
   },
   "keywords": [
     "ol",
@@ -26,7 +27,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ghettovoice/ol-rotate-feature.git"
+    "url": "https://github.com/ghettovoice/ol-rotate-feature.git"
   },
   "bugs": {
     "url": "https://github.com/ghettovoice/ol-rotate-feature/issues"
@@ -34,47 +35,49 @@
   "homepage": "https://ghettovoice.github.io/ol-rotate-feature/",
   "dependencies": {},
   "peerDependencies": {
-    "ol": ">=5.0"
+    "ol": "^6.0.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-plugin-istanbul": "^4.1.6",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-0": "^6.24.1",
+    "@babel/core": "^7.10.3",
+    "@babel/plugin-proposal-function-bind": "^7.10.1",
+    "@babel/plugin-proposal-optional-chaining": "^7.10.3",
+    "@babel/preset-env": "^7.10.3",
+    "babel-loader": "^8.1.0",
+    "babel-plugin-istanbul": "^6.0.0",
     "chai": "^4.2.0",
-    "coveralls": "^3.0.3",
-    "cross-env": "^5.2.0",
-    "css-loader": "^1.0.1",
-    "html-webpack-plugin": "^3.2.0",
-    "karma": "^2.0.5",
+    "coveralls": "^3.1.0",
+    "cross-env": "^7.0.2",
+    "css-loader": "^3.6.0",
+    "html-webpack-plugin": "^4.3.0",
+    "karma": "^5.1.0",
     "karma-chai": "^0.1.0",
-    "karma-coverage": "^1.1.2",
-    "karma-mocha": "^1.3.0",
+    "karma-coverage": "^2.0.2",
+    "karma-es6-shim": "^1.0.0",
+    "karma-mocha": "^2.0.1",
     "karma-phantomjs-launcher": "^1.0.4",
     "karma-sinon": "^1.0.5",
     "karma-sinon-chai": "^2.0.2",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "0.0.32",
-    "karma-webpack": "^3.0.5",
-    "mocha": "^5.2.0",
+    "karma-webpack": "^4.0.2",
+    "lodash": "^4.17.15",
+    "mocha": "^8.0.1",
     "mocha-phantomjs": "^4.1.0",
-    "ol": "^5.3.2",
+    "ol": "^6.3",
     "phantomjs-prebuilt": "^2.1.16",
-    "rollup": "^0.62.0",
-    "rollup-plugin-babel": "^3.0.7",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-node-resolve": "^3.4.0",
+    "rollup": "^2.18.1",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
-    "rollup-plugin-uglify": "^4.0.0",
-    "sinon": "^6.3.5",
-    "sinon-chai": "^3.3.0",
-    "style-loader": "^0.21.0",
-    "webpack": "^4.30.0",
-    "webpack-cli": "^3.3.1",
-    "webpack-dev-server": "^3.3.1",
-    "webpack-merge": "^4.2.1"
+    "rollup-plugin-terser": "^6.1.0",
+    "sinon": "^9.0.2",
+    "sinon-chai": "^3.5.0",
+    "style-loader": "^1.2.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0",
+    "webpack-merge": "^4.2.2"
   },
   "files": [
     "LICENSE",
@@ -83,7 +86,7 @@
     "src"
   ],
   "engines": {
-    "node": ">= 4.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">=10.0",
+    "npm": ">=6.0"
   }
 }

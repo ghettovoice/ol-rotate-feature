@@ -7,7 +7,7 @@ const baseConfig = require('./webpack.base.config')
 const host = process.env.HOST || 'localhost'
 const port = process.env.PORT || 8080
 
-const webpackCofnig = merge(baseConfig, {
+const webpackConfig = merge(baseConfig, {
   devtool: '#cheap-module-eval-source-map',
   devServer: {
     host,
@@ -19,7 +19,6 @@ const webpackCofnig = merge(baseConfig, {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
     // https://github.com/ampedandwired/html-webpack-plugin
     new HtmlWebpackPlugin({
       filename: 'index.html',
@@ -29,8 +28,8 @@ const webpackCofnig = merge(baseConfig, {
   ]
 })
 
-webpackCofnig.entry = {
+webpackConfig.entry = {
   app: path.join(__dirname, '../test/app.js'),
 }
 
-module.exports = webpackCofnig
+module.exports = webpackConfig

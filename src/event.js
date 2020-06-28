@@ -80,7 +80,7 @@ export default class RotateFeatureEvent {
   }
 
   /**
-   * @type {RotateFeatureEventType}
+   * @type {string}
    */
   get type () {
     return this.type_

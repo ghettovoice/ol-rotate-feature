@@ -9,21 +9,14 @@
  * Adds controls to rotate vector features.
  * Writes out total angle in radians (positive is counter-clockwise) to property for each feature.
  */
-import PointerInteraction from 'ol/interaction/Pointer'
-import Collection from 'ol/Collection'
-import VectorLayer from 'ol/layer/Vector'
-import VectorSource from 'ol/source/Vector'
-import Feature from 'ol/Feature'
-import Point from 'ol/geom/Point'
-import Polygon from 'ol/geom/Polygon'
-import GeometryCollection from 'ol/geom/GeometryCollection'
-import Style from 'ol/style/Style'
-import RegularShape from 'ol/style/RegularShape'
-import Stroke from 'ol/style/Stroke'
-import Fill from 'ol/style/Fill'
-import Text from 'ol/style/Text'
-import {getCenter as getExtentCenter} from 'ol/extent'
-import { always, mouseOnly } from 'ol/events/condition';
+import { Pointer as PointerInteraction } from 'ol/interaction'
+import { Collection, Feature } from 'ol'
+import { Vector as VectorLayer } from 'ol/layer'
+import { Vector as VectorSource } from 'ol/source'
+import { GeometryCollection, Point, Polygon } from 'ol/geom'
+import { Fill, RegularShape, Stroke, Style, Text } from 'ol/style'
+import { getCenter as getExtentCenter } from 'ol/extent'
+import { always, mouseOnly } from 'ol/events/condition'
 import { assert, identity, includes, isArray } from './util'
 import RotateFeatureEvent, { RotateFeatureEventType } from './event'
 import { mouseActionButton } from './shim'
@@ -47,7 +40,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
       handleDownEvent,
       handleUpEvent,
       handleDragEvent,
-      handleMoveEvent
+      handleMoveEvent,
     })
     /**
      * @type {string}
@@ -81,14 +74,14 @@ export default class RotateFeatureInteraction extends PointerInteraction {
     this.overlay_ = new VectorLayer({
       style: options.style || getDefaultStyle(),
       source: new VectorSource({
-        features: new Collection()
-      })
+        features: new Collection(),
+      }),
     })
     /**
      * @private
      * @type {module:ol/events/condition~Condition}
      */
-    this.condition_ = options.condition ? options.condition : always;
+    this.condition_ = options.condition ? options.condition : always
     /**
      * @type {Collection<Feature>}
      * @private
@@ -101,7 +94,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
         this.features_ = options.features
       } else {
         throw new Error('Features option should be an array or collection of features, ' +
-                        'got ' + (typeof options.features))
+          'got ' + (typeof options.features))
       }
     } else {
       this.features_ = new Collection()
@@ -111,7 +104,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
      * @type {boolean}
      * @public
      */
-    this.allowAnchorMovement = options.allowAnchorMovement === undefined ? true : options.allowAnchorMovement;
+    this.allowAnchorMovement = options.allowAnchorMovement === undefined ? true : options.allowAnchorMovement
 
     this.setAnchor(options.anchor || getFeaturesCentroid(this.features_))
     this.setAngle(options.angle || 0)
@@ -170,7 +163,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * @type {PluggableMap}
    */
-  get map() {
+  get map () {
     return this.getMap()
   }
 
@@ -262,8 +255,8 @@ export default class RotateFeatureInteraction extends PointerInteraction {
     } else {
       this.anchorFeature_ = new Feature({
         geometry: new Point(anchor),
-        [ ANGLE_PROP ]: angle,
-        [ ANCHOR_KEY ]: true
+        [ANGLE_PROP]: angle,
+        [ANCHOR_KEY]: true,
       })
       this.overlay_.getSource().addFeature(this.anchorFeature_)
     }
@@ -284,8 +277,8 @@ export default class RotateFeatureInteraction extends PointerInteraction {
     } else {
       this.arrowFeature_ = new Feature({
         geometry: new Point(anchor),
-        [ ANGLE_PROP ]: angle,
-        [ ARROW_KEY ]: true
+        [ANGLE_PROP]: angle,
+        [ARROW_KEY]: true,
       })
       this.overlay_.getSource().addFeature(this.arrowFeature_)
     }
@@ -294,29 +287,29 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * @private
    */
-  resetAngleAndAnchor_() {
-    this.resetAngle_();
-    this.resetAnchor_();
+  resetAngleAndAnchor_ () {
+    this.resetAngle_()
+    this.resetAnchor_()
   }
 
   /**
    * @private
    */
-  resetAngle_() {
-    this.set(ANGLE_PROP, 0, true);
-    this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle());
-    this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle());
+  resetAngle_ () {
+    this.set(ANGLE_PROP, 0, true)
+    this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle())
+    this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle())
   }
 
   /**
    * @private
    */
-  resetAnchor_() {
-    this.set(ANCHOR_PROP, getFeaturesCentroid(this.features_), true);
+  resetAnchor_ () {
+    this.set(ANCHOR_PROP, getFeaturesCentroid(this.features_), true)
 
     if (this.getAnchor()) {
-      this.arrowFeature_ && this.arrowFeature_.getGeometry().setCoordinates(this.getAnchor());
-      this.anchorFeature_ && this.anchorFeature_.getGeometry().setCoordinates(this.getAnchor());
+      this.arrowFeature_ && this.arrowFeature_.getGeometry().setCoordinates(this.getAnchor())
+      this.anchorFeature_ && this.anchorFeature_.getGeometry().setCoordinates(this.getAnchor())
     }
   }
 
@@ -347,7 +340,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * @private
    */
-  onAngleChange_({ oldValue }) {
+  onAngleChange_ ({oldValue}) {
     this.features_.forEach(feature => feature.getGeometry().rotate(this.getAngle() - oldValue, this.getAnchor()))
     this.arrowFeature_ && this.arrowFeature_.set(ANGLE_PROP, this.getAngle())
     this.anchorFeature_ && this.anchorFeature_.set(ANGLE_PROP, this.getAngle())
@@ -356,7 +349,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
   /**
    * @private
    */
-  onAnchorChange_() {
+  onAnchorChange_ () {
     const anchor = this.getAnchor()
 
     if (anchor) {
@@ -375,8 +368,8 @@ export default class RotateFeatureInteraction extends PointerInteraction {
         RotateFeatureEventType.START,
         features,
         this.getAngle(),
-        this.getAnchor()
-      )
+        this.getAnchor(),
+      ),
     )
   }
 
@@ -390,8 +383,8 @@ export default class RotateFeatureInteraction extends PointerInteraction {
         RotateFeatureEventType.ROTATING,
         features,
         this.getAngle(),
-        this.getAnchor()
-      )
+        this.getAnchor(),
+      ),
     )
   }
 
@@ -405,8 +398,8 @@ export default class RotateFeatureInteraction extends PointerInteraction {
         RotateFeatureEventType.END,
         features,
         this.getAngle(),
-        this.getAnchor()
-      )
+        this.getAnchor(),
+      ),
     )
   }
 }
@@ -438,15 +431,15 @@ export default class RotateFeatureInteraction extends PointerInteraction {
  */
 function handleDownEvent (evt) {
   if (!mouseOnly(evt)) {
-    return false;
+    return false
   }
 
   if (mouseActionButton(evt) && this.condition_(evt)) {
     // disable selection of inner features
     const foundFeature = evt.map.forEachFeatureAtPixel(evt.pixel, identity)
     if (
-      includes([ 'click', 'singleclick', 'dblclick' ], evt.type) &&
-      includes([ this.anchorFeature_, this.arrowFeature_ ], foundFeature)
+      includes(['click', 'singleclick', 'dblclick'], evt.type) &&
+      includes([this.anchorFeature_, this.arrowFeature_], foundFeature)
     ) {
       return false
     }
@@ -509,25 +502,25 @@ function handleUpEvent (evt) {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleDragEvent ({ coordinate }) {
+function handleDragEvent ({coordinate}) {
   const anchorCoordinate = this.anchorFeature_.getGeometry().getCoordinates()
 
   // handle drag of features by angle
   if (this.lastCoordinate_) {
     // calculate vectors of last and current pointer positions
     const lastVector = [
-      this.lastCoordinate_[ 0 ] - anchorCoordinate[ 0 ],
-      this.lastCoordinate_[ 1 ] - anchorCoordinate[ 1 ]
+      this.lastCoordinate_[0] - anchorCoordinate[0],
+      this.lastCoordinate_[1] - anchorCoordinate[1],
     ]
     const newVector = [
-      coordinate[ 0 ] - anchorCoordinate[ 0 ],
-      coordinate[ 1 ] - anchorCoordinate[ 1 ]
+      coordinate[0] - anchorCoordinate[0],
+      coordinate[1] - anchorCoordinate[1],
     ]
 
     // calculate angle between last and current vectors (positive angle counter-clockwise)
     let angle = Math.atan2(
-      lastVector[ 0 ] * newVector[ 1 ] - newVector[ 0 ] * lastVector[ 1 ],
-      lastVector[ 0 ] * newVector[ 0 ] + lastVector[ 1 ] * newVector[ 1 ]
+      lastVector[0] * newVector[1] - newVector[0] * lastVector[1],
+      lastVector[0] * newVector[0] + lastVector[1] * newVector[1],
     )
 
     this.setAngle(this.getAngle() + angle)
@@ -547,7 +540,7 @@ function handleDragEvent ({ coordinate }) {
  * @this {RotateFeatureInteraction}
  * @private
  */
-function handleMoveEvent ({ map, pixel }) {
+function handleMoveEvent ({map, pixel}) {
   const elem = map.getTargetElement()
   const foundFeature = map.forEachFeatureAtPixel(pixel, identity)
 
@@ -572,7 +565,7 @@ function handleMoveEvent ({ map, pixel }) {
   ) {
     this.previousCursor_ = elem.style.cursor
     setCursor('grab', true)
-  } else if (( foundFeature && foundFeature === this.anchorFeature_ && this.allowAnchorMovement) || this.anchorMoving_) {
+  } else if ((foundFeature && foundFeature === this.anchorFeature_ && this.allowAnchorMovement) || this.anchorMoving_) {
     this.previousCursor_ = elem.style.cursor
     setCursor('crosshair')
   } else {
@@ -586,62 +579,62 @@ function handleMoveEvent ({ map, pixel }) {
  * @private
  */
 function getDefaultStyle () {
-  const white = [ 255, 255, 255, 0.8 ]
-  const blue = [ 0, 153, 255, 0.8 ]
-  const transparent = [ 255, 255, 255, 0.01 ]
+  const white = [255, 255, 255, 0.8]
+  const blue = [0, 153, 255, 0.8]
+  const transparent = [255, 255, 255, 0.01]
   const width = 2
 
   const styles = {
-    [ ANCHOR_KEY ]: [
+    [ANCHOR_KEY]: [
       new Style({
         image: new RegularShape({
           fill: new Fill({
-            color: [ 0, 153, 255, 0.8 ]
+            color: [0, 153, 255, 0.8],
           }),
           stroke: new Stroke({
             color: blue,
-            width: 1
+            width: 1,
           }),
           radius: 4,
-          points: 6
+          points: 6,
         }),
-        zIndex: Infinity
-      })
+        zIndex: Infinity,
+      }),
     ],
-    [ ARROW_KEY ]: [
+    [ARROW_KEY]: [
       new Style({
         fill: new Fill({
-          color: transparent
+          color: transparent,
         }),
         stroke: new Stroke({
           color: white,
-          width: width + 2
+          width: width + 2,
         }),
         text: new Text({
           font: '12px sans-serif',
           offsetX: 20,
           offsetY: -20,
           fill: new Fill({
-            color: 'blue'
+            color: 'blue',
           }),
           stroke: new Stroke({
             color: white,
-            width: width + 1
-          })
+            width: width + 1,
+          }),
         }),
-        zIndex: Infinity
+        zIndex: Infinity,
       }),
       new Style({
         fill: new Fill({
-          color: transparent
+          color: transparent,
         }),
         stroke: new Stroke({
           color: blue,
-          width
+          width,
         }),
-        zIndex: Infinity
-      })
-    ]
+        zIndex: Infinity,
+      }),
+    ],
   }
 
   return function (feature, resolution) {
@@ -650,30 +643,30 @@ function getDefaultStyle () {
 
     switch (true) {
       case feature.get(ANCHOR_KEY):
-        style = styles[ ANCHOR_KEY ]
-        style[ 0 ].getImage().setRotation(-angle)
+        style = styles[ANCHOR_KEY]
+        style[0].getImage().setRotation(-angle)
 
         return style
       case feature.get(ARROW_KEY):
-        style = styles[ ARROW_KEY ]
+        style = styles[ARROW_KEY]
 
         const coordinates = feature.getGeometry().getCoordinates()
         // generate arrow polygon
         const geom = new Polygon([
           [
-            [ coordinates[ 0 ], coordinates[ 1 ] - 6 * resolution ],
-            [ coordinates[ 0 ] + 8 * resolution, coordinates[ 1 ] - 12 * resolution ],
-            [ coordinates[ 0 ], coordinates[ 1 ] + 30 * resolution ],
-            [ coordinates[ 0 ] - 8 * resolution, coordinates[ 1 ] - 12 * resolution ],
-            [ coordinates[ 0 ], coordinates[ 1 ] - 6 * resolution ],
-          ]
+            [coordinates[0], coordinates[1] - 6 * resolution],
+            [coordinates[0] + 8 * resolution, coordinates[1] - 12 * resolution],
+            [coordinates[0], coordinates[1] + 30 * resolution],
+            [coordinates[0] - 8 * resolution, coordinates[1] - 12 * resolution],
+            [coordinates[0], coordinates[1] - 6 * resolution],
+          ],
         ])
 
         // and rotate it according to current angle
         geom.rotate(angle, coordinates)
-        style[ 0 ].setGeometry(geom)
-        style[ 1 ].setGeometry(geom)
-        style[ 0 ].getText().setText(Math.round(-angle * 180 / Math.PI) + '°')
+        style[0].setGeometry(geom)
+        style[1].setGeometry(geom)
+        style[0].getText().setText(Math.round(-angle * 180 / Math.PI) + '°')
 
         return style
     }

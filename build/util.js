@@ -2,7 +2,7 @@ const replace = require('rollup-plugin-replace')
 const babel = require('rollup-plugin-babel')
 const resolve = require('rollup-plugin-node-resolve')
 const cjs = require('rollup-plugin-commonjs')
-const {uglify} = require('rollup-plugin-uglify')
+const terser = require('rollup-plugin-terser').terser
 
 function plugins (options = {}) {
   const plugins = [
@@ -15,21 +15,19 @@ function plugins (options = {}) {
       ],
     }),
     resolve({
-      main: true,
-      module: true,
-      jsnext: true,
+      mainFields: ['module', 'main'],
       browser: true,
     }),
     cjs(),
   ]
   if (options.min) {
-    plugins.push(uglify({
+    plugins.push(terser({
       mangle: true,
-      sourceMap: true,
       compress: {
         warnings: false,
       },
       output: {
+        comments: false,
         preamble: options.banner,
       },
     }))

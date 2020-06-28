@@ -40,29 +40,10 @@ module.exports = {
           path.join(__dirname, '../test'),
           path.join(__dirname, '../node_modules/ol'),
         ],
-      }, {
-        test: /\.json$/i,
-        loader: 'json-loader',
-      }, {
-        test: /\.txt$/i,
-        loader: 'raw-loader',
       },
       {
-        test: /\.s?css$/i,
-        use: [
-          {
-            loader: 'style-loader',
-            options: {
-              sourceMap: true,
-            },
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true,
-            },
-          },
-        ],
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
       },
     ],
     noParse: [/node_modules\/openlayers/],

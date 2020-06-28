@@ -1,35 +1,20 @@
 {
   "presets": [
     [
-      "env",
+      "@babel/preset-env",
       {
         "modules": false
       }
-    ],
-    "stage-0"
+    ]
+  ],
+  "plugins": [
+    "@babel/plugin-proposal-function-bind",
+    ["@babel/plugin-proposal-optional-chaining", { "loose": false }]
   ],
   "env": {
     "test": {
       "plugins": [
         "istanbul"
-      ]
-    },
-    "es": {
-      "plugins": [
-        "external-helpers"
-      ]
-    },
-    "umd": {
-      "plugins": [
-        "external-helpers",
-        [
-          "./modules/babel-plugin-merge-imports",
-          {
-            "pkg": "openlayers",
-            "pkgVar": "__ol__",
-            "regex": "^ol(?:/(.*))?$"
-          }
-        ]
       ]
     }
   }
