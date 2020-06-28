@@ -11,14 +11,16 @@
       padding : 0;
     }
   </style>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io/en/v5.3.0/build/ol.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/css/ol.css" />
 </head>
 <body>
   <div id="map"></div>
 
-  <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io/en/v5.3.0/build/ol.js"></script>
-  <script src="https://unpkg.com/ol-rotate-feature@latest/dist/bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/build/ol.js"></script>
+  <script src="../dist/ol-rotate-feature.umd.js"></script>
   <script>
+    console.log(window)
+
     var point = new ol.Feature({
       name: 'point',
       geometry: new ol.geom.Point([ 2384267.0573564973, 7557371.884852641 ])
@@ -159,17 +161,6 @@
         }
       }
     }
-  </script>
-  
-  <script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-98870917-1', 'auto');
-    ga('send', 'pageview');
-
   </script>
 </body>
 </html>
