@@ -64,6 +64,7 @@ module.exports = [
       min: true,
     }),
     output: {
+      ...baseUmdConf.output,
       file: path.join(__dirname, `../dist/${config.name}.umd.min.js`),
     },
   },
