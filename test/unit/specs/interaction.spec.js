@@ -3,7 +3,7 @@ import { Collection, Feature, Map, View } from 'ol'
 import { Point } from 'ol/geom'
 import { Vector as VectorLayer } from 'ol/layer'
 import { Vector as VectorSource } from 'ol/source'
-import MapBrowserPointerEvent from 'ol/MapBrowserPointerEvent'
+import MapBrowserEvent from 'ol/MapBrowserEvent'
 import olEvent from 'ol/events/Event'
 import RotateFeatureInteraction from '../../../src'
 import RotateFeatureEvent from '../../../src/event'
@@ -425,7 +425,7 @@ function simulatePointerEvent (type, [x, y]) {
     shiftKey: false,
     preventDefault () {},
   }
-  const evt = new MapBrowserPointerEvent(type, map, pointerEvt)
+  const evt = new MapBrowserEvent(type, map, pointerEvt)
   evt.originalEvent.button = 0
 
   map.handleMapBrowserEvent(evt)

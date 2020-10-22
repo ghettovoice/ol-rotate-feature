@@ -70,7 +70,7 @@
     "lodash": "^4.17.15",
     "mocha": "^8.0.1",
     "mocha-phantomjs": "^4.1.0",
-    "ol": "^6.3",
+    "ol": "^6.4.3",
     "phantomjs-prebuilt": "^2.1.16",
     "rollup": "^2.18.1",
     "rollup-plugin-terser": "^6.1.0",
