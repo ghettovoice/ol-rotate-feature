@@ -1,8 +1,9 @@
 language: node_js
 node_js:
-  - 10
+  - lts/*
 cache:
   directories:
     - node_modules
 script:
-  - npm test && npm run coveralls
+  - npm test
+after_success: npm run coveralls
