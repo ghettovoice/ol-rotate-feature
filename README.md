@@ -158,4 +158,4 @@ rotate.on('rotateend', evt => {
 
 ## License
 
-MIT (c) 2016-2020, Vladimir Vershinin
+MIT (c) 2016-2023, Vladimir Vershinin
