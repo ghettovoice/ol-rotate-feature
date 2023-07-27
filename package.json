@@ -1,6 +1,6 @@
 {
   "name": "ol-rotate-feature",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Rotate vector features interaction for OpenLayers",
   "main": "dist/ol-rotate-feature.umd.js",
   "module": "dist/ol-rotate-feature.esm.js",
@@ -37,7 +37,7 @@
     "@babel/runtime": "^7.10.3"
   },
   "peerDependencies": {
-    "ol": "^6.0.0|^7.0.0"
+    "ol": "6.x||7.x"
   },
   "devDependencies": {
     "@babel/core": "^7.10.3",
