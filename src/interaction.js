@@ -12,7 +12,7 @@
 import { Pointer as PointerInteraction } from 'ol/interaction'
 import { Collection, Feature } from 'ol'
 import { Vector as VectorLayer } from 'ol/layer'
-import { Vector as VectorSource } from 'ol/source'
+import VectorSource from 'ol/source/Vector'
 import { GeometryCollection, Point, Polygon } from 'ol/geom'
 import { Fill, RegularShape, Stroke, Style, Text } from 'ol/style'
 import { getCenter as getExtentCenter } from 'ol/extent'

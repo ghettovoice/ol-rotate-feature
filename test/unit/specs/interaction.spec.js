@@ -2,7 +2,7 @@
 import { Collection, Feature, Map, View } from 'ol'
 import { Point } from 'ol/geom'
 import { Vector as VectorLayer } from 'ol/layer'
-import { Vector as VectorSource } from 'ol/source'
+import VectorSource from 'ol/source/Vector'
 import MapBrowserEvent from 'ol/MapBrowserEvent'
 import olEvent from 'ol/events/Event'
 import RotateFeatureInteraction from '../../../src'

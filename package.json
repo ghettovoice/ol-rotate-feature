@@ -37,7 +37,7 @@
     "@babel/runtime": "^7.10.3"
   },
   "peerDependencies": {
-    "ol": "6.x||7.x"
+    "ol": "6.x||7.x||8.x"
   },
   "devDependencies": {
     "@babel/core": "^7.10.3",
@@ -70,7 +70,7 @@
     "lodash": "^4.17.15",
     "mocha": "^8.0.1",
     "mocha-phantomjs": "^4.1.0",
-    "ol": "^7.4.0",
+    "ol": "^8.2.0",
     "phantomjs-prebuilt": "^2.1.16",
     "rollup": "^2.18.1",
     "rollup-plugin-terser": "^6.1.0",

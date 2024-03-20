@@ -1,6 +1,7 @@
 import { Feature, Map, View } from 'ol'
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
-import { OSM as OSMSource, Vector as VectorSource } from 'ol/source'
+import OSMSource from 'ol/source/OSM'
+import VectorSource from 'ol/source/Vector'
 import { LineString, Point, Polygon } from 'ol/geom'
 import { Select as SelectInteraction } from 'ol/interaction'
 import { Fill, RegularShape, Stroke, Style, Text } from 'ol/style'
