@@ -20,7 +20,7 @@ module.exports = {
   input: path.join(__dirname, '../src/index.js'),
   banner,
   replace: {
-    'process.env.NODE_ENV': `'${env}'`,
+    // 'process.env.NODE_ENV': `'${env}'`,
     PKG_VERSION: `'${packageJson.version}'`,
   },
   dependencies: Object.keys(packageJson.dependencies).concat(
