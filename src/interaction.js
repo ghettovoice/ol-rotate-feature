@@ -16,7 +16,7 @@ import VectorSource from 'ol/source/Vector'
 import { GeometryCollection, Point, Polygon } from 'ol/geom'
 import { Fill, RegularShape, Stroke, Style, Text } from 'ol/style'
 import { getCenter as getExtentCenter } from 'ol/extent'
-import { always, mouseOnly } from 'ol/events/condition'
+import { always, mouseOnly, touchOnly, penOnly } from 'ol/events/condition'
 import { assert, identity, includes, isArray } from './util'
 import RotateFeatureEvent, { RotateFeatureEventType } from './event'
 import { mouseActionButton } from './shim'
@@ -109,10 +109,10 @@ export default class RotateFeatureInteraction extends PointerInteraction {
     this.setAnchor(options.anchor || getFeaturesCentroid(this.features_))
     this.setAngle(options.angle || 0)
 
-    this.features_.on('add', ::this.onFeatureAdd_)
-    this.features_.on('remove', ::this.onFeatureRemove_)
-    this.on('change:' + ANGLE_PROP, ::this.onAngleChange_)
-    this.on('change:' + ANCHOR_PROP, ::this.onAnchorChange_)
+    this.features_.on('add', this.onFeatureAdd_.bind(this))
+    this.features_.on('remove', this.onFeatureRemove_.bind(this))
+    this.on('change:' + ANGLE_PROP, this.onAngleChange_.bind(this))
+    this.on('change:' + ANCHOR_PROP, this.onAnchorChange_.bind(this))
 
     this.createOrUpdateAnchorFeature_()
     this.createOrUpdateArrowFeature_()
@@ -430,7 +430,7 @@ export default class RotateFeatureInteraction extends PointerInteraction {
  * @private
  */
 function handleDownEvent (evt) {
-  if (!mouseOnly(evt)) {
+  if (!(mouseOnly(evt) || touchOnly(evt) || penOnly(evt))) {
     return false
   }
 
@@ -453,7 +453,7 @@ function handleDownEvent (evt) {
     ) {
       this.lastCoordinate_ = evt.coordinate
 
-      this::handleMoveEvent(evt)
+      handleMoveEvent.call(this, evt)
       this.dispatchRotateStartEvent_(this.features_)
 
       return true
@@ -461,7 +461,7 @@ function handleDownEvent (evt) {
     // handle click & drag on rotation anchor feature
     else if (foundFeature && foundFeature === this.anchorFeature_ && this.allowAnchorMovement) {
       this.anchorMoving_ = true
-      this::handleMoveEvent(evt)
+      handleMoveEvent.call(this, evt)
 
       return true
     }
@@ -480,7 +480,7 @@ function handleUpEvent (evt) {
   if (this.lastCoordinate_) {
     this.lastCoordinate_ = undefined
 
-    this::handleMoveEvent(evt)
+    handleMoveEvent.call(this, evt)
     this.dispatchRotateEndEvent_(this.features_)
 
     return true
@@ -488,7 +488,7 @@ function handleUpEvent (evt) {
   // stop drag sequence of the anchors
   else if (this.anchorMoving_) {
     this.anchorMoving_ = false
-    this::handleMoveEvent(evt)
+    handleMoveEvent.call(this, evt)
 
     return true
   }
