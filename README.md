@@ -1,4 +1,3 @@
-[![Build Status](https://travis-ci.com/ghettovoice/ol-rotate-feature.svg?branch=master)](https://travis-ci.com/ghettovoice/ol-rotate-feature)
 [![Tests](https://github.com/ghettovoice/ol-rotate-feature/actions/workflows/test.yml/badge.svg)](https://github.com/ghettovoice/ol-rotate-feature/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/ghettovoice/ol-rotate-feature/badge.svg?branch=master)](https://coveralls.io/github/ghettovoice/ol-rotate-feature?branch=master)
 [![GitHub tag](https://img.shields.io/github/tag/ghettovoice/ol-rotate-feature.svg)](https://github.com/ghettovoice/ol-rotate-feature/releases)
